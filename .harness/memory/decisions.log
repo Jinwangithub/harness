@@ -1,0 +1,52 @@
+# Architecture Decision Log
+
+## 格式
+
+```
+YYYY-MM-DD | {标题}
+- 背景: {决策背景}
+- 方案: {选择的方案}
+- 备选: {考虑过的方案}
+- 理由: {为什么这样选}
+- 后果: {选择此方案的副作用}
+- 决定人: {谁做的决定}
+```
+
+## 记录
+
+2026-05-07 | Phase 1 产出确定为 understanding.md
+- 背景: Phase 0/1 边界模糊，spec-driven-development 覆盖了第一次的 spec 产出。
+- 方案: Phase 1 = idea-refine → understanding.md（需求理解笔记），不做详细设计。
+- 备选: 保持 Phase 1 产 spec.md，但在 spec-driven-development 中增加追加模式。
+- 理由: understanding.md 和 spec.md 是不同性质的产物（笔记 vs 正式文档）。
+- 后果: Phase 1 需要多一次用户交互（确认理解）。
+- 决定人: Orchestrator
+
+2026-05-07 | tasks.md 的唯一创建者是 Phase 3
+- 背景: Phase 2 和 Phase 3 都产 tasks.md，后者覆盖前者。
+- 方案: Phase 2 只产 spec.md，Phase 3 首次创建 tasks.md。
+- 备选: Phase 2 产粗粒度 tasks，Phase 3 细化。
+- 理由: 单一责任原则，避免两阶段修改同一文件的覆盖冲突。
+- 后果: spec-driven-development Skill 需被指示不产出 tasks.md。
+- 决定人: Orchestrator
+
+2026-05-07 | Phase 4 仅做编译验证，不做测试
+- 背景: Phase 4 运行了单元测试，与 Phase 6 重复。
+- 方案: Phase 4 = mvn clean compile。Phase 6 = mvn test + jacoco:report。
+- 理由: 编译和测试是不同的验证维度，分离后更聚焦。
+- 后果: 开发阶段不立即发现测试问题，但 Phase 6 会统一覆盖。
+- 决定人: Orchestrator
+
+2026-05-07 | 审查阶段加载 agents/ 角色定义文件
+- 背景: code-reviewer.md、security-auditor.md、test-engineer.md 未被实际使用。
+- 方案: Phase 5 每个审查 Agent 显式加载对应的角色文件。
+- 备选: 在 orchestrator.md 中内联审查标准。
+- 理由: 角色文件独立维护，审查标准可复用。
+- 决定人: Orchestrator
+
+2026-05-07 | 审查结论只询问一次用户
+- 背景: Phase 5 中每个 Agent 完成时都询问了确认。
+- 方案: 汇总后一次性展示结论，只问一次。
+- 理由: 用户关心整体能否通过，逐个确认效率低。
+- 后果: 2 轮重审机制处理需要修复的场景。
+- 决定人: Orchestrator
