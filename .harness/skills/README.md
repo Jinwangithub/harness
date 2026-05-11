@@ -1,9 +1,7 @@
-# Skills 索引 — agent-skills 映射表
+# Skills 索引 — 本地 Skill 映射表
 
-本目录映射 agent-skills 插件的 20 个 Skill 到 Harness Engineering 十阶段工作流。
-
-每个 Skill 的文件位于以下路径：
-`~/.claude/plugins/cache/addy-agent-skills/agent-skills/1.0.0/skills/{name}/SKILL.md`
+本目录包含 Harness Engineering 十阶段工作流所需的全部 22 个 Skill。
+所有 Skill 已从 agent-skills 插件复制到本地，团队使用无需安装插件。
 
 ## 01-Define (需求定义)
 
@@ -58,17 +56,14 @@
 
 ## 使用方式
 
-在 Claude Code 中通过 Skill tool 直接调用：
+在 Phase 执行时读取对应的 Skill 文件并按流程执行：
 ```
-Skill name: spec-driven-development
-Skill name: incremental-implementation
-Skill name: code-review-and-quality
+.harness/skills/idea-refine/SKILL.md
+.harness/skills/spec-driven-development/SKILL.md
+.harness/skills/code-review-and-quality/SKILL.md
 ```
 
-或通过 slash commands:
-```
-/spec → /plan → /build → /review → /test → /ship
-```
+所有 Skill 路径均为 `.harness/skills/{name}/SKILL.md`。
 
 ## 重要提醒
 
@@ -78,5 +73,5 @@ Skill name: code-review-and-quality
 | P2 | 产出 tasks.md | 只产 spec.md，tasks.md 是 P3 的职责 |
 | P3 | 覆盖 tasks.md | 首次创建 tasks.md（P2 不产 tasks.md） |
 | P4 | 运行 mvn test | 只做 mvn clean compile，测试是 P6 的职责 |
-| P5 | 使用 agents/ 角色文件 | 直接使用 agent-skills 插件的 Skill，无独立 Agent |
+| P5 | 使用 agents/ 角色文件 | 直接使用 .harness/skills/ 下的本地 Skill，无独立 Agent |
 | P6 | 不检查覆盖率 | 必须运行 JaCoCo 并产出覆盖率报告 |

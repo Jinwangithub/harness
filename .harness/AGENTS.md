@@ -6,7 +6,7 @@
 
 - **技术栈**: Java 17 / Spring Boot 3.x (参考规则)
 - **架构风格**: 分层架构 (Controller → Service → Domain)
-- **工程框架**: Harness Engineering + agent-skills
+- **工程框架**: Harness Engineering（本地 Skill，团队共享）
 
 ## 快速链接
 
@@ -17,7 +17,7 @@
 | 编码规范 | `.harness/rules/03-coding-standards.md` | 代码风格、约束 |
 | 质量门禁 | `.harness/rules/04-quality-gates.md` | 通过/回退条件 |
 | Orchestrator | `.harness/agents/orchestrator.md` | 唯一的 Agent（编排中枢） |
-| Skills 索引 | `.harness/skills/README.md` | 20 个 agent-skills 映射表 |
+| Skills 索引 | `.harness/skills/README.md` | 22 个本地 Skill 映射表 |
 
 ## 十阶段工作流速查
 

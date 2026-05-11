@@ -5,9 +5,9 @@
 ## 项目导航
 
 - **入口地图**: `.harness/AGENTS.md` — 先读这里
-- **角色定义**: `.harness/agents/` — Orchestrator / Reviewer / Test / Security
+- **角色定义**: `.harness/agents/orchestrator.md` — 唯一的 Agent（编排中枢）
 - **规则体系**: `.harness/rules/` — 工程结构、流程、编码、质量门禁
-- **技能索引**: `.harness/skills/README.md` — agent-skills 映射表
+- **技能索引**: `.harness/skills/README.md` — 22 个本地 Skill 映射表
 
 ## 开发工作流
 
@@ -30,7 +30,7 @@
 - 绝不在没有验证的情况下声称"完成"
 - 遇到失败优先回退到对应阶段修复，而非硬推
 
-## 使用的 Plugin
+## Skill 来源
 
-- agent-skills (Addy Osmani) — 提供 20 个 Skill 工作流
-- 技能路径: `~/.claude/plugins/cache/addy-agent-skills/agent-skills/1.0.0/skills/{name}/SKILL.md`
+所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`，已内置于项目仓库。
+团队使用无需安装任何插件，clone 即用。
