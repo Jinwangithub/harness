@@ -40,11 +40,11 @@
 
 | Phase | Skill | 源路径 | 使用时机 |
 |-------|-------|--------|---------|
-| P5: 编码评审 | code-review-and-quality | `skills/code-review-and-quality/SKILL.md` | 五轴代码审查，加载 agents/code-reviewer.md |
-| P5: 编码评审 | security-and-hardening | `skills/security-and-hardening/SKILL.md` | 安全审计，加载 agents/security-auditor.md |
+| P5: 编码评审 | code-review-and-quality | `skills/code-review-and-quality/SKILL.md` | 五轴代码审查（正确性/可读性/架构/安全/性能） |
+| P5: 编码评审 | security-and-hardening | `skills/security-and-hardening/SKILL.md` | 安全审计（OWASP Top 10） |
 | P5: 编码评审 | performance-optimization | `skills/performance-optimization/SKILL.md` | 性能审查 |
 | P5: 编码评审 | code-simplification | `skills/code-simplification/SKILL.md` | 简化复杂代码 |
-| P7: 测试评审 | — | 加载 agents/test-engineer.md | 测试质量审查，不使用第三方 Skill |
+| P7: 测试评审 | code-review-and-quality | `skills/code-review-and-quality/SKILL.md` | 使用其测试审查标准评估测试质量 |
 
 ## 06-Ship (交付)
 
@@ -78,5 +78,5 @@ Skill name: code-review-and-quality
 | P2 | 产出 tasks.md | 只产 spec.md，tasks.md 是 P3 的职责 |
 | P3 | 覆盖 tasks.md | 首次创建 tasks.md（P2 不产 tasks.md） |
 | P4 | 运行 mvn test | 只做 mvn clean compile，测试是 P6 的职责 |
-| P5 | 不使用 agents/ 角色文件 | 加载 code-reviewer.md / security-auditor.md / test-engineer.md |
+| P5 | 使用 agents/ 角色文件 | 直接使用 agent-skills 插件的 Skill，无独立 Agent |
 | P6 | 不检查覆盖率 | 必须运行 JaCoCo 并产出覆盖率报告 |

@@ -16,10 +16,8 @@
 | 开发流程规范 | `.harness/rules/02-development-workflow.md` | 十阶段流程、门禁 |
 | 编码规范 | `.harness/rules/03-coding-standards.md` | 代码风格、约束 |
 | 质量门禁 | `.harness/rules/04-quality-gates.md` | 通过/回退条件 |
-| Orchestrator | `.harness/agents/orchestrator.md` | 协调者角色定义 |
-| Code Reviewer | `.harness/agents/code-reviewer.md` | 五轴审查角色 |
-| Test Engineer | `.harness/agents/test-engineer.md` | 测试角色 |
-| Security Auditor | `.harness/agents/security-auditor.md` | 安全审计角色 |
+| Orchestrator | `.harness/agents/orchestrator.md` | 唯一的 Agent（编排中枢） |
+| Skills 索引 | `.harness/skills/README.md` | 20 个 agent-skills 映射表 |
 
 ## 十阶段工作流速查
 
@@ -28,9 +26,9 @@ Phase 1:  需求分析   → idea-refine               产出: understanding.md
 Phase 2:  需求评审   → spec-driven-development    产出: spec.md（不含 tasks.md）
 Phase 3:  任务规划   → planning-and-task-breakdown 产出: tasks.md（首次创建）
 Phase 4:  编码实现   → incremental-implementation  产出: 源码（编译验证，不做测试）
-Phase 5:  编码评审   → code-review(3轴并行)        产出: 评审报告（引用 agents/ 角色文件）
+Phase 5:  编码评审   → 3 Skill 并行(code-review/security/perf)  产出: 三份评审报告
 Phase 6:  单元测试   → test-driven-development     产出: 测试报告 + 覆盖率报告(JaCoCo)
-Phase 7:  测试评审   → test-engineer 审查           产出: 测试评审报告
+Phase 7:  测试评审   → code-review-and-quality     产出: 测试评审报告
 Phase 8:  CI验证     → ci-cd-and-automation        产出: CI报告
 Phase 9:  部署验证   → shipping-and-launch          产出: 部署报告
 Phase 10: 用户确认   → 人工                        产出: 最终确认

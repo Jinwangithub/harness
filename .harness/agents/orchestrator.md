@@ -167,14 +167,14 @@ Skill: incremental-implementation
 Skill: code-review-and-quality + security-and-hardening + performance-optimization
 执行动作:
   1. 读取编码描述和 tasks.md
-  2. 并行扇出 3 个审查 Agent，每个 Agent 加载对应角色定义：
-     - Agent 1: 加载 .harness/agents/code-reviewer.md → 五轴审查（正确性/可读性/架构/安全/性能）
-     - Agent 2: 加载 .harness/agents/security-auditor.md → 安全审计（OWASP Top 10）
-     - Agent 3: 加载 .harness/agents/test-engineer.md → 测试质量评估
-  3. **进度报告**：每个 Agent 完成时立即报告：
-     - 「Code Reviewer 审查完成」
-     - 「Security Auditor 审计完成」
-     - 「Test Engineer 评估完成」
+  2. 并行执行 3 个 Skill 审查流程（Skill 来自 agent-skills 插件）：
+     - Skill 1: code-review-and-quality → 五轴审查（正确性/可读性/架构/安全/性能）
+     - Skill 2: security-and-hardening → 安全审计（OWASP Top 10）
+     - Skill 3: performance-optimization → 性能审查
+  3. **进度报告**：每个 Skill 完成时立即报告：
+     - 「Code Review 审查完成」
+     - 「Security Audit 审计完成」
+     - 「Performance Review 审查完成」
   4. 汇总三份报告到 changes/{id}/coding/review/ 目录
   5. 生成一份摘要（Verdict + 关键问题列表）
   6. **只问一次**：汇总后一次性展示完整结论，询问用户是否通过
@@ -202,11 +202,10 @@ Skill: test-driven-development
 ### Phase 7: 测试评审
 ```
 入口: Phase 6 门禁通过
-Skill: 加载 .harness/agents/test-engineer.md 执行审查
+Skill: (使用 code-review-and-quality 中的测试审查标准)
 执行动作:
-  1. 加载 test-engineer 角色定义
-  2. 从测试视角审查：测试金字塔、边界覆盖、命名质量、Mock 使用
-  3. 写入 test_review_v1.md
+  1. 从测试视角审查变更的测试：测试金字塔、边界覆盖、命名质量、Mock 使用
+  2. 写入 test_review_v1.md
 产出: .harness/changes/{id}/unit_test/review/test_review_v1.md
 出口门禁: 询问用户确认。最多 2 轮。
 ```
@@ -257,7 +256,7 @@ Skill: shipping-and-launch
 | Phase 3 出口 | "任务拆解完成，每个任务均可独立验证。请确认是否合理？" |
 | Phase 4 出口 | "编码完成，编译通过。进度：N 个任务已完成。请确认是否可以提交评审？" |
 | Phase 4 子任务完成 | "Task {i}/{total} 已完成：{任务名称}" |
-| Phase 5 各 Agent | "Code Reviewer 审查完成" / "Security Auditor 审计完成" / "Test Engineer 评估完成" |
+| Phase 5 各 Skill | "Code Review 审查完成" / "Security Audit 审计完成" / "Performance Review 审查完成" |
 | Phase 5 出口 | "三轴审查全部完成。评审摘要：[Verdict]。请确认是否通过？" |
 | Phase 6 出口 | "测试已完成，全部 {N} 个通过，覆盖率 {X}%。请确认？" |
 | Phase 7 出口 | "测试评审完成。请确认？" |
