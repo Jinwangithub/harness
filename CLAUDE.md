@@ -24,6 +24,13 @@
 2. 读取 `.harness/memory/` 获取历史经验和已知问题
 3. 切换到 Orchestrator 模式推进开发
 
+## Session 结束检查
+
+每个 Phase 出口和整个变更交付时，检查是否有需要记入 `.harness/memory/` 的内容：
+- 做了架构决策？ → `decisions.log`
+- 发现了 Agent 错误？ → `lessons-learned.md` + 修复 Harness 防止再犯
+- 遇到已知限制？ → `known-issues.md`
+
 ## 质量守则
 
 - 绝不跳过阶段
