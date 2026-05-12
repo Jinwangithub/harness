@@ -35,6 +35,7 @@
 │   └── design-docs/           # 设计文档
 ├── scripts/                   # 构建/工具脚本
 ├── Dockerfile                 # 容器化
+├── .mcp.example.json          # MCP 示例配置，不含密钥
 └── .harness/                  # Harness Engineering 工程目录
     ├── AGENTS.md              # Agent 导航地图
     ├── agents/                # Agent 角色定义
@@ -43,6 +44,7 @@
     ├── changes/               # 变更管理
     ├── memory/                # 持久化记忆
     ├── wiki/                  # 项目知识库
+    ├── mcp/                   # MCP 可选集成说明
     └── references/            # 参考清单
 ```
 

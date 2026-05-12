@@ -1,7 +1,7 @@
 # Skills 索引 — 本地 Skill 映射表
 
-本目录包含 Harness Engineering 十阶段工作流所需的全部 22 个 Skill。
-所有 Skill 已从 agent-skills 插件复制到本地，团队使用无需安装插件。
+本目录包含 Harness Engineering 十阶段工作流所需的全部 23 个本地 Skill。
+所有 Skill 已复制到仓库本地，团队使用无需安装外部插件。
 
 ## 01-Define (需求定义)
 
@@ -30,6 +30,8 @@
 
 | Phase | Skill | 源路径 | 使用时机 |
 |-------|-------|--------|---------|
+| 每个 Phase 出口 | quality-gate-validation | `skills/quality-gate-validation/SKILL.md` | 验证 Mechanical Gate 与 Human Approval Gate，更新 summary.md 门禁状态 |
+| P4 出口 / 跨阶段质量自动化 | auto-check-and-optimize | `skills/auto-check-and-optimize/SKILL.md` | 代码实现后自检，可做五轴审查、简化建议、DDD 分层检查、编译验证；不能替代 Phase 5 正式评审 |
 | P6: 单元测试 | test-driven-development | `skills/test-driven-development/SKILL.md` | 编写/补全测试 + JaCoCo 覆盖率报告 |
 | 跨阶段 | debugging-and-error-recovery | `skills/debugging-and-error-recovery/SKILL.md` | 构建/测试失败时 |
 | 跨阶段 | browser-testing-with-devtools | `skills/browser-testing-with-devtools/SKILL.md` | 浏览器端调试 |
@@ -53,6 +55,7 @@
 | P9: 部署验证 | shipping-and-launch | `skills/shipping-and-launch/SKILL.md` | 预发布/投产检查 |
 | P10: 交付 | documentation-and-adrs | `skills/documentation-and-adrs/SKILL.md` | 架构决策记录 |
 | P10: 交付 | deprecation-and-migration | `skills/deprecation-and-migration/SKILL.md` | 废弃/迁移旧代码 |
+| 跨阶段 | using-agent-skills | `skills/using-agent-skills/SKILL.md` | Skill 使用说明与索引维护 |
 
 ## 使用方式
 
@@ -73,5 +76,6 @@
 | P2 | 产出 tasks.md | 只产 spec.md，tasks.md 是 P3 的职责 |
 | P3 | 覆盖 tasks.md | 首次创建 tasks.md（P2 不产 tasks.md） |
 | P4 | 运行 mvn test | 只做 mvn clean compile，测试是 P6 的职责 |
+| P4 出口 | 用 auto-check-and-optimize 替代 Phase 5 | auto-check-and-optimize 只做实现后自检，不能替代 Phase 5 正式评审 |
 | P5 | 使用 agents/ 角色文件 | 直接使用 .harness/skills/ 下的本地 Skill，无独立 Agent |
 | P6 | 不检查覆盖率 | 必须运行 JaCoCo 并产出覆盖率报告 |

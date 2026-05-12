@@ -50,3 +50,19 @@ YYYY-MM-DD | {标题}
 - 理由: 用户关心整体能否通过，逐个确认效率低。
 - 后果: 2 轮重审机制处理需要修复的场景。
 - 决定人: Orchestrator
+
+2026-05-12 | Harness 统一为唯一 Orchestrator + 本地 Skills
+- 背景: Phase 5/7 文档引用了不存在的审查 Agent 文件，而仓库实际提供的是 Orchestrator 与本地 Skill 集合。
+- 方案: `.harness/agents/orchestrator.md` 作为唯一 Agent；工程能力全部由 `.harness/skills/{name}/SKILL.md` 提供。
+- 备选: 新增 code-reviewer、security-auditor、test-engineer 等独立 Agent 文件。
+- 理由: 保持当前文件结构最小化，避免扩大架构面，并与 skills/README.md 的本地 Skill 体系一致。
+- 后果: Phase 5/7 的职责由 Skill 流程和证据产物承载，不再通过独立 Agent 文件区分角色。
+- 决定人: Orchestrator
+
+2026-05-12 | 质量门禁拆分为 Mechanical Gate 与 Human Approval Gate
+- 背景: 原门禁规则要求“可程序化验证”，但同时混入用户确认，导致机器证据与人工确认边界不清。
+- 方案: 每个 Phase 先执行 Mechanical Gate，再执行 Human Approval Gate；Mechanical Gate 状态为 pass/fail/blocked，用户等待状态为 pending-human。
+- 备选: 保持单层质量门禁，用自然语言描述验证和确认。
+- 理由: 分层后可明确哪些条件必须有证据，避免用人工确认绕过失败的机器验证。
+- 后果: summary.md 和各 Phase 产物需要记录两层门禁状态与 evidence_paths。
+- 决定人: Orchestrator

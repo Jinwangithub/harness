@@ -6,7 +6,13 @@
 
 - **技术栈**: Java 17 / Spring Boot 3.x (参考规则)
 - **架构风格**: 分层架构 (Controller → Service → Domain)
-- **工程框架**: Harness Engineering（本地 Skill，团队共享）
+- **工程框架**: Harness Engineering（唯一 Orchestrator + 本地 Skills，团队共享）
+
+## Agent / Skill 架构
+
+- `.harness/agents/orchestrator.md` 是唯一 Agent，负责流程编排、门禁检查、产物归档和用户确认。
+- 工程能力由 `.harness/skills/{name}/SKILL.md` 提供，Orchestrator 按阶段读取并调度本地 Skill。
+- Phase 5/7 不加载独立审查 Agent 文件；编码评审、安全审计、性能审查、测试审查均由本地 Skill 流程和证据产物承载。
 
 ## 快速链接
 
@@ -17,7 +23,7 @@
 | 编码规范 | `.harness/rules/03-coding-standards.md` | 代码风格、约束 |
 | 质量门禁 | `.harness/rules/04-quality-gates.md` | 通过/回退条件 |
 | Orchestrator | `.harness/agents/orchestrator.md` | 唯一的 Agent（编排中枢） |
-| Skills 索引 | `.harness/skills/README.md` | 22 个本地 Skill 映射表 |
+| Skills 索引 | `.harness/skills/README.md` | 23 个本地 Skill 映射表 |
 
 ## 十阶段工作流速查
 
@@ -92,7 +98,7 @@ exception/     → 异常定义 (与 domain 同级)
 ## 硬性约束
 
 - 绝不跳过任何开发阶段
-- Orchestrator 绝不自己写代码，只分派
+- Orchestrator 是唯一 Agent，通过本地 Skills 调度工程能力
 - 每次变更必须归档到 `.harness/changes/{type}-{name}-{YYYYMMDD}/`
 - 每个 Phase 完成后必须立即归档对应产物到变更目录
 - 所有决策记录写入 `.harness/memory/decisions.log`
