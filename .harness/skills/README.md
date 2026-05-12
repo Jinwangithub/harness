@@ -1,6 +1,7 @@
 # Skills 索引 — 本地 Skill 映射表
 
-本目录包含 Harness Engineering 十阶段工作流所需的全部 23 个本地 Skill。
+本目录包含 Harness Engineering 十阶段工作流所需的全部 22 个本地 Skill，并提供 23 个阶段/场景映射。
+其中 `code-review-and-quality` 同时用于 P5 编码评审和 P7 测试评审，因此映射数多于唯一 Skill 数。
 所有 Skill 已复制到仓库本地，团队使用无需安装外部插件。
 
 ## 01-Define (需求定义)
@@ -30,7 +31,6 @@
 
 | Phase | Skill | 源路径 | 使用时机 |
 |-------|-------|--------|---------|
-| 每个 Phase 出口 | quality-gate-validation | `skills/quality-gate-validation/SKILL.md` | 验证 Mechanical Gate 与 Human Approval Gate，更新 summary.md 门禁状态 |
 | P4 出口 / 跨阶段质量自动化 | auto-check-and-optimize | `skills/auto-check-and-optimize/SKILL.md` | 代码实现后自检，可做五轴审查、简化建议、DDD 分层检查、编译验证；不能替代 Phase 5 正式评审 |
 | P6: 单元测试 | test-driven-development | `skills/test-driven-development/SKILL.md` | 编写/补全测试 + JaCoCo 覆盖率报告 |
 | 跨阶段 | debugging-and-error-recovery | `skills/debugging-and-error-recovery/SKILL.md` | 构建/测试失败时 |
