@@ -66,3 +66,11 @@ YYYY-MM-DD | {标题}
 - 理由: 分层后可明确哪些条件必须有证据，避免用人工确认绕过失败的机器验证。
 - 后果: summary.md 和各 Phase 产物需要记录两层门禁状态与 evidence_paths。
 - 决定人: Orchestrator
+
+## 2026-05-14 | 修复Skill/References/Wiki引用断裂
+
+- 背景: 22个Skill中11个在orchestrator.md中无显式调用；wiki/和references/目录在启动路径中不可发现
+- 方案: 在AGENTS.md中补充wiki/references/memory导航链接；在orchestrator.md中增加规则9（知识源按需加载）、P4条件Skill触发、P5 code-simplification、P8 git-workflow + debugging、P10 deprecation-and-migration；所有条件Skill均标记触发场景保持简洁
+- 备选: 砍掉11个未使用的Skill（被否决，因为其中9个有合理使用场景，只是orchestrator漏引了）
+- 理由: 保持22个Skill完整性，通过条件触发而非强制加载控制上下文填充率；wiki/和references/作为L3按需查询层，通过规则9和AGENTS.md导航连通
+- 后果: 22个Skill中除frontend-ui-engineering和browser-testing-with-devtools外全部可被orchestrator发现和调度；wiki/在P1和P4有明确查阅点
