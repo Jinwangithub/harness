@@ -145,6 +145,36 @@ Orchestrator 在以下场景必须查阅 `.harness/wiki/`：
 
 ---
 
+## Session 启动流程
+
+每次新会话启动时，Orchestrator 必须先检查是否存在未完成的变更：
+
+### 检测逻辑
+
+1. 扫描 `.harness/changes/` 下所有子目录，按目录名中的日期 `YYYYMMDD` 降序排列
+2. 读取最新变更目录的 `summary.md`
+3. 检查 `## 基本信息` 下的 `状态` 字段：
+   - **`已完成`** → 查询用户是否有新需求
+   - **`进行中`** → 查看 `## 阶段进度`，找到第一个 `- [ ]`（未勾选）的 Phase，从该 Phase 恢复执行
+   - **无法读取 / 目录为空** → 视为无进行中变更，等待用户新需求
+4. 恢复时必须向用户报告当前状态并获得确认
+
+### 恢复模板
+
+```
+检测到未完成变更 `{dir-name}`:
+  - 状态: {进行中}
+  - 已完成: Phase 1 ~ Phase {N}
+  - 下一个: Phase {N+1}
+  - 上次产物: {evidence_path}
+
+是否从 Phase {N+1} 继续？还是创建新变更？
+```
+
+**禁止**: 无视 summary.md 中记录的 Phase 进度直接启动新变更。
+
+---
+
 ## 核心职责
 
 1. **需求理解**: 消化需求，复述确认，明确边界；查阅 `.harness/wiki/` 获取业务域上下文
@@ -404,6 +434,7 @@ Human Approval Gate: pending-human，用户最终确认。到此结束。
 | Phase 8 出口 | "Mechanical Gate: pass。Memory recorded: {N} entries / none。CI 验证完成，构建成功。请确认？" |
 | Phase 9 出口 | "Mechanical Gate: pass。Memory recorded: {N} entries / none。部署验证完成，冒烟测试通过。请确认？" |
 | Phase 10 出口 | "Mechanical Gate: pass。Memory recorded: {N} entries。交付完成。以下为交付物清单... 请最终确认。" |
+| Session 启动（检测到未完成变更） | "检测到未完成变更 `{dir-name}`（状态: {status}），已完成 Phase 1 ~ {N}。下一个: Phase {N+1}。是否从 Phase {N+1} 继续？还是创建新变更？" |
 | 遇到用户沉默 | "请确认是否通过，或指出需要修改的问题。" |
 
 ### 禁止做

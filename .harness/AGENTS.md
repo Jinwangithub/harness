@@ -32,6 +32,8 @@
 
 ## 十阶段工作流速查
 
+> Session 启动时自动检测最新变更目录的 `summary.md`：如 `状态: 进行中` 则从中断 Phase 恢复；如 `状态: 已完成` 则等待新需求。
+
 ```
 Phase 1:  需求分析   → idea-refine                  产出: understanding.md
                                  └─ 查阅 wiki/ 查找相关业务域文档

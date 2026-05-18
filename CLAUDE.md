@@ -24,8 +24,11 @@
 
 1. 读取 `.harness/AGENTS.md` 获取项目上下文
 2. 读取 `.harness/memory/` 获取历史经验和已知问题
-3. 遇到未知业务概念时查阅 `.harness/wiki/`，不猜测规则
-4. 切换到 Orchestrator 模式推进开发
+3. 扫描 `.harness/changes/` 下最新变更目录的 `summary.md`：
+   - 如 `状态: 进行中` 且存在未完成 Phase → 从中断处恢复，从第一个 `- [ ]` Phase 继续
+   - 如 `状态: 已完成` 或无变更目录 → 准备新变更
+4. 遇到未知业务概念时查阅 `.harness/wiki/`，不猜测规则
+5. 切换到 Orchestrator 模式，按 Session 启动流程推进开发
 
 ## Session 结束检查
 
