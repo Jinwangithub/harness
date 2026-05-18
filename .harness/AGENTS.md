@@ -118,6 +118,6 @@ exception/     → 异常定义 (与 domain 同级)
 - Orchestrator 是唯一 Agent，通过本地 Skills 调度工程能力
 - 每次变更必须归档到 `.harness/changes/{type}-{name}-{YYYYMMDD}/`
 - 每个 Phase 完成后必须立即归档对应产物到变更目录
-- 所有决策记录写入 `.harness/memory/decisions.log`
+- 每个 Phase 出口必须确认 Memory 已完整记录（按模板全部字段填写，出口报告 "Memory recorded: {N} entries / none"）
 - 外部服务调用必须设置超时和降级
-- 每发现一个错误, 写入 `lessons-learned.md` 防止再犯
+- 每发现一个错误，立即按完整模板写入 `lessons-learned.md`（问题/根因/影响/修复/预防）防止再犯

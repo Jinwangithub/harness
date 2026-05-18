@@ -29,10 +29,11 @@
 
 ## Session 结束检查
 
-每个 Phase 出口和整个变更交付时，检查是否有需要记入 `.harness/memory/` 的内容：
-- 做了架构决策？ → `decisions.log`
-- 发现了 Agent 错误？ → `lessons-learned.md` + 修复 Harness 防止再犯
-- 遇到已知限制？ → `known-issues.md`
+每个 Phase 出口必须确认 Memory 已完整记录。每个 Phase 出口和整个变更交付时，MUST record to `.harness/memory/` if applicable:
+- 做了架构决策？ → 完整写入 `decisions.log`（背景、方案、备选、理由、后果、决定人，6 字段全部必填）
+- 发现了 Agent 错误？ → 完整写入 `lessons-learned.md`（问题、根因、影响、修复、预防，5 字段全部必填）+ 修复 Harness 防止再犯
+- 遇到已知限制？ → 完整写入 `known-issues.md`（描述、影响范围、临时方案、计划修复，4 字段全部必填）
+每次记录必须按模板完整填写，禁止简化。Phase 出口必须明确报告 "Memory recorded: {N} entries / none"。
 
 ## 质量守则
 

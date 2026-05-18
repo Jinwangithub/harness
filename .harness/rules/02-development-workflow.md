@@ -106,10 +106,11 @@
 
 每个 Phase 必须按以下顺序退出：
 
-1. 执行 Mechanical Gate。
-2. Mechanical Gate 状态为 `fail` 或 `blocked` 时回退或阻塞。
-3. Mechanical Gate 状态为 `pass` 后，将 Human Approval Gate 标记为 `pending-human`。
-4. 用户确认后才能进入下一 Phase。
+1. 检查并记录 Memory：是否有架构决策/错误教训/技术限制？如有，按对应文件模板完整写入。
+2. 执行 Mechanical Gate。
+3. Mechanical Gate 状态为 `fail` 或 `blocked` 时回退或阻塞。
+4. Mechanical Gate 状态为 `pass` 后，将 Human Approval Gate 标记为 `pending-human`。
+5. 用户确认后才能进入下一 Phase。
 
 ## 人类确认点
 

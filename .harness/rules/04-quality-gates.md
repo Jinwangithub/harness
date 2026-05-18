@@ -37,7 +37,8 @@
       "security_report_v1.md exists",
       "perf_report_v1.md exists",
       "Critical == 0",
-      "Must Fix == 0"
+      "Must Fix == 0",
+      "memory check completed"
     ],
     "evidence_paths": [
       ".harness/changes/{id}/coding/review/code_review_v1.md",
@@ -66,7 +67,7 @@
   "name": "需求分析完成",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["understanding.md exists", "contains 需求复述", "contains 边界", "contains 疑问点"],
+    "checks": ["understanding.md exists", "contains 需求复述", "contains 边界", "contains 疑问点", "memory check completed"],
     "evidence_paths": [".harness/changes/{id}/request_analysis/understanding.md"]
   },
   "human_approval_gate": {
@@ -88,7 +89,7 @@
   "name": "需求评审通过",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["spec.md exists", "tasks.md not created by Phase 2"],
+    "checks": ["spec.md exists", "tasks.md not created by Phase 2", "memory check completed"],
     "evidence_paths": [".harness/changes/{id}/request_analysis/spec.md"]
   },
   "human_approval_gate": {
@@ -110,7 +111,7 @@
   "name": "任务规划完成",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["tasks.md exists", "each task has acceptance criteria", "tasks are independently verifiable"],
+    "checks": ["tasks.md exists", "each task has acceptance criteria", "tasks are independently verifiable", "memory check completed"],
     "evidence_paths": [".harness/changes/{id}/request_analysis/tasks.md"]
   },
   "human_approval_gate": {
@@ -132,7 +133,7 @@
   "name": "编码完成",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["compile success", "coding_report_v1.md exists"],
+    "checks": ["compile success", "coding_report_v1.md exists", "memory check completed"],
     "evidence_paths": [".harness/changes/{id}/coding/coding_report_v1.md", "build.log"]
   },
   "human_approval_gate": {
@@ -161,7 +162,8 @@
       "security_report_v1.md exists",
       "perf_report_v1.md exists",
       "Critical == 0",
-      "Must Fix == 0"
+      "Must Fix == 0",
+      "memory check completed"
     ],
     "evidence_paths": [
       ".harness/changes/{id}/coding/review/code_review_v1.md",
@@ -188,7 +190,7 @@
   "name": "单元测试通过",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["test command success", "total_tests > 0", "passed == total", "coverage >= threshold"],
+    "checks": ["test command success", "total_tests > 0", "passed == total", "coverage >= threshold", "memory check completed"],
     "evidence_paths": [
       ".harness/changes/{id}/unit_test/test_report.md",
       "target/site/jacoco/index.html"
@@ -213,7 +215,7 @@
   "name": "测试评审通过",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["test_review_v1.md exists", "Must Fix == 0"],
+    "checks": ["test_review_v1.md exists", "Must Fix == 0", "memory check completed"],
     "evidence_paths": [".harness/changes/{id}/unit_test/review/test_review_v1.md"]
   },
   "human_approval_gate": {
@@ -235,7 +237,7 @@
   "name": "CI 验证通过",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["ci_report.md exists", "CI status == success"],
+    "checks": ["ci_report.md exists", "CI status == success", "memory check completed"],
     "evidence_paths": [".harness/changes/{id}/ci_result/ci_report.md"]
   },
   "human_approval_gate": {
@@ -257,7 +259,7 @@
   "name": "部署验证通过",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["deploy_report.md exists", "smoke check completed", "rollback check completed"],
+    "checks": ["deploy_report.md exists", "smoke check completed", "rollback check completed", "memory check completed"],
     "evidence_paths": [".harness/changes/{id}/deployment/deploy_report.md"]
   },
   "human_approval_gate": {
@@ -279,7 +281,7 @@
   "name": "最终交付确认",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["delivery-summary.md exists", "summary.md status updated", "memory check completed"],
+    "checks": ["delivery-summary.md exists", "summary.md status updated", "memory completeness verified"],
     "evidence_paths": [
       ".harness/changes/{id}/delivery-summary.md",
       ".harness/changes/{id}/summary.md",
@@ -302,13 +304,13 @@
 
 | 门禁 | Mechanical Gate | Human Approval Gate | 证据 | 最大轮次 |
 |------|-----------------|---------------------|------|---------|
-| 需求分析 | understanding.md 存在且包含关键字段 | 用户确认理解 | understanding.md | 1 |
-| 需求评审 | spec.md 存在且 Phase 2 不产 tasks.md | 用户确认 spec | spec.md | 3 |
-| 任务规划 | tasks.md 存在且任务可验收 | 用户确认任务规划 | tasks.md | 1 |
-| 编码 | 编译成功且报告存在 | 用户确认提交评审 | coding_report.md | 1 |
-| 编码评审 | 三份报告存在，Critical=0，Must Fix=0 | 用户确认评审摘要 | 3 份评审报告 | 2 |
-| 单元测试 | 测试通过、测试数>0、覆盖率达标 | 用户确认测试结果 | test_report.md + JaCoCo | 1 |
-| 测试评审 | test_review 存在，Must Fix=0 | 用户确认测试评审 | test_review.md | 2 |
-| CI | ci_report 存在且成功 | 用户确认或规则放行 | ci_report.md | 1 |
-| 部署验证 | deploy_report 存在，冒烟/回滚检查完成 | 用户确认部署验证 | deploy_report.md | 1 |
-| 最终交付 | delivery-summary、summary、memory 检查完成 | 用户最终确认 | delivery-summary.md | 1 |
+| 需求分析 | understanding.md 存在且包含关键字段 + memory check | 用户确认理解 | understanding.md | 1 |
+| 需求评审 | spec.md 存在且 Phase 2 不产 tasks.md + memory check | 用户确认 spec | spec.md | 3 |
+| 任务规划 | tasks.md 存在且任务可验收 + memory check | 用户确认任务规划 | tasks.md | 1 |
+| 编码 | 编译成功且报告存在 + memory check | 用户确认提交评审 | coding_report.md | 1 |
+| 编码评审 | 三份报告存在，Critical=0，Must Fix=0 + memory check | 用户确认评审摘要 | 3 份评审报告 | 2 |
+| 单元测试 | 测试通过、测试数>0、覆盖率达标 + memory check | 用户确认测试结果 | test_report.md + JaCoCo | 1 |
+| 测试评审 | test_review 存在，Must Fix=0 + memory check | 用户确认测试评审 | test_review.md | 2 |
+| CI | ci_report 存在且成功 + memory check | 用户确认或规则放行 | ci_report.md | 1 |
+| 部署验证 | deploy_report 存在，冒烟/回滚检查完成 + memory check | 用户确认部署验证 | deploy_report.md | 1 |
+| 最终交付 | delivery-summary、summary、memory 完整性验证完成 | 用户最终确认 | delivery-summary.md | 1 |
