@@ -57,6 +57,16 @@
 | P10: 交付 | deprecation-and-migration | `skills/deprecation-and-migration/SKILL.md` | 废弃/迁移旧代码 |
 | 跨阶段 | using-agent-skills | `skills/using-agent-skills/SKILL.md` | Skill 使用说明与索引维护 |
 
+## Flow-tiered Skill Usage
+
+| Flow | Skill 使用策略 | 说明 |
+|------|----------------|------|
+| Mini-flow | 按需使用最少 Skill | 可只做内容审查、一致性搜索和 Memory check；不强制加载完整 Phase Skill 链。 |
+| Lite-flow | `lite_spec` + `checklist` + 压缩评审 | 使用需求澄清、任务清单、验证和压缩版 Two-stage Review；按风险触发 code/security/perf 相关 Skill。 |
+| Standard-flow | 完整 Phase 1-10 Skill 映射 | 使用下方完整阶段映射，保持 mandatory confirmation policy 和 CK1-CK9。 |
+
+任何 Flow 都不得跳过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。
+
 ## 使用方式
 
 在 Phase 执行时读取对应的 Skill 文件并按流程执行：

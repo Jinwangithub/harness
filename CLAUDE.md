@@ -24,7 +24,7 @@
 
 - Harness Iron Laws：未验证不宣称完成；未读证据不放行；Mechanical Gate 失败不得人工绕过；任意失败必须 Stop-the-Line 根因排查；业务规则未知必须查 wiki 或记录疑问；隔离上下文不能替代 Orchestrator 决策；流程分级不能取消验证、证据、Memory 和用户确认。
 - Two-stage Review：Phase 4 编译后自检是 Author/Self Review；Phase 5 三轴隔离评审是 Independent Review。
-- 流程分级：默认 Standard-flow 完整十阶段；Mini-flow/Lite-flow 仅用于低风险小变更，必须记录降级依据，且仍需 Mechanical Gate、fresh verification evidence、Memory check 和必要用户确认。
+- 流程分级：新需求先执行 Flow Classifier；低风险自动选择 Mini/Lite，高风险或不明确使用 Standard；任何流程仍需 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 和必要用户确认。
 
 ## Session 启动流程
 
@@ -46,7 +46,7 @@
 
 ## 质量守则
 
-- 绝不跳过阶段
+- Standard-flow 绝不跳 Phase；Mini/Lite 必须按分级流程完整执行并记录选择依据
 - 绝不在没有验证的情况下声称"完成"
 - 遇到失败优先回退到对应阶段修复，而非硬推
 - 不猜测业务规则 — wiki/ 中有相关文档时必须查阅

@@ -30,11 +30,19 @@
 | 项目知识库 | `.harness/wiki/` | L3 按需查询 — 业务领域、链路、模型 |
 | 记忆系统 | `.harness/memory/` | 架构决策、经验教训、已知问题 |
 
-## 十阶段工作流速查
+## 流程分级速查
 
-> Session 启动时自动检测最新变更目录的 `summary.md`：如 `状态: 进行中` 则从中断 Phase 恢复；如 `状态: 已完成` 则等待新需求。
+> Session 启动时自动检测最新变更目录的 `summary.md`：如 `状态: 进行中` 则从中断 Phase 或分级流程步骤恢复；如 `状态: 已完成` 则等待新需求。
 >
-> Standard-flow 使用完整十阶段；Mini-flow/Lite-flow 是小变更简化路径，只降低阶段密度，不跳过验证、证据、Memory 或必要用户确认。
+> 新需求先执行 Flow Classifier：高风险或不明确走 Standard-flow；明确低风险自动选择 Mini-flow 或 Lite-flow。任何流程仍需 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 和必要 Human Approval Gate。
+
+| Flow | 自动适用场景 | confirmation_policy | 产物 |
+|------|--------------|---------------------|------|
+| Mini-flow | typo、注释、格式、纯文档、README 小修、无行为变化小配置 | exception-only | summary.md、verification_report.md、review_summary.md |
+| Lite-flow | 单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | batched | summary.md、lite_spec.md、checklist.md、verification_report.md、review_summary.md |
+| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory | 完整 Phase 1-10 产物 |
+
+## Standard-flow 十阶段工作流速查
 
 ```
 Phase 1:  需求分析   → idea-refine                  产出: understanding.md
@@ -124,7 +132,7 @@ exception/     → 异常定义 (与 domain 同级)
 - 任意 Mechanical Gate 失败或阻塞，必须 Stop-the-Line 定位根因并回退，不得请求人工放行
 - 隔离执行上下文不等于新增 Agent；Orchestrator 仍是唯一 Agent，通过本地 Skills 调度工程能力
 - 流程分级不等于跳过验证；Mini-flow/Lite-flow 仍需 Mechanical Gate、验证证据、Memory check 和必要用户确认
-- 绝不跳过任何开发阶段；仅允许按流程分级规则降低阶段密度
+- Standard-flow 绝不跳 Phase；Mini/Lite 必须按分级流程完整执行并记录选择依据
 - Orchestrator 是唯一 Agent，通过本地 Skills 调度工程能力
 - 每次变更必须归档到 `.harness/changes/{type}-{name}-{YYYYMMDD}/`
 - 每个 Phase 完成后必须立即归档对应产物到变更目录

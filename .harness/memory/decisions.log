@@ -82,3 +82,11 @@ YYYY-MM-DD | {标题}
 - 理由: 保持 Orchestrator 作为唯一治理中心，同时通过流程分级降低小任务负担，并以可检查门禁确保任何流程都不跳过验证、证据、Memory 和必要用户确认。
 - 后果: 执行者需要在分级降级时记录依据，并在每个出口列出新鲜验证证据；Phase 4/5 审查边界更清晰；失败处理必须先根因定位再回退修复，文档执行成本有所增加。
 - 决定人: Orchestrator
+
+2026-05-19 | Flow Classifier 自动选择 Mini/Lite/Standard 流程
+- 背景: Harness 已有 Mini/Lite/Standard-flow 分级，但旧语义仍偏向默认 Standard-flow，导致低风险 typo、纯文档、小修复也容易被完整十阶段和逐阶段确认拖慢；同时减少确认点可能被误读为取消 Human Approval Gate，需要统一治理表述。
+- 方案: 引入 Flow Classifier + Confirmation Policy：新需求先分类并写入 summary.md 的 flow、selection_basis、risk_flags、confirmation_policy、upgrade_triggers；Mini-flow 使用 exception-only，Lite-flow 使用 batched，Standard-flow 使用 mandatory；风险扩大时 Stop-the-Line 并升级。
+- 备选: 继续默认 Standard-flow 仅允许人工降级；或新增复杂打分模型自动评分；或为 Mini/Lite 新增独立 Agent/JSON schema。
+- 理由: Flow Classifier 能把低风险任务自动导向 Mini/Lite，降低确认摩擦；Confirmation Policy 明确 Human Approval Gate 的触发时机，同时保留 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 和必要用户确认，避免把“少确认”误读为“无门禁”。
+- 后果: Orchestrator 必须在每次新需求开始时记录分类依据；summary.md 和变更归档模板需要支持非十阶段流程；低风险任务确认点减少，但执行者必须在风险扩大或门禁失败时立即升级流程。
+- 决定人: Orchestrator

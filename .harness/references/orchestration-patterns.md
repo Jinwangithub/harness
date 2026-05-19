@@ -15,6 +15,22 @@
 - 权限隔离：隔离上下文不能推进 Phase、不能请求用户确认、不能修改无关文件。
 - 汇总集中：只有 Orchestrator 能合并报告、判断 Mechanical Gate、请求 Human Approval Gate。
 
+## Flow Classifier Pattern
+
+- 新需求输入后先执行 Flow Classifier，再选择 Mini-flow / Lite-flow / Standard-flow。
+- 分类结果必须写入 `summary.md` 的 `## Flow Classification`：`flow`、`selection_basis`、`risk_flags`、`confirmation_policy`、`upgrade_triggers`。
+- Mini-flow 自动适用于 typo、注释、格式、纯文档、README 小修、无行为变化小配置。
+- Lite-flow 自动适用于单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充。
+- Standard-flow 适用于新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清。
+- 风险扩大时必须 Stop-the-Line，更新 Flow Classification 并升级流程。
+
+## Confirmation Policy Pattern
+
+- `mandatory`：Standard-flow 使用，保持 CK1-CK9 阶段确认。
+- `batched`：Lite-flow 使用，需求+简化计划确认一次，最终验证/评审摘要确认一次；中间 Mechanical Gate 通过则继续。
+- `exception-only`：Mini-flow 使用，仅分类不确定、门禁失败/阻塞、需要业务判断或最终摘要时确认。
+- Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh verification evidence、Memory check 或 Stop-the-Line。
+
 ## Skill 调度模式
 
 - 工程能力由 `.harness/skills/{name}/SKILL.md` 提供。
@@ -76,8 +92,8 @@ Phase 5 并行调度：
 - Standard-flow：完整 Phase 1-10，适用于新功能、跨模块、架构/数据/安全/性能相关变更。
 - Lite-flow：需求确认 → 简化计划 → 实现 → 验证/评审 → 交付，适用于单模块/少量文件、低风险行为变化、明确需求的小修复。
 - Mini-flow：理解 → 修改 → 验证 → 记录，适用于 typo、注释、纯文档、无行为变化的小配置。
-- 默认 Standard-flow；Mini-flow/Lite-flow 必须在 `summary.md` 记录降级依据。
-- 流程分级只是门禁密度不同，不允许跳过验证、fresh verification evidence、Memory check 或必要用户确认。
+- 新需求先执行 Flow Classifier；高风险或不明确走 Standard-flow，明确低风险自动选择 Mini-flow 或 Lite-flow。
+- 流程分级只是门禁密度和确认策略不同，不允许跳过验证、fresh verification evidence、Memory check、Stop-the-Line 或必要用户确认。
 - Mini-flow/Lite-flow 不得声明“完整交付流程完成”，只能声明对应流程完成。
 
 ## Standalone Skill Mode 限制

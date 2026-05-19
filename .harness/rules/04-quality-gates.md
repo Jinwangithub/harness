@@ -2,24 +2,35 @@
 
 ## 门禁通用规则
 
-- 每个 Phase 必须先执行 Mechanical Gate，再执行 Human Approval Gate。
+- 每个 Phase 或分级流程步骤必须先执行 Mechanical Gate，再按 confirmation_policy 执行 Human Approval Gate。
 - Mechanical Gate 必须机器可验证，或具备明确证据路径和判定规则。
 - Human Approval Gate 只能在 Mechanical Gate 通过后询问用户。
 - "感觉没问题" = 不通过。
 - 必须提供证据（测试结果、日志、回包、报告路径等）。
 - 事实判断优先于主观判断。
-- 每个 Phase 必须立即可验证，不允许合 Phase 检查。
+- Standard-flow 每个 Phase 必须立即可验证；Mini/Lite 每个分级流程步骤必须立即可验证。
 - Completion claim gate：未列出新鲜验证证据（命令、结果、报告路径或审查报告路径）时，不得声明完成、通过或交付。
 - Mini-flow、Lite-flow、Standard-flow 都必须具备 Mechanical Gate、fresh verification evidence、Memory check 和必要 Human Approval Gate。
 - Standard-flow 保持完整 10 阶段；Mini-flow/Lite-flow 只降低阶段密度，不取消验证、证据、Memory 或用户确认。
+- 任何 confirmation policy 都不能绕过 Mechanical Gate fail/blocked；失败或阻塞必须 Stop-the-Line。
+
+## Confirmation Policy
+
+| Policy | 默认 Flow | 行为 | 不可绕过项 |
+|--------|-----------|------|------------|
+| `mandatory` | Standard-flow | CK1-CK9 按 Phase 请求确认，用户确认前不得进入下一 Phase | Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line |
+| `batched` | Lite-flow | 需求+简化计划确认一次，最终验证/评审摘要确认一次；中间门禁通过则继续 | Mechanical Gate fail/blocked、证据缺失、Memory 缺失 |
+| `exception-only` | Mini-flow | 分类不确定、门禁失败/阻塞、需要业务判断或最终摘要时确认 | Mechanical Gate fail/blocked、证据缺失、Memory 缺失 |
+
+Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。
 
 ## 流程分级门禁
 
-| 流程 | Mechanical Gate | 验证证据 | Memory check | 评审要求 |
-|------|-----------------|----------|--------------|----------|
-| Mini-flow | 必须，覆盖变更说明、验证结果、影响面 | 必须列出命令/结果/报告路径；纯文档可用审查报告路径 | 必须 | 可豁免独立评审，但必须记录豁免依据 |
-| Lite-flow | 必须，覆盖 lite spec、任务清单、实现、验证/评审摘要 | 必须列出命令/结果/报告路径/审查摘要路径 | 必须 | 压缩版 Two-stage Review：实现后自检 + 独立/隔离评审摘要 |
-| Standard-flow | 必须，按 Phase 1-10 完整执行 | 每个 Phase 出口都必须列出 fresh verification evidence | 必须 | Phase 4 自检 + Phase 5 独立评审 |
+| 流程 | Mechanical Gate | 验证证据 | Memory check | 评审要求 | Confirmation Policy |
+|------|-----------------|----------|--------------|----------|---------------------|
+| Mini-flow | 必须，覆盖 Flow Classification、变更说明、验证结果、影响面 | 必须列出命令/结果/报告路径；纯文档可用审查报告路径或一致性搜索 | 必须 | 可豁免独立评审，但必须记录豁免依据 | exception-only |
+| Lite-flow | 必须，覆盖 lite spec、任务清单、实现、验证/评审摘要 | 必须列出命令/结果/报告路径/审查摘要路径 | 必须 | 压缩版 Two-stage Review：实现后自检 + 独立/隔离评审摘要 | batched |
+| Standard-flow | 必须，按 Phase 1-10 完整执行 | 每个 Phase 出口都必须列出 fresh verification evidence | 必须 | Phase 4 自检 + Phase 5 独立评审 | mandatory |
 
 ## 标准门禁模型
 
@@ -34,6 +45,89 @@
 ### Human Approval Gate
 
 用于用户确认。只有 Mechanical Gate 为 `pass` 后才能进入，未确认时状态为 `pending-human`。
+
+### Mini-flow Mechanical Gate JSON 示例
+
+```json
+{
+  "flow": "Mini-flow",
+  "name": "Mini-flow 完成",
+  "confirmation_policy": "exception-only",
+  "mechanical_gate": {
+    "status": "pass|fail|blocked",
+    "checks": [
+      "Flow Classification exists in summary.md",
+      "selection_basis confirms no behavior change",
+      "risk_flags do not include security/data/api/deployment/unclear-requirement",
+      "changed files match Mini-flow scope",
+      "fresh verification evidence listed",
+      "memory check completed"
+    ],
+    "evidence_paths": [
+      ".harness/changes/{id}/summary.md",
+      ".harness/changes/{id}/verification_report.md"
+    ],
+    "fresh_verification_evidence": [
+      "content review result or consistency search result",
+      "changed file list",
+      "verification_report.md path"
+    ]
+  },
+  "human_approval_gate": {
+    "required_when": ["classification uncertain", "mechanical gate fail|blocked", "business judgment needed", "final summary"],
+    "prompt": "Mini-flow 最终摘要如下，请确认。",
+    "approved_by": null,
+    "approved_at": null
+  },
+  "upgrade_to": "Lite-flow|Standard-flow",
+  "rollback_to": "Mini-flow 修改步骤"
+}
+```
+
+### Lite-flow Mechanical Gate JSON 示例
+
+```json
+{
+  "flow": "Lite-flow",
+  "name": "Lite-flow 验证/压缩评审通过",
+  "confirmation_policy": "batched",
+  "mechanical_gate": {
+    "status": "pass|fail|blocked",
+    "checks": [
+      "Flow Classification exists in summary.md",
+      "lite_spec.md exists",
+      "checklist.md exists",
+      "all checklist items completed or explicitly deferred",
+      "verification_report.md exists",
+      "review_summary.md exists",
+      "Critical == 0",
+      "Must Fix == 0",
+      "fresh verification evidence listed",
+      "memory check completed"
+    ],
+    "evidence_paths": [
+      ".harness/changes/{id}/summary.md",
+      ".harness/changes/{id}/request_analysis/lite_spec.md",
+      ".harness/changes/{id}/request_analysis/checklist.md",
+      ".harness/changes/{id}/verification_report.md",
+      ".harness/changes/{id}/review_summary.md"
+    ],
+    "fresh_verification_evidence": [
+      "verification commands or consistency search results",
+      "compressed review summary path",
+      "memory check result"
+    ]
+  },
+  "human_approval_gate": {
+    "required_at": ["requirements_plus_simplified_plan", "final_verification_and_review_summary"],
+    "prompt": "Lite-flow 验证和评审摘要如下，请确认。",
+    "approved_by": null,
+    "approved_at": null
+  },
+  "upgrade_to": "Standard-flow",
+  "rollback_to": "Lite-flow 实现步骤"
+}
+```
 
 ### 标准门禁 JSON 示例
 
@@ -338,6 +432,8 @@
 
 | 门禁 | Mechanical Gate | Human Approval Gate | 证据 | 最大轮次 |
 |------|-----------------|---------------------|------|---------|
+| Mini-flow | Flow Classification、变更说明、验证结果、影响面、memory check | exception-only：分类不确定/阻塞/业务判断/最终摘要 | summary.md + verification_report.md | 1 |
+| Lite-flow | lite_spec、checklist、验证/评审摘要、Critical=0、Must Fix=0、memory check | batched：需求+计划一次，最终摘要一次 | lite_spec.md + checklist.md + verification_report.md + review_summary.md | 2 |
 | 需求分析 | understanding.md 存在且包含关键字段 + memory check | 用户确认理解 | understanding.md | 1 |
 | 需求评审 | spec.md 存在且 Phase 2 不产 tasks.md + memory check | 用户确认 spec | spec.md | 3 |
 | 任务规划 | tasks.md 存在且任务可验收 + memory check | 用户确认任务规划 | tasks.md | 1 |
