@@ -33,6 +33,8 @@
 ## 十阶段工作流速查
 
 > Session 启动时自动检测最新变更目录的 `summary.md`：如 `状态: 进行中` 则从中断 Phase 恢复；如 `状态: 已完成` 则等待新需求。
+>
+> Standard-flow 使用完整十阶段；Mini-flow/Lite-flow 是小变更简化路径，只降低阶段密度，不跳过验证、证据、Memory 或必要用户确认。
 
 ```
 Phase 1:  需求分析   → idea-refine                  产出: understanding.md
@@ -116,7 +118,13 @@ exception/     → 异常定义 (与 domain 同级)
 
 ## 硬性约束
 
-- 绝不跳过任何开发阶段
+- Harness Iron Laws 不可违反：验证、证据、根因、Memory 和用户确认优先于速度
+- 未列出新鲜验证证据，不得声明完成、通过或交付
+- Two-stage Review：Phase 4 自检是 Author/Self Review，Phase 5 三轴隔离评审是 Independent Review
+- 任意 Mechanical Gate 失败或阻塞，必须 Stop-the-Line 定位根因并回退，不得请求人工放行
+- 隔离执行上下文不等于新增 Agent；Orchestrator 仍是唯一 Agent，通过本地 Skills 调度工程能力
+- 流程分级不等于跳过验证；Mini-flow/Lite-flow 仍需 Mechanical Gate、验证证据、Memory check 和必要用户确认
+- 绝不跳过任何开发阶段；仅允许按流程分级规则降低阶段密度
 - Orchestrator 是唯一 Agent，通过本地 Skills 调度工程能力
 - 每次变更必须归档到 `.harness/changes/{type}-{name}-{YYYYMMDD}/`
 - 每个 Phase 完成后必须立即归档对应产物到变更目录

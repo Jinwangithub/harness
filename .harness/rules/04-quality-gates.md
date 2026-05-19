@@ -9,6 +9,17 @@
 - 必须提供证据（测试结果、日志、回包、报告路径等）。
 - 事实判断优先于主观判断。
 - 每个 Phase 必须立即可验证，不允许合 Phase 检查。
+- Completion claim gate：未列出新鲜验证证据（命令、结果、报告路径或审查报告路径）时，不得声明完成、通过或交付。
+- Mini-flow、Lite-flow、Standard-flow 都必须具备 Mechanical Gate、fresh verification evidence、Memory check 和必要 Human Approval Gate。
+- Standard-flow 保持完整 10 阶段；Mini-flow/Lite-flow 只降低阶段密度，不取消验证、证据、Memory 或用户确认。
+
+## 流程分级门禁
+
+| 流程 | Mechanical Gate | 验证证据 | Memory check | 评审要求 |
+|------|-----------------|----------|--------------|----------|
+| Mini-flow | 必须，覆盖变更说明、验证结果、影响面 | 必须列出命令/结果/报告路径；纯文档可用审查报告路径 | 必须 | 可豁免独立评审，但必须记录豁免依据 |
+| Lite-flow | 必须，覆盖 lite spec、任务清单、实现、验证/评审摘要 | 必须列出命令/结果/报告路径/审查摘要路径 | 必须 | 压缩版 Two-stage Review：实现后自检 + 独立/隔离评审摘要 |
+| Standard-flow | 必须，按 Phase 1-10 完整执行 | 每个 Phase 出口都必须列出 fresh verification evidence | 必须 | Phase 4 自检 + Phase 5 独立评审 |
 
 ## 标准门禁模型
 
@@ -36,6 +47,8 @@
       "code_review_v1.md exists",
       "security_report_v1.md exists",
       "perf_report_v1.md exists",
+      "independent review lanes isolated",
+      "review summary exists",
       "Critical == 0",
       "Must Fix == 0",
       "memory check completed"
@@ -43,7 +56,13 @@
     "evidence_paths": [
       ".harness/changes/{id}/coding/review/code_review_v1.md",
       ".harness/changes/{id}/coding/review/security_report_v1.md",
-      ".harness/changes/{id}/coding/review/perf_report_v1.md"
+      ".harness/changes/{id}/coding/review/perf_report_v1.md",
+      ".harness/changes/{id}/coding/review/review_summary.md"
+    ],
+    "fresh_verification_evidence": [
+      "review input package hash or path",
+      "independent review reports generated in this Phase",
+      "review summary path"
     ]
   },
   "human_approval_gate": {
@@ -133,8 +152,9 @@
   "name": "编码完成",
   "mechanical_gate": {
     "status": "pass|fail|blocked",
-    "checks": ["compile success", "coding_report_v1.md exists", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/coding/coding_report_v1.md", "build.log"]
+    "checks": ["compile success", "coding_report_v1.md exists", "self review completed", "memory check completed"],
+    "evidence_paths": [".harness/changes/{id}/coding/coding_report_v1.md", "build.log"],
+    "fresh_verification_evidence": ["mvn clean compile result", "auto-check-and-optimize self review result", "coding_report_v1.md path"]
   },
   "human_approval_gate": {
     "required": true,
@@ -161,6 +181,8 @@
       "code_review_v1.md exists",
       "security_report_v1.md exists",
       "perf_report_v1.md exists",
+      "independent review lanes isolated",
+      "review summary exists",
       "Critical == 0",
       "Must Fix == 0",
       "memory check completed"
@@ -168,8 +190,10 @@
     "evidence_paths": [
       ".harness/changes/{id}/coding/review/code_review_v1.md",
       ".harness/changes/{id}/coding/review/security_report_v1.md",
-      ".harness/changes/{id}/coding/review/perf_report_v1.md"
-    ]
+      ".harness/changes/{id}/coding/review/perf_report_v1.md",
+      ".harness/changes/{id}/coding/review/review_summary.md"
+    ],
+    "fresh_verification_evidence": ["same immutable input package for all lanes", "independent reports generated", "review summary path"]
   },
   "human_approval_gate": {
     "required": true,
@@ -299,6 +323,16 @@
   "rollback_to": "Phase 9"
 }
 ```
+
+## 失败门禁规则
+
+任一 Mechanical Gate 为 `fail|blocked` 时，门禁记录必须包含：
+
+- `failure_evidence`: 失败命令、日志、报告路径、缺失条件或阻塞原因。
+- `root_cause`: 已定位根因；未定位时保持 blocked，不得进入 Human Approval Gate。
+- `rollback_target`: 回退到的 Phase 或分级流程步骤。
+- `regression_verification`: 修复后的新鲜验证证据。
+- `memory_action`: 是否写入 `lessons-learned.md` / `known-issues.md` / `decisions.log`，如无则说明 none。
 
 ## 质量门禁快速检查表
 

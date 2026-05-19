@@ -74,3 +74,11 @@ YYYY-MM-DD | {标题}
 - 备选: 砍掉11个未使用的Skill（被否决，因为其中9个有合理使用场景，只是orchestrator漏引了）
 - 理由: 保持22个Skill完整性，通过条件触发而非强制加载控制上下文填充率；wiki/和references/作为L3按需查询层，通过规则9和AGENTS.md导航连通
 - 后果: 22个Skill中除frontend-ui-engineering和browser-testing-with-devtools外全部可被orchestrator发现和调度；wiki/在P1和P4有明确查阅点
+
+2026-05-18 | 吸收 Superpowers 执行纪律强化 Harness 治理
+- 背景: Harness 原有十阶段流程强调阶段完整性，但对小变更过重，且 verification-before-completion、两阶段评审、失败根因纪律和隔离审查语义未形成统一权威规则。
+- 方案: 在唯一 Orchestrator 架构下引入 Harness Iron Laws、Mini/Lite/Standard-flow 分级、verification-before-completion、Two-stage Review、Stop-the-Line debugging 和隔离执行上下文；同步更新 orchestrator、workflow、quality gates、orchestration patterns、AGENTS 与 CLAUDE 摘要，不修改本地 Skill 文件。
+- 备选: 保持原完整十阶段流程不变；或新增独立审查 Agent 文件承载隔离执行；或直接修改各 Skill 文件内嵌新纪律。
+- 理由: 保持 Orchestrator 作为唯一治理中心，同时通过流程分级降低小任务负担，并以可检查门禁确保任何流程都不跳过验证、证据、Memory 和必要用户确认。
+- 后果: 执行者需要在分级降级时记录依据，并在每个出口列出新鲜验证证据；Phase 4/5 审查边界更清晰；失败处理必须先根因定位再回退修复，文档执行成本有所增加。
+- 决定人: Orchestrator

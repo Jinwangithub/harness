@@ -18,7 +18,13 @@
 需求 → /spec → /plan → /build → /review → /test → /ship
 ```
 
-每个阶段结束后，Orchestrator 检查质量门禁，通过后进入下一阶段。
+每个阶段结束后，Orchestrator 先检查 Mechanical Gate，再请求 Human Approval Gate；未列出新鲜验证证据，不得声明完成、通过或交付。
+
+## 全局纪律摘要
+
+- Harness Iron Laws：未验证不宣称完成；未读证据不放行；Mechanical Gate 失败不得人工绕过；任意失败必须 Stop-the-Line 根因排查；业务规则未知必须查 wiki 或记录疑问；隔离上下文不能替代 Orchestrator 决策；流程分级不能取消验证、证据、Memory 和用户确认。
+- Two-stage Review：Phase 4 编译后自检是 Author/Self Review；Phase 5 三轴隔离评审是 Independent Review。
+- 流程分级：默认 Standard-flow 完整十阶段；Mini-flow/Lite-flow 仅用于低风险小变更，必须记录降级依据，且仍需 Mechanical Gate、fresh verification evidence、Memory check 和必要用户确认。
 
 ## Session 启动流程
 

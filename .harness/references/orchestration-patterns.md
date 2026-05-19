@@ -6,6 +6,15 @@
 - Orchestrator 负责阶段推进、证据检查、归档、回退和用户确认。
 - 不新增 `code-reviewer.md`、`security-auditor.md`、`test-engineer.md` 等独立 Agent。
 
+### 隔离执行上下文模式
+
+- 隔离执行上下文是唯一 Orchestrator 调度下的受限任务或审查泳道，不是新增 Agent 文件。
+- 输入隔离：每个泳道收到同一份不可变输入包。
+- 输出隔离：每个泳道只写自己的报告。
+- 结论隔离：初次报告产出前不参考其他泳道结论。
+- 权限隔离：隔离上下文不能推进 Phase、不能请求用户确认、不能修改无关文件。
+- 汇总集中：只有 Orchestrator 能合并报告、判断 Mechanical Gate、请求 Human Approval Gate。
+
 ## Skill 调度模式
 
 - 工程能力由 `.harness/skills/{name}/SKILL.md` 提供。
@@ -20,13 +29,39 @@ Phase 5 并行调度：
 - `security-and-hardening`
 - `performance-optimization`
 
-三份报告全部完成后再汇总，一次请求用户确认。
+每个泳道使用同一份不可变输入包，独立写自己的报告，初次结论产出前不互相影响；三份报告全部完成后才由 Orchestrator 汇总，一次请求用户确认。
+
+## Two-stage Review 模式
+
+- Stage 1: Author/Self Review，在 Phase 4 编译后执行，由 `auto-check-and-optimize` 产出自检结论。
+- Stage 2: Independent Review，在 Phase 5 执行三轴隔离评审，由 code/security/performance 泳道独立产出报告。
+- Stage 2 不替代 Stage 1；Stage 1 不替代 Stage 2。
+- Lite-flow 可使用压缩版 Two-stage Review：实现后自检 + 独立/隔离评审摘要。
+- Mini-flow 可豁免独立评审，但必须记录豁免依据和验证证据。
+
+## Verification-before-completion 模式
+
+- 未列出新鲜验证证据，不得声明完成、通过或交付。
+- 每个 Phase 或分级流程出口必须列出 Mechanical Gate 状态、命令/结果/报告路径/审查报告路径、`Memory recorded: {N} entries / none`。
+- Human Approval Gate 只能在 Mechanical Gate 为 pass 且证据完整后请求。
 
 ## Mechanical Gate + Human Approval Gate
 
 - Mechanical Gate：机器可验证或有明确证据路径，状态为 `pass|fail|blocked`。
 - Human Approval Gate：用户确认，Mechanical Gate 通过后才可进入，等待时状态为 `pending-human`。
 - 不允许用人工确认绕过失败的 Mechanical Gate。
+
+## Stop-the-Line debugging 模式
+
+任一 Mechanical Gate 为 `fail|blocked` 时：
+
+1. 停止进入下一阶段，不请求人工放行。
+2. 记录 failure evidence。
+3. 复现或确认失败条件。
+4. 定位 root cause。
+5. 回退到对应 Phase 或分级流程步骤。
+6. 修复并重新验证。
+7. 如属于 Agent 错误或可复用教训，完整写入 `lessons-learned.md`。
 
 ## 回退模式
 
@@ -35,6 +70,15 @@ Phase 5 并行调度：
 - CI 失败：回退 Phase 6。
 - 需求不符：回退 Phase 1。
 - 评审超轮次：升级人工决策。
+
+## 流程分级模式
+
+- Standard-flow：完整 Phase 1-10，适用于新功能、跨模块、架构/数据/安全/性能相关变更。
+- Lite-flow：需求确认 → 简化计划 → 实现 → 验证/评审 → 交付，适用于单模块/少量文件、低风险行为变化、明确需求的小修复。
+- Mini-flow：理解 → 修改 → 验证 → 记录，适用于 typo、注释、纯文档、无行为变化的小配置。
+- 默认 Standard-flow；Mini-flow/Lite-flow 必须在 `summary.md` 记录降级依据。
+- 流程分级只是门禁密度不同，不允许跳过验证、fresh verification evidence、Memory check 或必要用户确认。
+- Mini-flow/Lite-flow 不得声明“完整交付流程完成”，只能声明对应流程完成。
 
 ## Standalone Skill Mode 限制
 
