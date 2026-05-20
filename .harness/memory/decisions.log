@@ -98,3 +98,11 @@ YYYY-MM-DD | {标题}
 - 理由: 最小侵入性修改，保持单 Orchestrator 架构，消除 Phase 4/6 隔离语义缺失的风险，与现有 Phase 5 隔离模式完全对齐。
 - 后果: Phase 4 自检和 Phase 6 测试执行均受隔离约束，Orchestrator 是唯一汇总和放行节点；无 Skill 文件变更，无流程分级变更。
 - 决定人: Orchestrator + 用户确认
+
+2026-05-20 | Harness 单一权威源与 Orchestrator 瘦身
+- 背景: Harness 治理文档存在规则重复、Orchestrator 膨胀、Mini/Lite 仍偏重的问题，入口文件和执行文件重复定义 Flow、Gate、Memory 与 Skill 语义，增加上下文负担和维护分叉风险。
+- 方案: 建立权威源边界：workflow 负责 Flow 与流程，quality-gates 负责门禁检查表，memory/README 负责模板与检查频率，changes/README 负责产物结构，skills/README 负责分层按需加载；同时瘦身 Orchestrator 为调度内核，Mini-flow 减少为 summary.md 与 verification_report.md 两件产物。
+- 备选: 继续在现有文件上补规则；删除大量 Skill 文件减少规模；维持现状不做治理重构。
+- 理由: 单一权威源能降低上下文负担和维护分叉风险；Orchestrator 瘦身能让执行者按需读取细则；Mini/Lite 减少产物能降低低风险任务摩擦，同时保留验证、证据、Memory 和 Stop-the-Line。
+- 后果: 入口文件更短、重复说明减少，但执行者需要按引用读取对应权威源；低风险任务产物更少，但仍必须完成 Mechanical Gate、fresh verification evidence、Memory check 和必要 Human Approval Gate。
+- 决定人: Orchestrator + 用户确认

@@ -1,105 +1,88 @@
 # 质量门禁定义
 
-## 门禁通用规则
+本文件是 Mechanical Gate、Human Approval Gate、检查表和失败门禁的权威源。流程选择和检查时机见 `.harness/rules/02-development-workflow.md`。
 
-- 每个 Phase 或分级流程步骤必须先执行 Mechanical Gate，再按 confirmation_policy 执行 Human Approval Gate。
+## 1. 通用规则
+
+- 每个 Phase 或 Flow step 必须先执行 Mechanical Gate，再按 `confirmation_policy` 执行 Human Approval Gate。
 - Mechanical Gate 必须机器可验证，或具备明确证据路径和判定规则。
-- Human Approval Gate 只能在 Mechanical Gate 通过后询问用户。
-- "感觉没问题" = 不通过。
-- 必须提供证据（测试结果、日志、回包、报告路径等）。
-- 事实判断优先于主观判断。
-- Standard-flow 每个 Phase 必须立即可验证；Mini/Lite 每个分级流程步骤必须立即可验证。
-- Completion claim gate：未列出新鲜验证证据（命令、结果、报告路径或审查报告路径）时，不得声明完成、通过或交付。
+- Human Approval Gate 只能在 Mechanical Gate 为 `pass` 后进入。
+- Mechanical Gate 为 `fail|blocked` 时必须 Stop-the-Line，不得请求用户人工放行。
+- “感觉没问题”不是证据。
+- 出口必须列出 fresh verification evidence：命令、结果、报告路径、审查报告路径或可复查的检查结果。
+- Completion claim gate：未列出 fresh verification evidence，不得声明完成、通过或交付。
 - Mini-flow、Lite-flow、Standard-flow 都必须具备 Mechanical Gate、fresh verification evidence、Memory check 和必要 Human Approval Gate。
-- Standard-flow 保持完整 10 阶段；Mini-flow/Lite-flow 只降低阶段密度，不取消验证、证据、Memory 或用户确认。
-- 任何 confirmation policy 都不能绕过 Mechanical Gate fail/blocked；失败或阻塞必须 Stop-the-Line。
 
-## Confirmation Policy
-
-| Policy | 默认 Flow | 行为 | 不可绕过项 |
-|--------|-----------|------|------------|
-| `mandatory` | Standard-flow | CK1-CK9 按 Phase 请求确认，用户确认前不得进入下一 Phase | Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line |
-| `batched` | Lite-flow | 需求+简化计划确认一次，最终验证/评审摘要确认一次；中间门禁通过则继续 | Mechanical Gate fail/blocked、证据缺失、Memory 缺失 |
-| `exception-only` | Mini-flow | 分类不确定、门禁失败/阻塞、需要业务判断或最终摘要时确认 | Mechanical Gate fail/blocked、证据缺失、Memory 缺失 |
-
-Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。
-
-## 流程分级门禁
-
-| 流程 | Mechanical Gate | 验证证据 | Memory check | 评审要求 | Confirmation Policy |
-|------|-----------------|----------|--------------|----------|---------------------|
-| Mini-flow | 必须，覆盖 Flow Classification、变更说明、验证结果、影响面 | 必须列出命令/结果/报告路径；纯文档可用审查报告路径或一致性搜索 | 必须 | 可豁免独立评审，但必须记录豁免依据 | exception-only |
-| Lite-flow | 必须，覆盖 lite spec、任务清单、实现、验证/评审摘要 | 必须列出命令/结果/报告路径/审查摘要路径 | 必须 | 压缩版 Two-stage Review：实现后自检 + 独立/隔离评审摘要 | batched |
-| Standard-flow | 必须，按 Phase 1-10 完整执行 | 每个 Phase 出口都必须列出 fresh verification evidence | 必须 | Phase 4 自检 + Phase 5 独立评审 | mandatory |
-
-## 标准门禁模型
+## 2. Gate 状态定义
 
 ### Mechanical Gate
 
-用于检查文件、状态、命令结果、报告字段、问题计数等可验证条件。状态只能是：
-
-- `pass`: 证据完整且判定通过
-- `fail`: 证据存在但判定失败
-- `blocked`: 证据缺失、命令无法执行、环境不满足或条件无法判定
+| 状态 | 含义 | 下一步 |
+|------|------|--------|
+| `pass` | 证据完整且判定通过 | 按 `confirmation_policy` 进入 Human Approval Gate 或继续 |
+| `fail` | 证据存在但判定失败 | Stop-the-Line，回退修复 |
+| `blocked` | 证据缺失、命令无法执行、环境不满足或无法判定 | Stop-the-Line，补证据或处理阻塞 |
 
 ### Human Approval Gate
 
-用于用户确认。只有 Mechanical Gate 为 `pass` 后才能进入，未确认时状态为 `pending-human`。
+| 状态 | 含义 |
+|------|------|
+| `pending-human` | Mechanical Gate 已通过，等待用户确认 |
+| `approved` | 用户确认通过 |
+| `rejected` | 用户不通过，必须回退处理 |
+| `not-required-by-policy` | 当前 `confirmation_policy` 不要求此处确认，且 Mechanical Gate 已通过 |
 
-### Mini-flow Mechanical Gate JSON 示例
+## 3. Confirmation Policy
+
+| Policy | 默认 Flow | Human Approval Gate 时机 | 不可绕过项 |
+|--------|-----------|--------------------------|------------|
+| `mandatory` | Standard-flow | CK1-CK9 按 Phase 请求确认 | Mechanical Gate、fresh evidence、Memory check、Stop-the-Line |
+| `batched` | Lite-flow | 需求+简化计划一次；最终验证/评审摘要一次 | Mechanical Gate fail/blocked、证据缺失、Memory 缺失 |
+| `exception-only` | Mini-flow | 分类不确定、门禁失败/阻塞、需要业务判断或最终摘要 | Mechanical Gate fail/blocked、证据缺失、Memory 缺失 |
+
+## 4. Flow-level 快速检查表
+
+| Flow | Mechanical Gate 必查 | Evidence | Review | Memory | Human Approval |
+|------|----------------------|----------|--------|--------|----------------|
+| Mini-flow | Flow Classification 存在；变更范围无行为变化；验证完成；独立评审豁免依据已记录 | `summary.md`、`verification_report.md` | 可豁免，依据写入 `verification_report.md` | 最终 verification 检查 | exception-only |
+| Lite-flow | lite spec 存在；checklist 存在且完成/延期明确；验证报告存在；评审摘要存在；Critical=0；Must Fix=0 | `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`、`verification_report.md`、`review_summary.md` | 压缩版 Two-stage Review | 计划确认后、最终验证/交付前检查 | batched |
+| Standard-flow | 对应 Phase 产物存在；本 Phase 判定条件满足；fresh evidence 列出 | 对应 Phase 报告与命令结果 | Phase 4 自检 + Phase 5 独立评审 | 每个 Phase 出口检查 | mandatory |
+
+## 5. Phase-level 快速检查表
+
+| Phase | Mechanical Gate 必查 | Evidence | Human Approval |
+|------|----------------------|----------|----------------|
+| Phase 1 需求分析 | `understanding.md` 存在，包含需求复述、边界、疑问点，Memory check 完成 | `request_analysis/understanding.md` | CK1 |
+| Phase 2 需求评审 | `spec.md` 存在，Phase 2 不创建 `tasks.md`，Memory check 完成 | `request_analysis/spec.md` | CK2 |
+| Phase 3 任务规划 | `tasks.md` 存在，每个任务有验收条件且可独立验证，Memory check 完成 | `request_analysis/tasks.md` | CK3 |
+| Phase 4 编码实现 | 编译成功，`coding_report_v1.md` 存在，Author/Self Review 完成，Memory check 完成 | 编译命令结果、`coding/coding_report_v1.md` | CK4 |
+| Phase 5 编码评审 | 独立评审报告存在，隔离审查完成，Critical=0，Must Fix=0，Memory check 完成 | `coding/review/*.md`、评审摘要 | CK5 |
+| Phase 6 单元测试 | 测试通过，测试数>0，覆盖率符合项目阈值，Memory check 完成 | 测试命令结果、`unit_test/test_report.md`、覆盖率报告 | CK6 |
+| Phase 7 测试评审 | 测试评审报告存在，Must Fix=0，Memory check 完成 | `unit_test/review/test_review_v1.md` | CK7 |
+| Phase 8 CI 验证 | CI 报告存在且成功，Memory check 完成 | `ci_result/ci_report.md` | 按 Standard 规则确认或记录自动放行依据 |
+| Phase 9 部署验证 | 部署报告存在，冒烟/回滚检查完成，Memory check 完成 | `deployment/deploy_report.md` | CK8 |
+| Phase 10 用户确认 | delivery summary 存在，summary 状态更新，Memory 完整性验证完成 | `delivery-summary.md`、`summary.md`、Memory 记录 | CK9 |
+
+## 6. Failure gate 检查
+
+任一 Mechanical Gate 为 `fail|blocked` 时，门禁记录必须包含：
+
+- `failure_evidence`：失败命令、日志、报告路径、缺失条件或阻塞原因。
+- `root_cause`：已定位根因；未定位时保持 `blocked`，不得进入 Human Approval Gate。
+- `rollback_target`：回退到的 Phase 或 Flow step。
+- `regression_verification`：修复后的 fresh verification evidence。
+- `memory_action`：是否写入 `lessons-learned.md` / `known-issues.md` / `decisions.log`；如无则说明 `none`。
+
+## 7. 最小 Gate Record 示例
 
 ```json
 {
-  "flow": "Mini-flow",
-  "name": "Mini-flow 完成",
-  "confirmation_policy": "exception-only",
+  "scope": "Lite-flow L3 verification/review",
   "mechanical_gate": {
-    "status": "pass|fail|blocked",
+    "status": "pass",
     "checks": [
-      "Flow Classification exists in summary.md",
-      "selection_basis confirms no behavior change",
-      "risk_flags do not include security/data/api/deployment/unclear-requirement",
-      "changed files match Mini-flow scope",
-      "fresh verification evidence listed",
-      "memory check completed"
-    ],
-    "evidence_paths": [
-      ".harness/changes/{id}/summary.md",
-      ".harness/changes/{id}/verification_report.md"
-    ],
-    "fresh_verification_evidence": [
-      "content review result or consistency search result",
-      "changed file list",
-      "verification_report.md path"
-    ]
-  },
-  "human_approval_gate": {
-    "required_when": ["classification uncertain", "mechanical gate fail|blocked", "business judgment needed", "final summary"],
-    "prompt": "Mini-flow 最终摘要如下，请确认。",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "upgrade_to": "Lite-flow|Standard-flow",
-  "rollback_to": "Mini-flow 修改步骤"
-}
-```
-
-### Lite-flow Mechanical Gate JSON 示例
-
-```json
-{
-  "flow": "Lite-flow",
-  "name": "Lite-flow 验证/压缩评审通过",
-  "confirmation_policy": "batched",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": [
-      "Flow Classification exists in summary.md",
-      "lite_spec.md exists",
-      "checklist.md exists",
-      "all checklist items completed or explicitly deferred",
-      "verification_report.md exists",
-      "review_summary.md exists",
+      "Flow Classification exists",
+      "required artifacts exist",
       "Critical == 0",
       "Must Fix == 0",
       "fresh verification evidence listed",
@@ -107,340 +90,22 @@ Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical 
     ],
     "evidence_paths": [
       ".harness/changes/{id}/summary.md",
-      ".harness/changes/{id}/request_analysis/lite_spec.md",
-      ".harness/changes/{id}/request_analysis/checklist.md",
       ".harness/changes/{id}/verification_report.md",
       ".harness/changes/{id}/review_summary.md"
     ],
     "fresh_verification_evidence": [
-      "verification commands or consistency search results",
-      "compressed review summary path",
-      "memory check result"
+      "verification command or consistency search result",
+      "review_summary.md path",
+      "Memory recorded: 0 entries / none"
     ]
   },
   "human_approval_gate": {
-    "required_at": ["requirements_plus_simplified_plan", "final_verification_and_review_summary"],
-    "prompt": "Lite-flow 验证和评审摘要如下，请确认。",
-    "approved_by": null,
-    "approved_at": null
+    "status": "pending-human",
+    "policy": "batched",
+    "reason": "final verification/review summary"
   },
-  "upgrade_to": "Standard-flow",
-  "rollback_to": "Lite-flow 实现步骤"
+  "rollback_to": "Lite-flow implementation"
 }
 ```
 
-### 标准门禁 JSON 示例
-
-```json
-{
-  "phase": "Phase 5",
-  "name": "编码评审通过",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": [
-      "code_review_v1.md exists",
-      "security_report_v1.md exists",
-      "perf_report_v1.md exists",
-      "independent review lanes isolated",
-      "review summary exists",
-      "Critical == 0",
-      "Must Fix == 0",
-      "memory check completed"
-    ],
-    "evidence_paths": [
-      ".harness/changes/{id}/coding/review/code_review_v1.md",
-      ".harness/changes/{id}/coding/review/security_report_v1.md",
-      ".harness/changes/{id}/coding/review/perf_report_v1.md",
-      ".harness/changes/{id}/coding/review/review_summary.md"
-    ],
-    "fresh_verification_evidence": [
-      "review input package hash or path",
-      "independent review reports generated in this Phase",
-      "review summary path"
-    ]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "评审报告摘要如下（Verdict: Approve/Request Changes），请确认是否通过？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 6",
-  "rollback_to": "Phase 4"
-}
-```
-
-## 各阶段门禁
-
-### Phase 1 门禁: 需求分析完成
-
-```json
-{
-  "phase": "Phase 1",
-  "name": "需求分析完成",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["understanding.md exists", "contains 需求复述", "contains 边界", "contains 疑问点", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/request_analysis/understanding.md"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "以上理解是否正确？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 2",
-  "rollback_to": "Phase 1"
-}
-```
-
-### Phase 2 门禁: 需求评审通过
-
-```json
-{
-  "phase": "Phase 2",
-  "name": "需求评审通过",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["spec.md exists", "tasks.md not created by Phase 2", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/request_analysis/spec.md"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "spec 是否确认？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 3",
-  "rollback_to": "Phase 1"
-}
-```
-
-### Phase 3 门禁: 任务规划完成
-
-```json
-{
-  "phase": "Phase 3",
-  "name": "任务规划完成",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["tasks.md exists", "each task has acceptance criteria", "tasks are independently verifiable", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/request_analysis/tasks.md"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "任务拆解是否合理？每一个都可独立验证？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 4",
-  "rollback_to": "Phase 2"
-}
-```
-
-### Phase 4 门禁: 编码完成
-
-```json
-{
-  "phase": "Phase 4",
-  "name": "编码完成",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["compile success", "coding_report_v1.md exists", "self review completed", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/coding/coding_report_v1.md", "build.log"],
-    "fresh_verification_evidence": ["mvn clean compile result", "auto-check-and-optimize self review result", "coding_report_v1.md path"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "编码完成，编译通过，请确认是否可以提交评审？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 5",
-  "rollback_to": "Phase 4"
-}
-```
-
-**注意**: Phase 4 不运行测试，测试是 Phase 6 的职责。
-
-### Phase 5 门禁: 编码评审通过
-
-```json
-{
-  "phase": "Phase 5",
-  "name": "编码评审通过",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": [
-      "code_review_v1.md exists",
-      "security_report_v1.md exists",
-      "perf_report_v1.md exists",
-      "independent review lanes isolated",
-      "review summary exists",
-      "Critical == 0",
-      "Must Fix == 0",
-      "memory check completed"
-    ],
-    "evidence_paths": [
-      ".harness/changes/{id}/coding/review/code_review_v1.md",
-      ".harness/changes/{id}/coding/review/security_report_v1.md",
-      ".harness/changes/{id}/coding/review/perf_report_v1.md",
-      ".harness/changes/{id}/coding/review/review_summary.md"
-    ],
-    "fresh_verification_evidence": ["same immutable input package for all lanes", "independent reports generated", "review summary path"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "评审报告摘要如下（Verdict: Approve/Request Changes），请确认是否通过？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 6",
-  "rollback_to": "Phase 4"
-}
-```
-
-### Phase 6 门禁: 单元测试通过
-
-```json
-{
-  "phase": "Phase 6",
-  "name": "单元测试通过",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["test command success", "total_tests > 0", "passed == total", "coverage >= threshold", "memory check completed"],
-    "evidence_paths": [
-      ".harness/changes/{id}/unit_test/test_report.md",
-      "target/site/jacoco/index.html"
-    ]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "测试已完成，请确认测试结果是否通过？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 7",
-  "rollback_to": "Phase 6"
-}
-```
-
-### Phase 7 门禁: 测试评审通过
-
-```json
-{
-  "phase": "Phase 7",
-  "name": "测试评审通过",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["test_review_v1.md exists", "Must Fix == 0", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/unit_test/review/test_review_v1.md"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "测试评审完成，请确认是否通过？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 8",
-  "rollback_to": "Phase 6"
-}
-```
-
-### Phase 8 门禁: CI 验证通过
-
-```json
-{
-  "phase": "Phase 8",
-  "name": "CI 验证通过",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["ci_report.md exists", "CI status == success", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/ci_result/ci_report.md"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "CI 验证完成，请确认是否通过？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 9",
-  "rollback_to": "Phase 6"
-}
-```
-
-### Phase 9 门禁: 部署验证通过
-
-```json
-{
-  "phase": "Phase 9",
-  "name": "部署验证通过",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["deploy_report.md exists", "smoke check completed", "rollback check completed", "memory check completed"],
-    "evidence_paths": [".harness/changes/{id}/deployment/deploy_report.md"]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "部署验证完成，请确认是否通过？",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": "Phase 10",
-  "rollback_to": "Phase 8"
-}
-```
-
-### Phase 10 门禁: 最终交付确认
-
-```json
-{
-  "phase": "Phase 10",
-  "name": "最终交付确认",
-  "mechanical_gate": {
-    "status": "pass|fail|blocked",
-    "checks": ["delivery-summary.md exists", "summary.md status updated", "memory completeness verified"],
-    "evidence_paths": [
-      ".harness/changes/{id}/delivery-summary.md",
-      ".harness/changes/{id}/summary.md",
-      ".harness/memory/decisions.log",
-      ".harness/memory/lessons-learned.md"
-    ]
-  },
-  "human_approval_gate": {
-    "required": true,
-    "prompt": "交付完成，请最终确认。",
-    "approved_by": null,
-    "approved_at": null
-  },
-  "next_phase": null,
-  "rollback_to": "Phase 9"
-}
-```
-
-## 失败门禁规则
-
-任一 Mechanical Gate 为 `fail|blocked` 时，门禁记录必须包含：
-
-- `failure_evidence`: 失败命令、日志、报告路径、缺失条件或阻塞原因。
-- `root_cause`: 已定位根因；未定位时保持 blocked，不得进入 Human Approval Gate。
-- `rollback_target`: 回退到的 Phase 或分级流程步骤。
-- `regression_verification`: 修复后的新鲜验证证据。
-- `memory_action`: 是否写入 `lessons-learned.md` / `known-issues.md` / `decisions.log`，如无则说明 none。
-
-## 质量门禁快速检查表
-
-| 门禁 | Mechanical Gate | Human Approval Gate | 证据 | 最大轮次 |
-|------|-----------------|---------------------|------|---------|
-| Mini-flow | Flow Classification、变更说明、验证结果、影响面、memory check | exception-only：分类不确定/阻塞/业务判断/最终摘要 | summary.md + verification_report.md | 1 |
-| Lite-flow | lite_spec、checklist、验证/评审摘要、Critical=0、Must Fix=0、memory check | batched：需求+计划一次，最终摘要一次 | lite_spec.md + checklist.md + verification_report.md + review_summary.md | 2 |
-| 需求分析 | understanding.md 存在且包含关键字段 + memory check | 用户确认理解 | understanding.md | 1 |
-| 需求评审 | spec.md 存在且 Phase 2 不产 tasks.md + memory check | 用户确认 spec | spec.md | 3 |
-| 任务规划 | tasks.md 存在且任务可验收 + memory check | 用户确认任务规划 | tasks.md | 1 |
-| 编码 | 编译成功且报告存在 + memory check | 用户确认提交评审 | coding_report.md | 1 |
-| 编码评审 | 三份报告存在，Critical=0，Must Fix=0 + memory check | 用户确认评审摘要 | 3 份评审报告 | 2 |
-| 单元测试 | 测试通过、测试数>0、覆盖率达标 + memory check | 用户确认测试结果 | test_report.md + JaCoCo | 1 |
-| 测试评审 | test_review 存在，Must Fix=0 + memory check | 用户确认测试评审 | test_review.md | 2 |
-| CI | ci_report 存在且成功 + memory check | 用户确认或规则放行 | ci_report.md | 1 |
-| 部署验证 | deploy_report 存在，冒烟/回滚检查完成 + memory check | 用户确认部署验证 | deploy_report.md | 1 |
-| 最终交付 | delivery-summary、summary、memory 完整性验证完成 | 用户最终确认 | delivery-summary.md | 1 |
+附录示例只展示字段形态；实际检查项以本文件快速检查表和对应 Flow/Phase 产物为准。

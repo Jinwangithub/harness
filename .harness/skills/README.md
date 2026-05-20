@@ -1,91 +1,79 @@
-# Skills 索引 — 本地 Skill 映射表
+# Skills Registry — 按需加载策略
 
-本目录包含 Harness Engineering 十阶段工作流所需的全部 22 个本地 Skill，并提供 23 个阶段/场景映射。
-其中 `code-review-and-quality` 同时用于 P5 编码评审和 P7 测试评审，因此映射数多于唯一 Skill 数。
-所有 Skill 已复制到仓库本地，团队使用无需安装外部插件。
+本文件是 Skill 分层、触发策略和加载边界的权威源。所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`，仓库内置，无需安装插件。
 
-## 01-Define (需求定义)
+## Core-meta
 
-| Phase | Skill | 源路径 | 使用时机 |
-|-------|-------|--------|---------|
-| P1: 需求分析 | idea-refine | `skills/idea-refine/SKILL.md` | 需求模糊时，用发散/收敛思维澄清。产出 understanding.md |
-| P2: 需求评审 | spec-driven-development | `skills/spec-driven-development/SKILL.md` | 编写 PRD（spec.md）。不含 tasks.md |
+| Skill | 路径 | 用途 |
+|------|------|------|
+| `using-agent-skills` | `.harness/skills/using-agent-skills/SKILL.md` | Skill 发现、路由和索引维护 |
+| `context-engineering` | `.harness/skills/context-engineering/SKILL.md` | 新会话、任务切换、上下文压缩与恢复 |
+| `debugging-and-error-recovery` | `.harness/skills/debugging-and-error-recovery/SKILL.md` | Stop-the-Line、构建/测试/门禁失败排查 |
 
-## 02-Plan (任务规划)
+## Core-flow
 
-| Phase | Skill | 源路径 | 使用时机 |
-|-------|-------|--------|---------|
-| P3: 任务规划 | planning-and-task-breakdown | `skills/planning-and-task-breakdown/SKILL.md` | 拆解 task，标注依赖和验收条件。首次创建 tasks.md |
+| Skill | 路径 | 主用途 |
+|------|------|--------|
+| `idea-refine` | `.harness/skills/idea-refine/SKILL.md` | 需求澄清、问题收敛 |
+| `spec-driven-development` | `.harness/skills/spec-driven-development/SKILL.md` | PRD / spec 编写 |
+| `planning-and-task-breakdown` | `.harness/skills/planning-and-task-breakdown/SKILL.md` | 任务拆解、验收条件 |
+| `incremental-implementation` | `.harness/skills/incremental-implementation/SKILL.md` | 垂直切片增量实现 |
+| `auto-check-and-optimize` | `.harness/skills/auto-check-and-optimize/SKILL.md` | Phase 4 出口 Author/Self Review；不替代 Phase 5 |
+| `test-driven-development` | `.harness/skills/test-driven-development/SKILL.md` | 测试编写、覆盖率验证 |
+| `code-review-and-quality` | `.harness/skills/code-review-and-quality/SKILL.md` | 代码/测试质量评审 |
+| `ci-cd-and-automation` | `.harness/skills/ci-cd-and-automation/SKILL.md` | CI 验证与自动化 |
+| `shipping-and-launch` | `.harness/skills/shipping-and-launch/SKILL.md` | 部署、冒烟、发布检查 |
+| `documentation-and-adrs` | `.harness/skills/documentation-and-adrs/SKILL.md` | 交付摘要、ADR、文档沉淀 |
 
-## 03-Build (编码实现)
+## Conditional-domain
 
-| Phase | Skill | 源路径 | 使用时机 |
-|-------|-------|--------|---------|
-| P4: 编码实现 | incremental-implementation | `skills/incremental-implementation/SKILL.md` | 按垂直切片增量实现。仅编译验证 |
-| P4: 编码实现 | context-engineering | `skills/context-engineering/SKILL.md` | 启动 Session/切换任务时加载上下文 |
-| P4: 编码实现 | source-driven-development | `skills/source-driven-development/SKILL.md` | 使用新框架/库时参考官方文档 |
-| P4: 编码实现 | frontend-ui-engineering | `skills/frontend-ui-engineering/SKILL.md` | 构建 UI 组件 |
-| P4: 编码实现 | api-and-interface-design | `skills/api-and-interface-design/SKILL.md` | 设计 API/模块边界 |
+| Skill | 路径 | 触发条件 |
+|------|------|----------|
+| `source-driven-development` | `.harness/skills/source-driven-development/SKILL.md` | 引入新框架、库、API 或需要官方文档依据 |
+| `api-and-interface-design` | `.harness/skills/api-and-interface-design/SKILL.md` | 设计 API、模块边界、接口契约 |
+| `frontend-ui-engineering` | `.harness/skills/frontend-ui-engineering/SKILL.md` | 前端 UI、组件、交互实现 |
+| `browser-testing-with-devtools` | `.harness/skills/browser-testing-with-devtools/SKILL.md` | 浏览器端调试、页面行为验证 |
+| `security-and-hardening` | `.harness/skills/security-and-hardening/SKILL.md` | 安全、auth、权限、输入边界、OWASP 风险 |
+| `performance-optimization` | `.harness/skills/performance-optimization/SKILL.md` | 性能风险、瓶颈分析、容量或延迟目标 |
+| `code-simplification` | `.harness/skills/code-simplification/SKILL.md` | 评审发现复杂、冗余、可简化代码 |
+| `deprecation-and-migration` | `.harness/skills/deprecation-and-migration/SKILL.md` | 废弃旧功能、迁移接口、兼容策略 |
 
-## 04-Verify (验证)
+## Support-macro / Support-workflow
 
-| Phase | Skill | 源路径 | 使用时机 |
-|-------|-------|--------|---------|
-| P4 出口 / 跨阶段质量自动化 | auto-check-and-optimize | `skills/auto-check-and-optimize/SKILL.md` | 代码实现后自检，可做五轴审查、简化建议、DDD 分层检查、编译验证；不能替代 Phase 5 正式评审 |
-| P6: 单元测试 | test-driven-development | `skills/test-driven-development/SKILL.md` | 编写/补全测试 + JaCoCo 覆盖率报告 |
-| 跨阶段 | debugging-and-error-recovery | `skills/debugging-and-error-recovery/SKILL.md` | 构建/测试失败时 |
-| 跨阶段 | browser-testing-with-devtools | `skills/browser-testing-with-devtools/SKILL.md` | 浏览器端调试 |
+| Skill | 路径 | 触发条件 |
+|------|------|----------|
+| `git-workflow-and-versioning` | `.harness/skills/git-workflow-and-versioning/SKILL.md` | 用户要求提交、分支、版本或发布协作 |
 
-## 05-Review (审查)
+## Flow-tiered 加载策略
 
-| Phase | Skill | 源路径 | 使用时机 |
-|-------|-------|--------|---------|
-| P5: 编码评审 | code-review-and-quality | `skills/code-review-and-quality/SKILL.md` | 五轴代码审查（正确性/可读性/架构/安全/性能） |
-| P5: 编码评审 | security-and-hardening | `skills/security-and-hardening/SKILL.md` | 安全审计（OWASP Top 10） |
-| P5: 编码评审 | performance-optimization | `skills/performance-optimization/SKILL.md` | 性能审查 |
-| P5: 编码评审 | code-simplification | `skills/code-simplification/SKILL.md` | 简化复杂代码 |
-| P7: 测试评审 | code-review-and-quality | `skills/code-review-and-quality/SKILL.md` | 使用其测试审查标准评估测试质量 |
+| Flow | 默认策略 |
+|------|----------|
+| Mini-flow | 默认不加载阶段 Skill；除非需要内容审查、失败恢复或用户明确要求单点 Skill。 |
+| Lite-flow | 只加载完成 lite spec、checklist、verification、review 所需的最少 Skill；按风险触发 Conditional-domain。 |
+| Standard-flow | 按 Phase 主干加载 Core-flow；Conditional-domain 按风险触发；Core-meta 按上下文或失败触发。 |
 
-## 06-Ship (交付)
+## 加载边界
 
-| Phase | Skill | 源路径 | 使用时机 |
-|-------|-------|--------|---------|
-| P8: CI验证 | ci-cd-and-automation | `skills/ci-cd-and-automation/SKILL.md` | CI 流水线设置 |
-| P8: CI验证 | git-workflow-and-versioning | `skills/git-workflow-and-versioning/SKILL.md` | 提交/版本管理 |
-| P9: 部署验证 | shipping-and-launch | `skills/shipping-and-launch/SKILL.md` | 预发布/投产检查 |
-| P10: 交付 | documentation-and-adrs | `skills/documentation-and-adrs/SKILL.md` | 架构决策记录 |
-| P10: 交付 | deprecation-and-migration | `skills/deprecation-and-migration/SKILL.md` | 废弃/迁移旧代码 |
-| 跨阶段 | using-agent-skills | `skills/using-agent-skills/SKILL.md` | Skill 使用说明与索引维护 |
+- `auto-check-and-optimize` 是 Phase 4 出口自检宏，只承载 Author/Self Review，不替代 Phase 5 Independent Review。
+- `security-and-hardening` 不默认全文加载；安全、auth、权限、外部输入或风险标记触发时加载。
+- `performance-optimization` 不默认全文加载；性能风险、容量/延迟目标或评审需要时加载。
+- `source-driven-development` 不默认全文加载；新增或不熟悉依赖、框架、API 时加载。
+- `browser-testing-with-devtools` 不默认全文加载；浏览器端行为验证或前端调试时加载。
+- `git-workflow-and-versioning` 不默认全文加载；仅在用户要求 git 操作或流程进入提交/版本管理动作时加载。
 
-## Flow-tiered Skill Usage
+## Standard-flow 主干映射
 
-| Flow | Skill 使用策略 | 说明 |
-|------|----------------|------|
-| Mini-flow | 按需使用最少 Skill | 可只做内容审查、一致性搜索和 Memory check；不强制加载完整 Phase Skill 链。 |
-| Lite-flow | `lite_spec` + `checklist` + 压缩评审 | 使用需求澄清、任务清单、验证和压缩版 Two-stage Review；按风险触发 code/security/perf 相关 Skill。 |
-| Standard-flow | 完整 Phase 1-10 Skill 映射 | 使用下方完整阶段映射，保持 mandatory confirmation policy 和 CK1-CK9。 |
+| Phase | 主 Skill | 条件 Skill |
+|------|----------|------------|
+| Phase 1 | `idea-refine` | `context-engineering` |
+| Phase 2 | `spec-driven-development` | `source-driven-development` |
+| Phase 3 | `planning-and-task-breakdown` | `api-and-interface-design` |
+| Phase 4 | `incremental-implementation`、`auto-check-and-optimize` | `frontend-ui-engineering`、`source-driven-development`、`api-and-interface-design` |
+| Phase 5 | `code-review-and-quality` | `security-and-hardening`、`performance-optimization`、`code-simplification` |
+| Phase 6 | `test-driven-development` | `browser-testing-with-devtools` |
+| Phase 7 | `code-review-and-quality` | `test-driven-development` |
+| Phase 8 | `ci-cd-and-automation` | `git-workflow-and-versioning`、`debugging-and-error-recovery` |
+| Phase 9 | `shipping-and-launch` | `performance-optimization`、`security-and-hardening` |
+| Phase 10 | `documentation-and-adrs` | `deprecation-and-migration` |
 
-任何 Flow 都不得跳过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。
-
-## 使用方式
-
-在 Phase 执行时读取对应的 Skill 文件并按流程执行：
-```
-.harness/skills/idea-refine/SKILL.md
-.harness/skills/spec-driven-development/SKILL.md
-.harness/skills/code-review-and-quality/SKILL.md
-```
-
-所有 Skill 路径均为 `.harness/skills/{name}/SKILL.md`。
-
-## 重要提醒
-
-| Phase | 常见误区 | 纠正 |
-|-------|---------|------|
-| P1 | 产出 spec.md | 产出 understanding.md，不做详细设计 |
-| P2 | 产出 tasks.md | 只产 spec.md，tasks.md 是 P3 的职责 |
-| P3 | 覆盖 tasks.md | 首次创建 tasks.md（P2 不产 tasks.md） |
-| P4 | 运行 mvn test | 只做 mvn clean compile，测试是 P6 的职责 |
-| P4 出口 | 用 auto-check-and-optimize 替代 Phase 5 | auto-check-and-optimize 只做实现后自检，不能替代 Phase 5 正式评审 |
-| P5 | 使用 agents/ 角色文件 | 直接使用 .harness/skills/ 下的本地 Skill，无独立 Agent |
-| P6 | 不检查覆盖率 | 必须运行 JaCoCo 并产出覆盖率报告 |
+任何 Flow 都不得通过“少加载 Skill”跳过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。

@@ -1,58 +1,49 @@
 # CLAUDE.md — Harness Engineering 驱动开发
 
-本项目使用 **Harness Engineering** 框架驱动 AI 编码，基于 `.harness/` 目录下的三层体系运行。
+本项目使用 **Harness Engineering**：唯一 Orchestrator、规则权威源、本地 Skills、changes 归档和 memory 沉淀。
 
-## 项目导航
+## 启动入口
 
-- **入口地图**: `.harness/AGENTS.md` — 先读这里
-- **角色定义**: `.harness/agents/orchestrator.md` — 唯一的 Agent（编排中枢）
-- **规则体系**: `.harness/rules/` — 工程结构、流程、编码、质量门禁
-- **技能索引**: `.harness/skills/README.md` — 22 个本地 Skill 映射表
-- **参考清单**: `.harness/references/` — 安全/性能/测试/可访问性审查清单
-- **项目知识库**: `.harness/wiki/` — 业务领域、核心流程、外部集成（L3 按需查询）
+1. 先读 `.harness/AGENTS.md` 获取项目地图。
+2. 再读 `.harness/agents/orchestrator.md` 进入唯一 Orchestrator 模式。
+3. 按 `.harness/memory/README.md` 检查历史 Memory。
+4. 扫描 `.harness/changes/` 最新 `summary.md`：
+   - `状态: 进行中` → 从第一个未完成 Phase / Flow step 恢复。
+   - `状态: 已完成` 或无变更目录 → 准备新变更。
+5. 遇到未知业务概念时查 `.harness/wiki/`，不猜测规则。
 
-## 开发工作流
+## 权威源路径
 
-按顺序执行：
+| 主题 | 权威源 |
+|------|--------|
+| Orchestrator 调度 | `.harness/agents/orchestrator.md` |
+| Flow Classifier、Mini/Lite/Standard、升级/回退 | `.harness/rules/02-development-workflow.md` |
+| Mechanical Gate / Human Approval Gate / 检查表 | `.harness/rules/04-quality-gates.md` |
+| Memory 模板与检查频率 | `.harness/memory/README.md` |
+| 变更目录结构与产物模板 | `.harness/changes/README.md` |
+| Skill 分层与触发策略 | `.harness/skills/README.md` |
+| 用户操作方式 | `.harness/USAGE.md` |
+
+## 不可违反原则摘要
+
+- 未验证，不得声称完成、通过或交付。
+- 未读相关代码、规则或证据，不得提出修改方案或放行结论。
+- 先 Mechanical Gate，后 Human Approval Gate。
+- Mechanical Gate `fail|blocked` 必须 Stop-the-Line，不得请求人工放行。
+- 任意失败必须定位根因、回退修复并重新验证。
+- 业务规则未知时必须查 `.harness/wiki/` 或记录疑问。
+- Mini/Lite 只降低阶段密度，不取消验证、fresh evidence、Memory、Stop-the-Line 或必要确认。
+- Memory 触发即记录；完整模板见 `.harness/memory/README.md`。
+- Skill 按 Core / Conditional / Support 分层按需加载；不默认全文展开。
+
+## 基本工作流
+
+```text
+需求 → Flow Classifier → /spec → /plan → /build → /review → /test → /ship
 ```
-需求 → /spec → /plan → /build → /review → /test → /ship
-```
 
-每个阶段结束后，Orchestrator 先检查 Mechanical Gate，再请求 Human Approval Gate；未列出新鲜验证证据，不得声明完成、通过或交付。
-
-## 全局纪律摘要
-
-- Harness Iron Laws：未验证不宣称完成；未读证据不放行；Mechanical Gate 失败不得人工绕过；任意失败必须 Stop-the-Line 根因排查；业务规则未知必须查 wiki 或记录疑问；隔离上下文不能替代 Orchestrator 决策；流程分级不能取消验证、证据、Memory 和用户确认。
-- Two-stage Review：Phase 4 编译后自检是 Author/Self Review；Phase 5 三轴隔离评审是 Independent Review。
-- 流程分级：新需求先执行 Flow Classifier；低风险自动选择 Mini/Lite，高风险或不明确使用 Standard；任何流程仍需 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 和必要用户确认。
-
-## Session 启动流程
-
-1. 读取 `.harness/AGENTS.md` 获取项目上下文
-2. 读取 `.harness/memory/` 获取历史经验和已知问题
-3. 扫描 `.harness/changes/` 下最新变更目录的 `summary.md`：
-   - 如 `状态: 进行中` 且存在未完成 Phase → 从中断处恢复，从第一个 `- [ ]` Phase 继续
-   - 如 `状态: 已完成` 或无变更目录 → 准备新变更
-4. 遇到未知业务概念时查阅 `.harness/wiki/`，不猜测规则
-5. 切换到 Orchestrator 模式，按 Session 启动流程推进开发
-
-## Session 结束检查
-
-每个 Phase 出口必须确认 Memory 已完整记录。每个 Phase 出口和整个变更交付时，MUST record to `.harness/memory/` if applicable:
-- 做了架构决策？ → 完整写入 `decisions.log`（背景、方案、备选、理由、后果、决定人，6 字段全部必填）
-- 发现了 Agent 错误？ → 完整写入 `lessons-learned.md`（问题、根因、影响、修复、预防，5 字段全部必填）+ 修复 Harness 防止再犯
-- 遇到已知限制？ → 完整写入 `known-issues.md`（描述、影响范围、临时方案、计划修复，4 字段全部必填）
-每次记录必须按模板完整填写，禁止简化。Phase 出口必须明确报告 "Memory recorded: {N} entries / none"。
-
-## 质量守则
-
-- Standard-flow 绝不跳 Phase；Mini/Lite 必须按分级流程完整执行并记录选择依据
-- 绝不在没有验证的情况下声称"完成"
-- 遇到失败优先回退到对应阶段修复，而非硬推
-- 不猜测业务规则 — wiki/ 中有相关文档时必须查阅
-- Skill 按需加载：11 个核心 Skill 每流程必用，其他为条件触发（参见 AGENTS.md 流程图）
+实际步骤由 Flow Classifier 选择：Mini-flow、Lite-flow 或 Standard-flow。完整定义见 `.harness/rules/02-development-workflow.md`。
 
 ## Skill 来源
 
-所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`，已内置于项目仓库。
-团队使用无需安装任何插件，clone 即用。
+所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`，已内置于项目仓库。加载策略以 `.harness/skills/README.md` 为准。
