@@ -122,6 +122,7 @@ Standard-flow 适用于高风险或不明确需求，保持完整 Phase 1-10、C
 - **产出**: `.harness/changes/{id}/coding/coding_report_v1.md`
 - **Mechanical Gate**: 编译成功且 coding_report_v1.md 存在，self review completed，fresh verification evidence 已列出，Memory check
 - **Human Approval Gate**: CK4 用户确认可提交评审
+- **隔离上下文**: `auto-check-and-optimize` 自检作为隔离泳道执行，遵守"隔离执行上下文原则"（见本文件第 75–83 行）
 
 ### Phase 5: 编码评审
 - **入口**: Phase 4 门禁通过且 CK4 approved
@@ -140,6 +141,7 @@ Standard-flow 适用于高风险或不明确需求，保持完整 Phase 1-10、C
 - **产出**: `test_report.md`（含测试总数、通过数、行覆盖率、分支覆盖率）
 - **Mechanical Gate**: 测试通过、测试数大于 0、覆盖率达标，Memory check
 - **Human Approval Gate**: CK6 用户确认测试结果
+- **隔离上下文**: 测试执行作为隔离泳道执行，遵守"隔离执行上下文原则"（见本文件第 75–83 行）
 
 ### Phase 7: 测试评审
 - **入口**: Phase 6 门禁通过且 CK6 approved
