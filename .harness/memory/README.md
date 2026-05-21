@@ -32,7 +32,6 @@
 |------|----------|
 | Standard-flow | 每个 Phase 出口检查；触发即记录 |
 | Lite-flow | 计划确认后、最终验证/交付前检查；触发即记录 |
-| Mini-flow | 最终 verification 阶段检查一次；触发即记录 |
 
 每次出口报告必须包含：`Memory recorded: {N} entries / none`。
 

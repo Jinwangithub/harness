@@ -17,7 +17,7 @@
 | 主题 | 权威源 |
 |------|--------|
 | Orchestrator 调度 | `.harness/agents/orchestrator.md` |
-| Flow Classifier、Mini/Lite/Standard、升级/回退 | `.harness/rules/02-development-workflow.md` |
+| Flow Classifier、Lite/Standard、升级/回退 | `.harness/rules/02-development-workflow.md` |
 | Mechanical Gate / Human Approval Gate / 检查表 | `.harness/rules/04-quality-gates.md` |
 | Memory 模板与检查频率 | `.harness/memory/README.md` |
 | 变更目录结构与产物模板 | `.harness/changes/README.md` |
@@ -32,7 +32,7 @@
 - Mechanical Gate `fail|blocked` 必须 Stop-the-Line，不得请求人工放行。
 - 任意失败必须定位根因、回退修复并重新验证。
 - 业务规则未知时必须查 `.harness/wiki/` 或记录疑问。
-- Mini/Lite 只降低阶段密度，不取消验证、fresh evidence、Memory、Stop-the-Line 或必要确认。
+- Lite-flow 只降低阶段密度，不取消验证、fresh evidence、Memory、Stop-the-Line 或必要确认。
 - Memory 触发即记录；完整模板见 `.harness/memory/README.md`。
 - Skill 按 Core / Conditional / Support 分层按需加载；不默认全文展开。
 
@@ -42,7 +42,7 @@
 需求 → Flow Classifier → /spec → /plan → /build → /review → /test → /ship
 ```
 
-实际步骤由 Flow Classifier 选择：Mini-flow、Lite-flow 或 Standard-flow。完整定义见 `.harness/rules/02-development-workflow.md`。
+实际步骤由 Flow Classifier 选择：Lite-flow 或 Standard-flow。完整定义见 `.harness/rules/02-development-workflow.md`。
 
 ## Skill 来源
 

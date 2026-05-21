@@ -1,6 +1,6 @@
 # 变更管理 — Audit Trail
 
-本文件是变更目录结构、产物清单和 summary 模板的权威源。流程规则见 `.harness/rules/02-development-workflow.md`，门禁检查见 `.harness/rules/04-quality-gates.md`。
+本文件是变更目录结构、summary 模板、Skill Load Record、Phase Lock 状态模板和产物模板的权威源。流程规则见 `.harness/rules/02-development-workflow.md`，门禁检查见 `.harness/rules/04-quality-gates.md`。
 
 ## 目录命名
 
@@ -23,16 +23,6 @@
 ## Flow 产物结构
 
 根据 `summary.md` 的 Flow Classification，只保留所选 Flow 的进度表和产物结构，不展开未采用流程。
-
-### Mini-flow
-
-```text
-.harness/changes/{type}-{name}-{YYYYMMDD}/
-├── summary.md
-└── verification_report.md
-```
-
-Mini-flow 不强制 `review_summary.md`；独立评审豁免依据写入 `verification_report.md`。
 
 ### Lite-flow
 
@@ -71,7 +61,7 @@ Lite-flow 不扩展成 Standard-flow 产物结构。
 
 ## summary.md 模板
 
-只展示所选 Flow 的进度，不同时展开三套流程。
+只展示所选 Flow 的进度，不同时展开多套流程。
 
 ```markdown
 # 变更摘要
@@ -84,10 +74,10 @@ Lite-flow 不扩展成 Standard-flow 产物结构。
 - **负责人**: Orchestrator
 
 ## Flow Classification
-- **Flow**: {Mini-flow/Lite-flow/Standard-flow}
+- **Flow**: {Lite-flow/Standard-flow}
 - **Selection basis**: {选择依据，说明影响面、行为变化、风险判断}
 - **Risk flags**: {none/security/data/api/auth/payment/perf/migration/architecture/deployment/unclear-requirement}
-- **Confirmation policy**: {exception-only/batched/mandatory}
+- **Confirmation policy**: {batched/mandatory}
 - **Upgrade triggers**: {风险扩大、门禁 fail|blocked、证据不足、Memory 无法完整记录、需要业务判断等}
 
 ## 阶段进度
@@ -98,19 +88,17 @@ Lite-flow 不扩展成 Standard-flow 产物结构。
 |------------|-----------------|----------|----------------|---------------|
 | {Step/Phase} | pass/fail/blocked | {evidence path} | pending-human/approved/rejected/not-required-by-policy | {next/rollback} |
 
+## Skill Load Records
+{Standard-flow 每个 Phase 必填；Lite-flow 按需记录}
+
+## Standard Phase Locks
+{仅 Standard-flow 使用；模板见下方}
+
 ## 回退/升级记录
 - {如果有回退或流程升级，记录原因和时间；没有则写 none}
 
 ## 最终交付物
 - {产出的文件/功能清单}
-```
-
-### Mini-flow 阶段进度片段
-
-```markdown
-- [ ] M1: 理解/分类
-- [ ] M2: 修改
-- [ ] M3: 验证与记录
 ```
 
 ### Lite-flow 阶段进度片段
@@ -137,35 +125,32 @@ Lite-flow 不扩展成 Standard-flow 产物结构。
 - [ ] Phase 10: 用户确认
 ```
 
-## Mini-flow verification_report.md 模板
+## Skill Load Record 模板
+
+Standard-flow 每个 Phase 必须记录 Required Skills；Support/Conditional Skills 在加载或触发时记录。
 
 ```markdown
-# Verification Report
+## Skill Load Records
 
-## Scope
-- Flow: Mini-flow
-- Changed files:
-- No behavior change basis:
-
-## Mechanical Gate
-- Status: {pass/fail/blocked}
-- Checks:
-  - [ ] Flow Classification exists
-  - [ ] Scope remains Mini-flow
-  - [ ] Fresh verification evidence listed
-  - [ ] Independent review waiver basis recorded if applicable
-  - [ ] Memory check completed
-
-## Fresh Verification Evidence
-- {content review / consistency search / file check}
-
-## Review Waiver
-- Independent review waived: {yes/no}
-- Waiver basis: {Mini-flow low-risk no behavior change basis}
-
-## Memory
-- Memory recorded: {N} entries / none
+| Phase/Step | Skill | Role | Status | Reason/Evidence |
+|------------|-------|------|--------|-----------------|
+| {Phase 4} | `incremental-implementation` | Required | loaded/blocked/not-triggered | {读取路径、触发原因、阻塞原因或证据路径} |
+| {Phase 4} | `auto-check-and-optimize` | Required | loaded/blocked/not-triggered | {读取路径、Author/Self Review 证据路径} |
 ```
+
+`Role` 取值以 `.harness/skills/README.md` 为准；Required Skill 未加载时对应 Mechanical Gate 必须 `blocked`。
+
+## Standard Phase Locks 状态模板
+
+```markdown
+## Standard Phase Locks
+
+| Phase | Entry Lock | Work Lock | Exit Lock | Human Approval Lock | Failure Lock | Evidence |
+|-------|------------|-----------|-----------|---------------------|--------------|----------|
+| Phase {N} | open/closed/blocked | respected/violated | open/closed/blocked | pending-human/approved/rejected/not-required-by-policy | none/active/resolved | {gate record, artifact paths, memory check, approval evidence} |
+```
+
+Phase Lock 判定规则见 `.harness/rules/02-development-workflow.md`；机械检查要求见 `.harness/rules/04-quality-gates.md`。
 
 ## Lite-flow 产物模板
 
@@ -239,6 +224,35 @@ Lite-flow 不扩展成 Standard-flow 产物结构。
 - Final verification/review approval:
 ```
 
+## Standard-flow 产物说明
+
+Standard-flow 目录结构完整模板在本文件维护；具体 Gate 检查不复制到产物模板中，统一引用 `.harness/rules/04-quality-gates.md`。
+
+推荐每个 Phase 报告包含：
+
+```markdown
+# {Phase} Report
+
+## Scope
+- {本 Phase 范围}
+
+## Skill Load Record
+- {引用 summary.md 或复制本 Phase 的记录}
+
+## Artifacts
+- {产物路径}
+
+## Fresh Verification Evidence
+- {命令/检查/报告路径}
+
+## Mechanical Gate
+- Status: {pass/fail/blocked}
+- Gate rules: `.harness/rules/04-quality-gates.md`
+
+## Memory
+- Memory recorded: {N} entries / none
+```
+
 ## 归档规则
 
 1. 每个 Phase 或 Flow step 完成后立即归档对应产物。
@@ -247,3 +261,4 @@ Lite-flow 不扩展成 Standard-flow 产物结构。
 4. 变更完成后，`summary.md` 标记为“已完成”。
 5. 每个 Phase 或 Flow step 的 Mechanical Gate 与 Human Approval Gate 状态必须记录到 `summary.md`。
 6. 根据 Flow Classification 仅保留对应流程进度表，不把未采用流程标记为“跳过”。
+7. 新规则适用于新变更；历史 `.harness/changes/` 作为旧证据保留，不自动重写。

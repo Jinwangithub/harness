@@ -13,7 +13,7 @@
 | 主题 | 权威源 | 说明 |
 |------|--------|------|
 | Orchestrator 角色与调度 | `.harness/agents/orchestrator.md` | 唯一 Agent、Dispatch Loop、出口协议 |
-| Flow 分类与执行 | `.harness/rules/02-development-workflow.md` | Flow Classifier、Mini/Lite/Standard、十阶段、升级/回退 |
+| Flow 分类与执行 | `.harness/rules/02-development-workflow.md` | Flow Classifier、Lite/Standard、十阶段、升级/回退 |
 | 质量门禁 | `.harness/rules/04-quality-gates.md` | Mechanical Gate、Human Approval Gate、检查表 |
 | 变更归档 | `.harness/changes/README.md` | 目录结构、产物模板、summary 模板 |
 | Memory | `.harness/memory/README.md` | Memory 模板、检查频率、触发即记录 |
@@ -28,8 +28,7 @@
 
 | Flow | 场景 | 产物 |
 |------|------|------|
-| Mini-flow | typo、注释、格式、纯文档、README 小修、无行为变化小配置 | `summary.md`、`verification_report.md` |
-| Lite-flow | 单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`、`verification_report.md`、`review_summary.md` |
+| Lite-flow | typo、注释、格式、纯文档、README 小修、小配置、简单 bugfix、简单测试补充、单模块/少量文件且明确低风险 | `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`、`verification_report.md`、`review_summary.md` |
 | Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | 完整 Phase 1-10 产物 |
 
 完整 Flow Classifier、Confirmation Policy、升级/回退规则见 `.harness/rules/02-development-workflow.md`。

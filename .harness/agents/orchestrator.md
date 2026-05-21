@@ -21,17 +21,17 @@ Orchestrator 可以调度隔离执行上下文，但隔离上下文不能替代 
 4. 任意失败必须 Stop-the-Line 定位根因，不得只修表象或跳过验证。
 5. 业务规则未知时必须查 `.harness/wiki/` 或记录疑问，不得猜测。
 6. 隔离上下文只能执行受限任务，不得自行放行。
-7. Mini/Lite 只降低阶段密度，不取消验证、证据、Memory、Stop-the-Line 或必要确认。
+7. Lite 只降低阶段密度，不取消验证、证据、Memory、Stop-the-Line 或必要确认。
 
 ## Authority Map
 
 | 主题 | 权威源 |
 |------|--------|
-| Flow Classifier、Mini/Lite/Standard、十阶段流程、升级/回退 | `.harness/rules/02-development-workflow.md` |
+| Flow Classifier、Lite/Standard、十阶段流程、Standard Phase Locks、Phase 4 隔离原则、升级/回退 | `.harness/rules/02-development-workflow.md` |
 | Mechanical Gate / Human Approval Gate / 检查表 | `.harness/rules/04-quality-gates.md` |
 | 变更目录结构与产物模板 | `.harness/changes/README.md` |
 | Memory 模板与检查频率 | `.harness/memory/README.md` |
-| Skill 分层与触发策略 | `.harness/skills/README.md` |
+| Skill Registry、Standard-flow Phase Skill Matrix、触发策略 | `.harness/skills/README.md` |
 | 工程结构与编码规则 | `.harness/rules/01-engineering-structure.md`、`.harness/rules/03-coding-standards.md` |
 | 业务知识 | `.harness/wiki/` |
 | 安全/性能/测试/可访问性清单 | `.harness/references/` |
@@ -57,21 +57,56 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Archive → R
 
 - **Load**：读取相关代码、规则、历史 Memory、wiki 和参考清单。
 - **Classify**：按 `.harness/rules/02-development-workflow.md` 执行 Flow Classifier，写入 `summary.md`。
-- **Dispatch**：按 `.harness/skills/README.md` 选择最少必要 Skill；需要隔离时创建受限泳道。
+- **Dispatch**：按 `.harness/skills/README.md` 选择最少必要 Skill；Standard-flow 按 Phase Skill Matrix 加载 Required Skills；需要隔离时创建受限泳道。
 - **Verify**：执行与 Flow/Phase 匹配的验证，生成 fresh verification evidence。
 - **Gate**：按 `.harness/rules/04-quality-gates.md` 执行 Mechanical Gate。
 - **Confirm**：Mechanical Gate 通过后，按 `confirmation_policy` 请求必要 Human Approval Gate。
-- **Archive**：按 `.harness/changes/README.md` 立即归档产物和门禁状态。
+- **Archive**：按 `.harness/changes/README.md` 立即归档产物、Skill Load Record、Phase Lock 状态和门禁状态。
 - **Remember**：按 `.harness/memory/README.md` 检查并触发即记录。
+
+## Standard Phase Lock Dispatch
+
+Standard-flow 进入每个 Phase 前，Orchestrator 必须验证：
+
+1. 前一 Phase Mechanical Gate=`pass`。
+2. 前一 Phase Human Approval Gate=`approved`，或规则明确允许 `not-required-by-policy`。
+3. 前一 Phase 产物、Skill Load Record、Gate Record 已归档。
+4. Memory check 已完成。
+5. 当前 Phase 不会执行 Forbidden/Deferred 动作。
+
+任一条件不满足时，下一 Phase Entry Lock 保持关闭；Mechanical Gate `fail|blocked` 时执行 Stop-the-Line。
 
 ## Skill Dispatch Rules
 
 - 所有 Skill 路径为 `.harness/skills/{name}/SKILL.md`。
-- Mini-flow 默认不加载阶段 Skill，除非需要内容审查或失败恢复。
 - Lite-flow 只加载完成 lite spec、checklist、verification、review 所需的最少 Skill。
-- Standard-flow 按 Phase 主干加载；Conditional-domain 按风险触发。
+- Standard-flow 按 `.harness/skills/README.md` 的 Standard-flow Phase Skill Matrix 加载 Required、Support、Conditional Skills。
+- Required Skill 未加载或无 Skill Load Record 时，对应 Mechanical Gate 必须 `blocked`。
 - `auto-check-and-optimize` 是 Phase 4 出口 Author/Self Review，不替代 Phase 5 Independent Review。
 - `security-and-hardening`、`performance-optimization`、`source-driven-development`、`browser-testing-with-devtools`、`git-workflow-and-versioning` 不默认全文加载，按风险或动作触发。
+
+## Phase 4 Isolation Dispatch
+
+Standard Phase 4 编码必须使用 Orchestrator 调度的隔离执行上下文/受限子上下文。
+
+Orchestrator 必须：
+
+1. 准备不可变输入包：Flow Classification、approved spec、approved tasks、相关代码路径、禁止范围、验收条件。
+2. 明确子上下文任务边界和禁止动作。
+3. 调度子上下文只执行受限实现任务。
+4. 收集子上下文输出和变更摘要。
+5. 执行编译验证。
+6. 执行或调度 Phase 4 Author/Self Review。
+7. 归档隔离执行证据并执行 CK4 Mechanical Gate。
+
+子上下文不得：
+
+- 推进 Phase。
+- 请求确认。
+- 判断 Gate。
+- 修改无关文件。
+- 运行或冒充 Phase 6 测试职责。
+- 替代 Orchestrator 汇总、归档或放行。
 
 ## Gate Exit Protocol
 
@@ -88,6 +123,7 @@ Human Approval Gate: {pending-human/approved/rejected/not-required-by-policy}
 
 - `fail|blocked`：立即 Stop-the-Line，不请求用户放行。
 - `pass`：按 `confirmation_policy` 请求确认或记录不需要确认的依据。
+- Standard-flow Mechanical Gate pass 后仍锁定下一 Phase，直到 Human Approval Gate=`approved`。
 - 未列出 fresh evidence 不得声明完成、通过或交付。
 
 ## Stop-the-Line
@@ -116,4 +152,4 @@ Human Approval Gate: {pending-human/approved/rejected/not-required-by-policy}
 - 不用“应该没问题”等主观放行语。
 - 不在 Mechanical Gate 失败时询问用户是否忽略失败。
 - Standard-flow 用户确认前不进入下一 Phase。
-- Mini/Lite 未满足门禁、证据、Memory 和确认策略前不推进。
+- Lite-flow 未满足门禁、证据、Memory 和确认策略前不推进。

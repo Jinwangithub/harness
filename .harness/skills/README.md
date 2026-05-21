@@ -1,6 +1,26 @@
 # Skills Registry — 按需加载策略
 
-本文件是 Skill 分层、触发策略和加载边界的权威源。所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`，仓库内置，无需安装插件。
+本文件是 Skill Registry、Standard-flow Phase Skill Matrix、Skill 角色术语、触发策略和 Harness Integration Override 的权威源。所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`，仓库内置，无需安装插件。
+
+## Skill 角色术语
+
+| 术语 | 含义 | Gate 影响 |
+|------|------|-----------|
+| Required Skill | 当前 Phase 必须读取/调用的 Skill | 未加载或无 Skill Load Record 时 Mechanical Gate=`blocked` |
+| Support Skill | 阶段支持能力，按上下文需要加载 | 需要但未加载时记录原因；不默认阻塞 |
+| Conditional Skill | 由 risk flag、任务类型、证据缺口或失败触发 | 触发条件成立但未加载时 Mechanical Gate=`blocked` |
+| Forbidden/Deferred | 当前 Phase 不得执行的能力或动作，必须延后或回退 | 执行后 Gate=`fail` 或 `blocked` |
+
+## Harness Integration Override
+
+当通用 Skill 指南与 Harness 阶段边界冲突时，以 Harness 权威源为准：
+
+- 流程顺序与 Phase Lock 以 `.harness/rules/02-development-workflow.md` 为准。
+- Gate 语义与机械验证以 `.harness/rules/04-quality-gates.md` 为准。
+- 产物模板与 Skill Load Record 以 `.harness/changes/README.md` 为准。
+- Standard-flow Skill Matrix 以本文为准。
+- `auto-check-and-optimize` 在 Phase 4 只代表 Author/Self Review，不能替代 Phase 5 Independent Review。
+- git 操作只在用户要求或对应发布/版本场景中执行。
 
 ## Core-meta
 
@@ -48,32 +68,33 @@
 
 | Flow | 默认策略 |
 |------|----------|
-| Mini-flow | 默认不加载阶段 Skill；除非需要内容审查、失败恢复或用户明确要求单点 Skill。 |
 | Lite-flow | 只加载完成 lite spec、checklist、verification、review 所需的最少 Skill；按风险触发 Conditional-domain。 |
-| Standard-flow | 按 Phase 主干加载 Core-flow；Conditional-domain 按风险触发；Core-meta 按上下文或失败触发。 |
+| Standard-flow | 按 Phase Skill Matrix 加载 Required Skills；Support/Conditional 按触发条件加载；Core-meta 按上下文或失败触发。 |
+
+任何 Flow 都不得通过“少加载 Skill”跳过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。
+
+## Standard-flow Phase Skill Matrix
+
+| Phase | Required Skills | Support Skills | Conditional Skills | Forbidden/Deferred |
+|------|-----------------|----------------|--------------------|--------------------|
+| Phase 1 | `idea-refine` | `context-engineering` | none | 不创建 `spec.md`、`tasks.md`；不实现代码 |
+| Phase 2 | `spec-driven-development` | none | `source-driven-development`、`api-and-interface-design`、`security-and-hardening`、`performance-optimization` | 不创建 `tasks.md`；不实现代码 |
+| Phase 3 | `planning-and-task-breakdown` | `api-and-interface-design` | `security-and-hardening`、`deprecation-and-migration` | 不实现代码；不运行 Phase 6 测试职责 |
+| Phase 4 | `incremental-implementation`、`auto-check-and-optimize` | none | `frontend-ui-engineering`、`source-driven-development`、`api-and-interface-design` | 不推进 Phase；不请求确认；不判断 Gate；不运行 Phase 6 测试职责；不冒充 Phase 5 Independent Review |
+| Phase 5 | `code-review-and-quality` | none | `security-and-hardening`、`performance-optimization`、`code-simplification` | 不直接实现修复；Must Fix/Critical 回退 Phase 4 |
+| Phase 6 | `test-driven-development` | none | `browser-testing-with-devtools`、`debugging-and-error-recovery` | 不改需求/spec；实现缺陷回退 Phase 4 |
+| Phase 7 | `code-review-and-quality`、`test-driven-development` | none | none | 不扩大测试范围为新需求；发现缺口回退 Phase 6 或更早 |
+| Phase 8 | `ci-cd-and-automation` | `debugging-and-error-recovery` | none | 不发布；不绕过失败 CI |
+| Phase 9 | `shipping-and-launch` | none | `security-and-hardening`、`performance-optimization` | 不替代最终交付确认；部署风险回退 Phase 8/9 |
+| Phase 10 | `documentation-and-adrs` | none | `git-workflow-and-versioning`、`deprecation-and-migration` | 未经用户要求不执行 git 提交/推送；不改实现代码 |
 
 ## 加载边界
 
-- `auto-check-and-optimize` 是 Phase 4 出口自检宏，只承载 Author/Self Review，不替代 Phase 5 Independent Review。
+- Required Skill 必须在对应 Phase 读取/调用，并写入 Skill Load Record。
+- Conditional Skill 的触发依据必须来自 risk flag、任务类型、证据缺口、评审发现或失败现象。
+- Support Skill 只在有明确支持需求时加载。
 - `security-and-hardening` 不默认全文加载；安全、auth、权限、外部输入或风险标记触发时加载。
 - `performance-optimization` 不默认全文加载；性能风险、容量/延迟目标或评审需要时加载。
 - `source-driven-development` 不默认全文加载；新增或不熟悉依赖、框架、API 时加载。
 - `browser-testing-with-devtools` 不默认全文加载；浏览器端行为验证或前端调试时加载。
 - `git-workflow-and-versioning` 不默认全文加载；仅在用户要求 git 操作或流程进入提交/版本管理动作时加载。
-
-## Standard-flow 主干映射
-
-| Phase | 主 Skill | 条件 Skill |
-|------|----------|------------|
-| Phase 1 | `idea-refine` | `context-engineering` |
-| Phase 2 | `spec-driven-development` | `source-driven-development` |
-| Phase 3 | `planning-and-task-breakdown` | `api-and-interface-design` |
-| Phase 4 | `incremental-implementation`、`auto-check-and-optimize` | `frontend-ui-engineering`、`source-driven-development`、`api-and-interface-design` |
-| Phase 5 | `code-review-and-quality` | `security-and-hardening`、`performance-optimization`、`code-simplification` |
-| Phase 6 | `test-driven-development` | `browser-testing-with-devtools` |
-| Phase 7 | `code-review-and-quality` | `test-driven-development` |
-| Phase 8 | `ci-cd-and-automation` | `git-workflow-and-versioning`、`debugging-and-error-recovery` |
-| Phase 9 | `shipping-and-launch` | `performance-optimization`、`security-and-hardening` |
-| Phase 10 | `documentation-and-adrs` | `deprecation-and-migration` |
-
-任何 Flow 都不得通过“少加载 Skill”跳过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。

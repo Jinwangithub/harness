@@ -1,16 +1,17 @@
 # 开发流程规范
 
-本文件是 Flow Classifier、Mini/Lite/Standard-flow、十阶段流程、升级/回退与检查时机的权威源。
+本文件是 Flow Classifier、Lite/Standard-flow 顺序、Standard Phase Locks、Phase 4 隔离原则、升级/回退与检查时机的权威源。
 
-详细门禁检查表见 `.harness/rules/04-quality-gates.md`；Memory 模板与检查频率见 `.harness/memory/README.md`；变更目录模板见 `.harness/changes/README.md`。
+详细门禁检查表见 `.harness/rules/04-quality-gates.md`；Skill Matrix 见 `.harness/skills/README.md`；Memory 模板与检查频率见 `.harness/memory/README.md`；变更目录模板见 `.harness/changes/README.md`。
 
 ## 核心原则
 
 1. **先分类再执行**：新需求必须先执行 Flow Classifier。
-2. **低风险降密度，高风险保完整**：Mini/Lite 只减少阶段和产物，不减少验证、证据、Memory、Stop-the-Line 或必要用户确认。
+2. **低风险降密度，高风险保完整**：Lite 只减少阶段和产物，不减少验证、证据、Memory、Stop-the-Line 或必要用户确认。
 3. **先机械后人工**：每个 Phase / Flow step 先执行 Mechanical Gate，通过后再按 `confirmation_policy` 进入 Human Approval Gate。
 4. **证据优先**：未列出 fresh verification evidence，不得声明完成、通过或交付。
 5. **唯一 Orchestrator + 本地 Skills**：隔离上下文只能执行受限任务，不替代 Orchestrator 决策。
+6. **单一权威源**：流程顺序与锁在本文件；Gate 规则、模板和 Skill Matrix 只引用各自权威源。
 
 ## Harness Iron Laws
 
@@ -28,55 +29,34 @@
 
 | 字段 | 含义 |
 |------|------|
-| `flow` | `Mini-flow` / `Lite-flow` / `Standard-flow` |
+| `flow` | `Lite-flow` / `Standard-flow` |
 | `selection_basis` | 选择依据，必须说明影响面、行为变化和风险判断 |
 | `risk_flags` | `none` 或 `security`、`data`、`api`、`auth`、`payment`、`perf`、`migration`、`architecture`、`deployment`、`unclear-requirement` |
-| `confirmation_policy` | `exception-only` / `batched` / `mandatory` |
+| `confirmation_policy` | `batched` / `mandatory` |
 | `upgrade_triggers` | 风险扩大、门禁失败/阻塞、证据不足、Memory 无法完整记录、需要业务判断等 |
 
 ### 自动选择规则
 
 | Flow | 自动适用场景 | 强制升级条件 | confirmation_policy |
 |------|--------------|--------------|---------------------|
-| Mini-flow | typo、注释、格式、纯文档、README 小修、无行为变化小配置 | 任何代码行为变化、需求不清、涉及安全/数据/API/部署 | `exception-only` |
-| Lite-flow | 单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | 跨模块、API/DB/schema/auth/payment/security/perf/migration/architecture | `batched` |
+| Lite-flow | typo、注释、格式、纯文档、README 小修、无行为变化小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | 跨模块、API/DB/schema/auth/payment/security/perf/migration/architecture、需求不清或需要业务判断 | `batched` |
 | Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | N/A | `mandatory` |
 
 ### 强制升级规则
 
-任一条件出现时，必须 Stop-the-Line，记录升级原因，更新 `summary.md`，并升级到更高流程：
+任一条件出现时，必须 Stop-the-Line，记录升级原因，更新 `summary.md`，并升级到 Standard-flow：
 
-- Mini-flow 发现代码行为变化、业务规则不明确、需要用户业务判断，或需要独立评审。
 - Lite-flow 发现跨模块影响、接口/数据库/schema/auth/payment/security/perf/migration/architecture 变更。
+- 需求不清、需要业务判断，或低风险假设无法机械证明。
 - 任一流程的 Mechanical Gate 为 `fail|blocked` 且无法在当前流程步骤内修复。
 - 验证证据不足以支撑当前完成声明。
 - Memory 记录要求被触发但无法按完整模板记录。
 
 ## Flow 产物与执行顺序
 
-### Mini-flow
-
-适用：typo、注释、格式、纯文档、README 小修、无行为变化小配置。
-
-必需产物：
-
-```text
-summary.md
-verification_report.md
-```
-
-执行顺序：
-
-1. 理解/分类：执行 Flow Classifier，写入 `summary.md`。
-2. 修改：仅进行无行为变化的小改动。
-3. 验证：执行适配任务的最小验证；纯文档可用内容审查、一致性搜索、文件检查作为 fresh evidence。
-4. 记录/总结：更新 `verification_report.md`，包含 Mechanical Gate、fresh evidence、Memory check、独立评审豁免依据和最终摘要。
-
-Mini-flow 不强制 `review_summary.md`；如豁免独立评审，依据写入 `verification_report.md`。
-
 ### Lite-flow
 
-适用：单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充。
+适用：typo、注释、格式、纯文档、README 小修、无行为变化小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充。
 
 必需产物：
 
@@ -95,33 +75,70 @@ review_summary.md
 3. 验证/压缩评审：生成 `verification_report.md` 和 `review_summary.md`，包含 fresh verification evidence 和压缩版 Two-stage Review。
 4. 交付：最终验证/评审摘要确认一次；Mechanical Gate fail/blocked 时不得请求人工放行。
 
-Lite-flow 不扩展成 Standard-flow 产物结构；只保留以上五类产物。
+Lite-flow 不扩展成 Standard-flow 产物结构；只保留以上五类产物。低风险小变更可填写较短内容，但不能省略机械验证、Memory check、Stop-the-Line 或必要确认。
 
 ### Standard-flow
 
-适用：高风险或不明确需求，保持完整 Phase 1-10、CK1-CK9 和逐 Phase Mechanical Gate。
+适用：高风险或不明确需求，保持完整 Phase 1-10、CK1-CK9、逐 Phase Mechanical Gate 和逐 Phase Human Approval Gate。
 
-| Phase | 目标 | 主 Skill | 主要产物 |
-|------|------|----------|----------|
-| 1 | 需求分析 | `idea-refine` | `request_analysis/understanding.md` |
-| 2 | 需求评审 | `spec-driven-development` | `request_analysis/spec.md` |
-| 3 | 任务规划 | `planning-and-task-breakdown` | `request_analysis/tasks.md` |
-| 4 | 编码实现 | `incremental-implementation` + `auto-check-and-optimize` | `coding/coding_report_v1.md` |
-| 5 | 编码评审 | `code-review-and-quality` + 条件安全/性能 Skill | `coding/review/*.md` |
-| 6 | 单元测试 | `test-driven-development` | `unit_test/test_report.md` |
-| 7 | 测试评审 | `code-review-and-quality` | `unit_test/review/test_review_v1.md` |
-| 8 | CI 验证 | `ci-cd-and-automation` | `ci_result/ci_report.md` |
-| 9 | 部署验证 | `shipping-and-launch` | `deployment/deploy_report.md` |
-| 10 | 用户确认 | `documentation-and-adrs` | `delivery-summary.md` |
+| Phase | 目标 | 主要产物 | 确认点 |
+|------|------|----------|--------|
+| Phase 1 | 需求分析 | `request_analysis/understanding.md` | CK1 |
+| Phase 2 | 需求评审 | `request_analysis/spec.md` | CK2 |
+| Phase 3 | 任务规划 | `request_analysis/tasks.md` | CK3 |
+| Phase 4 | 编码实现 | `coding/coding_report_v1.md` | CK4 |
+| Phase 5 | 编码评审 | `coding/review/*.md` | CK5 |
+| Phase 6 | 单元测试 | `unit_test/test_report.md` | CK6 |
+| Phase 7 | 测试评审 | `unit_test/review/test_review_v1.md` | CK7 |
+| Phase 8 | CI 验证 | `ci_result/ci_report.md` | 按 Standard 规则确认或记录自动放行依据 |
+| Phase 9 | 部署验证 | `deployment/deploy_report.md` | CK8 |
+| Phase 10 | 用户确认 | `delivery-summary.md` | CK9 |
+
+Standard-flow 每个阶段必须加载 Required Skills；完整 Standard-flow Phase Skill Matrix 以 `.harness/skills/README.md` 为唯一权威源。
 
 Standard-flow 关键边界：
 
-- Phase 1 只产 `understanding.md`，不产 `spec.md`。
+- Phase 1 只产 `understanding.md`，不产 `spec.md` 或 `tasks.md`。
 - Phase 2 只产 `spec.md`，不产 `tasks.md`。
 - Phase 3 首次创建 `tasks.md`。
-- Phase 4 只做编译验证和 Author/Self Review，不运行测试。
+- Phase 4 只做编码实现、编译验证和 Author/Self Review，不运行 Phase 6 测试职责。
 - Phase 5 是 Independent Review，不替代 Phase 4 自检。
 - Phase 6 才运行测试和覆盖率验证。
+
+## Standard Phase Locks
+
+Standard-flow 使用强 Phase Lock。未满足当前锁，不得进入下一 Phase。
+
+| Lock | 判定 |
+|------|------|
+| Entry Lock | 前一阶段 Mechanical Gate=`pass`、Human Approval=`approved` 或策略明确允许、产物已归档、Memory check 完成。Phase 1 Entry Lock 需完成 Flow Classification 和变更目录准备。 |
+| Work Lock | 当前阶段只能执行本阶段允许动作，不得提前做后续阶段工作；发现需要后续阶段动作时记录并延后或回退。 |
+| Exit Lock | 当前阶段产物、Required Skill Load Record、Mechanical Gate、fresh evidence、Memory check 完成。 |
+| Human Approval Lock | Mechanical Gate=`pass` 后才能请求确认；用户 `approved` 前不能进入下一阶段。 |
+| Failure Lock | Mechanical Gate=`fail|blocked` 时 Stop-the-Line，记录失败证据、回退目标和重新验证要求。 |
+
+Phase Lock 状态模板见 `.harness/changes/README.md`；判定细则见 `.harness/rules/04-quality-gates.md`。
+
+## Phase 4 隔离实现原则
+
+Standard Phase 4 编码实现必须由 Orchestrator 调度隔离执行上下文/受限子上下文完成。
+
+Orchestrator 责任：
+
+1. 准备不可变输入包：需求、spec、tasks、相关代码路径、禁止范围、验收条件。
+2. 调度隔离上下文执行受限实现任务。
+3. 汇总变更，执行编译验证。
+4. 调度或执行 Author/Self Review。
+5. 归档隔离执行证据、编译证据、`coding_report_v1.md` 和 CK4 门禁状态。
+
+隔离上下文限制：
+
+- 不得推进 Phase。
+- 不得请求用户确认。
+- 不得判断 Gate。
+- 不得修改无关文件。
+- 不得运行或冒充 Phase 6 测试职责。
+- 只能按不可变输入包执行受限编码任务并回传结果。
 
 ## Confirmation Policy
 
@@ -129,7 +146,6 @@ Standard-flow 关键边界：
 |--------|-----------|------|
 | `mandatory` | Standard-flow | CK1-CK9 按 Phase 请求确认；用户确认前不得进入下一 Phase。 |
 | `batched` | Lite-flow | 需求+简化计划确认一次，最终验证/评审摘要确认一次；中间 Mechanical Gate 通过则可继续。 |
-| `exception-only` | Mini-flow | 分类不确定、门禁失败/阻塞、需要业务判断或最终摘要时确认。 |
 
 Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。
 
@@ -137,7 +153,6 @@ Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical 
 
 - Standard-flow：每个 Phase 出口检查；触发即按 `.harness/memory/README.md` 记录。
 - Lite-flow：计划确认后、最终验证/交付前检查；触发即记录。
-- Mini-flow：最终 verification 阶段检查一次；触发即记录。
 
 workflow 只定义“何时检查”；Memory 模板和完整字段以 `.harness/memory/README.md` 为准。
 
@@ -145,20 +160,19 @@ workflow 只定义“何时检查”；Memory 模板和完整字段以 `.harness
 
 ### Standard-flow
 
-1. 执行本 Phase 产物归档。
-2. 按本文件频率检查 Memory，触发即记录。
-3. 执行 `.harness/rules/04-quality-gates.md` 对应 Mechanical Gate。
-4. 出口报告列出 Mechanical Gate 状态、fresh verification evidence、`Memory recorded: {N} entries / none`。
-5. Mechanical Gate 为 `fail|blocked` 时执行 Failure Handling Protocol，不得请求用户人工放行。
-6. Mechanical Gate 为 `pass` 后按 `mandatory` 请求 Human Approval Gate。
+1. 验证 Entry Lock 与 Work Lock 未被破坏。
+2. 执行本 Phase 产物归档。
+3. 按本文件频率检查 Memory，触发即记录。
+4. 检查 Required Skill Load Record。
+5. 执行 `.harness/rules/04-quality-gates.md` 对应 Mechanical Gate。
+6. 出口报告列出 Mechanical Gate 状态、fresh verification evidence、`Memory recorded: {N} entries / none`。
+7. Mechanical Gate 为 `fail|blocked` 时执行 Failure Handling Protocol，不得请求用户人工放行。
+8. Mechanical Gate 为 `pass` 后按 `mandatory` 请求 Human Approval Gate。
+9. Human Approval Gate 为 `approved` 前，下一 Phase Entry Lock 保持关闭。
 
 ### Lite-flow
 
 按 `batched` 执行：需求+简化计划出口确认一次；实现、验证/压缩评审的 Mechanical Gate 通过且证据完整时可继续；最终验证/评审摘要再确认一次。
-
-### Mini-flow
-
-按 `exception-only` 执行：分类不确定、门禁失败/阻塞、需要业务判断或最终摘要时确认；Mechanical Gate fail/blocked 不得请求人工放行。
 
 ## Failure Handling Protocol
 
@@ -180,7 +194,7 @@ workflow 只定义“何时检查”；Memory 模板和完整字段以 `.harness
 | 需求不符 | Phase 1 或当前 Flow 的需求/分类步骤 |
 | Spec 不符 | Phase 2 |
 | 任务不可验收 | Phase 3 |
-| 编译错误 | Phase 4 或 Lite/Mini 修改步骤 |
+| 编译错误 | Phase 4 或 Lite 实现步骤 |
 | 编码评审 Must Fix/Critical | Phase 4 |
 | 测试失败 | Phase 6 |
 | 测试评审失败 | Phase 6 |
@@ -193,7 +207,7 @@ workflow 只定义“何时检查”；Memory 模板和完整字段以 `.harness
 隔离执行上下文是 Orchestrator 调度下的受限任务或审查泳道，不是新增 Agent 文件。
 
 - 输入隔离：每个泳道收到同一份不可变输入包。
-- 输出隔离：每个泳道只写自己的报告。
+- 输出隔离：每个泳道只写自己的报告或返回自己的实现结果。
 - 结论隔离：初次报告产出前不参考其他泳道结论。
 - 权限隔离：隔离上下文不能推进 Phase、不能请求用户确认、不能修改无关文件。
 - 汇总集中：只有 Orchestrator 能合并报告、判断 Mechanical Gate、请求 Human Approval Gate。
