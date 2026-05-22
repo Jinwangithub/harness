@@ -18,6 +18,7 @@
 - 流程顺序与 Phase Lock 以 `.harness/rules/02-development-workflow.md` 为准。
 - Gate 语义与机械验证以 `.harness/rules/04-quality-gates.md` 为准。
 - 产物模板与 Skill Load Record 以 `.harness/changes/README.md` 为准。
+- Required Skill 原始输出须通过 `.harness/changes/README.md` 映射为 Harness artifact template。
 - Standard-flow Skill Matrix 以本文为准。
 - `auto-check-and-optimize` 在 Phase 4 只代表 Author/Self Review，不能替代 Phase 5 Independent Review。
 - git 操作只在用户要求或对应发布/版本场景中执行。

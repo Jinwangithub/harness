@@ -58,7 +58,7 @@
 | Flow | Mechanical Gate 必查 | Evidence | Review | Memory | Human Approval |
 |------|----------------------|----------|--------|--------|----------------|
 | Lite-flow | lite spec 存在；checklist 存在且完成/延期明确；验证报告存在；评审摘要存在；Critical=0；Must Fix=0 | `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`、`verification_report.md`、`review_summary.md` | 压缩版 Two-stage Review | 计划确认后、最终验证/交付前检查 | batched |
-| Standard-flow | 对应 Phase 产物存在；前置 Phase Lock 满足；Required Skill Load Record 存在；本 Phase 判定条件满足；fresh evidence 列出 | 对应 Phase 报告、命令结果、Skill Load Record、Phase Lock Record | Phase 4 自检 + Phase 5 独立评审 | 每个 Phase 出口检查 | mandatory |
+| Standard-flow | 对应 Phase 产物存在并符合 `.harness/changes/README.md` 对应模板结构；前置 Phase Lock 满足；Required Skill Load Record 存在；本 Phase 判定条件满足；fresh evidence 列出 | 对应 Phase 报告、命令结果、Skill Load Record、Phase Lock Record | Phase 4 自检 + Phase 5 独立评审 | 每个 Phase 出口检查 | mandatory |
 
 ## 6. Standard Phase-level 快速检查表
 
