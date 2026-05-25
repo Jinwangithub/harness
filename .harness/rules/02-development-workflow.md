@@ -31,16 +31,27 @@
 |------|------|
 | `flow` | `Lite-flow` / `Standard-flow` |
 | `selection_basis` | 选择依据，必须说明影响面、行为变化和风险判断 |
-| `risk_flags` | `none` 或 `security`、`data`、`api`、`auth`、`payment`、`perf`、`migration`、`architecture`、`deployment`、`unclear-requirement` |
+| `risk_flags` | `none` 或 `security`、`data`、`api`、`auth`、`payment`、`perf`、`migration`、`architecture`、`governance`、`deployment`、`unclear-requirement` |
 | `confirmation_policy` | `batched` / `mandatory` |
 | `upgrade_triggers` | 风险扩大、门禁失败/阻塞、证据不足、Memory 无法完整记录、需要业务判断等 |
+
+### 机械判定清单
+
+Flow Classifier 必须逐项回答并写入 `summary.md` / `lite_spec.md`：
+
+1. 影响面是否单模块/少量文件，或纯文档/格式/注释？
+2. 是否修改治理规则、模板、流程、Skill Matrix、Gate、Memory 或 changes 结构？如是，默认 `Standard-flow`，或至少设置 `risk_flags: governance` / `architecture`，不得写 `risk_flags: none`。
+3. 是否跨模块、跨目录边界或改变公共契约？
+4. 是否涉及 API、DB/schema、auth、security、perf、migration、architecture、deployment 或 unclear requirement？
+5. Lite-flow 是否有可机械复核的 `low_risk_proof`？没有则不得选择 Lite-flow。
+6. 是否需要业务判断或用户确认未定义规则？如是，使用 `unclear-requirement` 并进入 Standard-flow。
 
 ### 自动选择规则
 
 | Flow | 自动适用场景 | 强制升级条件 | confirmation_policy |
 |------|--------------|--------------|---------------------|
-| Lite-flow | typo、注释、格式、纯文档、README 小修、无行为变化小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | 跨模块、API/DB/schema/auth/payment/security/perf/migration/architecture、需求不清或需要业务判断 | `batched` |
-| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | N/A | `mandatory` |
+| Lite-flow | typo、注释、格式、纯文档、README 小修、无行为变化小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充，且 `low_risk_proof` 可机械复核 | 跨模块、API/DB/schema/auth/payment/security/perf/migration/architecture/governance/deployment、治理规则/流程/模板/Skill Matrix/Gate/Memory/changes 结构变更、需求不清或需要业务判断 | `batched` |
+| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、治理规则/流程/模板/Skill Matrix/Gate/Memory/changes 结构变更、需求不清 | N/A | `mandatory` |
 
 ### 强制升级规则
 
@@ -70,10 +81,10 @@ review_summary.md
 
 执行顺序：
 
-1. 需求确认+简化计划：写入 `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`，进行一次 batched Human Approval Gate。
-2. 实现：按 checklist 修改；若风险扩大则 Stop-the-Line 并升级。
-3. 验证/压缩评审：生成 `verification_report.md` 和 `review_summary.md`，包含 fresh verification evidence 和压缩版 Two-stage Review。
-4. 交付：最终验证/评审摘要确认一次；Mechanical Gate fail/blocked 时不得请求人工放行。
+1. L1 需求确认+简化计划：写入 `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`；Mechanical Gate=`pass` 后请求一次 batched Human Approval Gate。未 `approved` 前不得进入 L2。
+2. L2 实现：进入前必须 L1 Human Approval Gate=`approved`；按 checklist 修改；若风险扩大则 Stop-the-Line 并升级。
+3. L3 验证/压缩评审：生成 `verification_report.md` 和 `review_summary.md`，包含 fresh verification evidence、Memory check 和压缩版 Two-stage Review。
+4. L4 交付：最终验证/评审摘要确认一次；final approval=`approved` 且 Completion Claim Gate 通过前，不得把 `summary.md` 标为 `已完成`；Mechanical Gate fail/blocked 时不得请求人工放行。
 
 Lite-flow 不扩展成 Standard-flow 产物结构；只保留以上五类产物。低风险小变更可填写较短内容，但不能省略机械验证、Memory check、Stop-the-Line 或必要确认。
 
@@ -147,7 +158,7 @@ Orchestrator 责任：
 | `mandatory` | Standard-flow | CK1-CK9 按 Phase 请求确认；用户确认前不得进入下一 Phase。 |
 | `batched` | Lite-flow | 需求+简化计划确认一次，最终验证/评审摘要确认一次；中间 Mechanical Gate 通过则可继续。 |
 
-Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。
+Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。`not-required-by-policy` 只适用于策略明确定义的中间点，不能代替 Standard-flow mandatory Phase approval，也不能代替 Lite L1/L4 batched approval。非 canonical Human Approval 状态视为 Gate blocked。
 
 ## Memory 检查频率
 
@@ -172,7 +183,7 @@ workflow 只定义“何时检查”；Memory 模板和完整字段以 `.harness
 
 ### Lite-flow
 
-按 `batched` 执行：需求+简化计划出口确认一次；实现、验证/压缩评审的 Mechanical Gate 通过且证据完整时可继续；最终验证/评审摘要再确认一次。
+按 `batched` 执行 Lite step locks：L1 需求+简化计划必须 Mechanical Gate=`pass` 后请求确认；L1 Human Approval Gate=`approved` 前不得进入 L2；L2 实现不得扩大风险；L3 必须具备 fresh evidence 和 Memory check；L4 final approval=`approved` 且 Completion Claim Gate 通过前，不得把 `summary.md` 标为 `已完成`。
 
 ## Failure Handling Protocol
 

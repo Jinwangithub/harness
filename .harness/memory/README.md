@@ -21,10 +21,11 @@
 任何 Flow 中一旦出现以下情况，必须立即记录，不能等到最终交付再补：
 
 - 做了架构决策 → 写入 `decisions.log`。
-- 发现 Agent 错误或流程教训 → 写入 `lessons-learned.md`。
-- 遇到已知限制或暂无法修复的问题 → 写入 `known-issues.md`。
+- 做了治理规则、模板、Skill、Gate、Flow、changes 结构或长期维护决策 → 高概率写入 `decisions.log`。
+- 发现 Agent 错误、流程教训、模板误导或 Skill 冲突 → 写入 `lessons-learned.md`。
+- 遇到已知限制、暂无法修复的问题或治理债务 → 写入 `known-issues.md`。
 
-记录必须使用下方完整模板，禁止简化字段。
+记录必须使用下方完整模板，禁止简化字段。历史旧格式 Memory 可作为 legacy evidence 保留，不强制重写；新记录必须使用完整模板，不得复制旧的不完整条目格式。
 
 ## Memory 检查频率
 
@@ -33,7 +34,21 @@
 | Standard-flow | 每个 Phase 出口检查；触发即记录 |
 | Lite-flow | 计划确认后、最终验证/交付前检查；触发即记录 |
 
-每次出口报告必须包含：`Memory recorded: {N} entries / none`。
+每次出口报告必须包含：`Memory recorded: {N} entries / none`。每个 Phase/Flow step artifact 或 `summary.md` Gate Record 必须引用或填写下方 Memory Check 块。
+
+## Memory Check 块
+
+```markdown
+## Memory Check
+- Architecture/governance decision made: {yes/no; evidence}
+- Agent/process lesson found: {yes/no; evidence}
+- Known issue or governance debt found: {yes/no; evidence}
+- Memory action: {decisions.log / lessons-learned.md / known-issues.md / none}
+- Memory recorded: {N} entries / none
+- Template completeness verified: {yes/no/N/A}
+```
+
+`Template completeness verified` 对触发记录的条目必须为 `yes`；如无法完整记录则当前 Gate=`blocked`。
 
 ## 完整模板
 

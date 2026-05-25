@@ -5,6 +5,10 @@ description: Breaks work into ordered tasks. Use when you have a spec or clear r
 
 # Planning and Task Breakdown
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/skills/README.md` and `.harness/changes/README.md`. In Harness Standard Phase 3, output only `request_analysis/tasks.md`; do not create `# Implementation Plan` or `### Phase 1/2/3` headings. Use `Task Group`, `Slice`, and `Checkpoint`, and map every task to `spec.md` Success Criteria.
+
 ## Overview
 
 Decompose work into small, verifiable tasks with explicit acceptance criteria. Good task breakdown is the difference between an agent that completes work reliably and one that produces a tangled mess. Every task should be small enough to implement, test, and verify in a single focused session.

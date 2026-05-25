@@ -5,6 +5,10 @@ description: Records decisions and documentation. Use when making architectural 
 
 # Documentation and ADRs
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, ADRs and project documentation do not replace `.harness/memory/*` records or `.harness/changes/{id}/delivery-summary.md`. Memory triggers must still be recorded with the full Memory template.
+
 ## Overview
 
 Document decisions, not just code. The most valuable documentation captures the *why* — the context, constraints, and trade-offs that led to a decision. Code shows *what* was built; documentation explains *why it was built this way* and *what alternatives were considered*. This context is essential for future humans and agents working in the codebase.

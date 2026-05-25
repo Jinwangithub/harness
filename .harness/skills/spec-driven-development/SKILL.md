@@ -5,6 +5,10 @@ description: Creates specs before coding. Use when starting a new project, featu
 
 # Spec-Driven Development
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/skills/README.md` and `.harness/changes/README.md`. In Harness Standard Phase 2, output only `request_analysis/spec.md`; the generic `SPECIFY → PLAN → TASKS → IMPLEMENT` workflow is background guidance and must not create tasks, code, tests, or later-phase artifacts.
+
 ## Overview
 
 Write a structured specification before writing any code. The spec is the shared source of truth between you and the human engineer — it defines what we're building, why, and how we'll know it's done. Code without a spec is guessing.

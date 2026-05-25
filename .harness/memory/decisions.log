@@ -106,3 +106,11 @@ YYYY-MM-DD | {标题}
 - 理由: 单一权威源能降低上下文负担和维护分叉风险；Orchestrator 瘦身能让执行者按需读取细则；Mini/Lite 减少产物能降低低风险任务摩擦，同时保留验证、证据、Memory 和 Stop-the-Line。
 - 后果: 入口文件更短、重复说明减少，但执行者需要按引用读取对应权威源；低风险任务产物更少，但仍必须完成 Mechanical Gate、fresh verification evidence、Memory check 和必要 Human Approval Gate。
 - 决定人: Orchestrator + 用户确认
+
+2026-05-25 | 强化 Harness 模板硬约束修复执行偏差
+- 背景: 用户指出 summary 不完整、Memory 不主动、确认被跳过、Skill 未加载、tasks.md 乱生成、Flow 分类/Lite-flow 跳步、Lite 产物不稳定等执行偏差，说明抽象原则不足以约束能力较弱模型。
+- 方案: 在 `.harness/changes/README.md`、workflow、quality gates、memory、skills registry 和 orchestrator 中增加靠近模板的必填字段、canonical 状态、Lite step locks、Completion Claim Gate、Skill Load Lifecycle 与 Raw Skill Template Suppression，并在高冲突 Skill 顶部加入短 Harness Integration Constraint。
+- 备选: 新增流程、Agent 或第三套模板；重写全部 Skill；重写历史 changes 归档。
+- 理由: 少量权威文件强化能保持单一权威源和现有 Flow 分工，同时把约束放在模型最容易复制的模板位置，降低跳步和模板污染概率。
+- 后果: 新变更的 summary、Lite artifacts、Gate Record、Skill Load Record 和 Memory Check 字段更严格；历史旧归档作为 legacy evidence 保留，不自动重写。
+- 决定人: Orchestrator + 用户计划

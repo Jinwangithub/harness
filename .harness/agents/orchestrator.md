@@ -44,6 +44,7 @@ Orchestrator 可以调度隔离执行上下文，但隔离上下文不能替代 
 2. 读取 `.harness/memory/README.md`，按需查看 `decisions.log`、`lessons-learned.md`、`known-issues.md`。
 3. 扫描 `.harness/changes/` 最新变更目录的 `summary.md`：
    - `状态: 进行中` 且存在未完成项 → 报告状态并从第一个未完成 Phase / Flow step 恢复。
+   - 发现多个 `状态: 进行中` → Stop-the-Line，报告候选变更目录、Current step 和 Resume point，不自行猜测恢复对象。
    - `状态: 已完成` 或无变更目录 → 准备新变更。
 4. 遇到未知业务概念时查 `.harness/wiki/`，不猜测规则。
 
@@ -52,7 +53,8 @@ Orchestrator 可以调度隔离执行上下文，但隔离上下文不能替代 
 对每个需求执行：
 
 ```text
-Load → Classify → Dispatch → Verify → Gate → Confirm → Archive → Remember
+Load → Classify → Dispatch → Verify → Gate → Confirm → Archive
+                         ↘ Remember when triggered; check again at exit
 ```
 
 - **Load**：读取相关代码、规则、历史 Memory、wiki 和参考清单。
@@ -61,8 +63,8 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Archive → R
 - **Verify**：执行与 Flow/Phase 匹配的验证，生成 fresh verification evidence。
 - **Gate**：按 `.harness/rules/04-quality-gates.md` 执行 Mechanical Gate。
 - **Confirm**：Mechanical Gate 通过后，按 `confirmation_policy` 请求必要 Human Approval Gate。
-- **Archive**：按 `.harness/changes/README.md` 立即归档产物、Skill Load Record、Phase Lock 状态和门禁状态。
-- **Remember**：按 `.harness/memory/README.md` 检查并触发即记录。
+- **Archive**：按 `.harness/changes/README.md` 立即归档产物、Skill Load Record、Phase Lock 状态和门禁状态，并同步更新 `summary.md` 的 Gate、Current step、Resume point、Memory status、Completion lock。
+- **Remember**：按 `.harness/memory/README.md` 触发即记录；Phase/Step 出口再次检查并归档 Memory status。
 
 ## Standard Phase Lock Dispatch
 
@@ -80,7 +82,7 @@ Standard-flow 进入每个 Phase 前，Orchestrator 必须验证：
 
 - 所有 Skill 路径为 `.harness/skills/{name}/SKILL.md`。
 - Lite-flow 只加载完成 lite spec、checklist、verification、review 所需的最少 Skill。
-- Standard-flow 按 `.harness/skills/README.md` 的 Standard-flow Phase Skill Matrix 加载 Required、Support、Conditional Skills。
+- Standard-flow 按 `.harness/skills/README.md` 的 Standard-flow Phase Skill Matrix 加载 Required、Support、Conditional Skills；Required Skill 必须在当前 Phase artifact 生成前加载。
 - Required Skill 未加载或无 Skill Load Record 时，对应 Mechanical Gate 必须 `blocked`。
 - `auto-check-and-optimize` 是 Phase 4 出口 Author/Self Review，不替代 Phase 5 Independent Review。
 - `security-and-hardening`、`performance-optimization`、`source-driven-development`、`browser-testing-with-devtools`、`git-workflow-and-versioning` 不默认全文加载，按风险或动作触发。
@@ -121,10 +123,12 @@ Human Approval Gate: {pending-human/approved/rejected/not-required-by-policy}
 
 规则：
 
+- Gate Exit Protocol 字段必须同步写入 `summary.md`，不能只口头报告。
 - `fail|blocked`：立即 Stop-the-Line，不请求用户放行。
 - `pass`：按 `confirmation_policy` 请求确认或记录不需要确认的依据。
 - Standard-flow Mechanical Gate pass 后仍锁定下一 Phase，直到 Human Approval Gate=`approved`。
 - 未列出 fresh evidence 不得声明完成、通过或交付。
+- Lite-flow step locks：L1 approval=approved 前不得进入 L2；L3 必须有 fresh evidence 和 Memory check；L4 final approval=approved 且 Completion Claim Gate 通过前不得标记已完成。
 
 ## Stop-the-Line
 

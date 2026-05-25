@@ -5,6 +5,10 @@ description: Delivers changes incrementally. Use when implementing any feature o
 
 # Incremental Implementation
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/skills/README.md` and `.harness/changes/README.md`. In Harness Phase 4, “commit” means archive implementation evidence in Harness artifacts; do not run `git commit` unless the user explicitly requests it. This Skill must not run or claim Phase 6 test responsibilities.
+
 ## Overview
 
 Build in thin vertical slices — implement one piece, test it, verify it, then expand. Avoid implementing an entire feature in one pass. Each increment should leave the system in a working, testable state. This is the execution discipline that makes large features manageable.

@@ -10,7 +10,7 @@
 - Human Approval Gate 只能在 Mechanical Gate 为 `pass` 后进入。
 - Mechanical Gate 为 `fail|blocked` 时必须 Stop-the-Line，不得请求用户人工放行。
 - 出口必须列出 fresh verification evidence：命令、结果、报告路径、审查报告路径或可复查的检查结果。
-- Completion claim gate：未列出 fresh verification evidence，不得声明完成、通过或交付。
+- Completion Claim Gate：summary 必填字段完整、final evidence 存在、Memory check 完成、Human Approval Gate 为 `approved` 或规则明确允许；否则不得声明完成、通过或交付。
 - Lite-flow、Standard-flow 都必须具备 Mechanical Gate、fresh verification evidence、Memory check 和必要 Human Approval Gate。
 
 ## 2. Gate 状态定义
@@ -32,7 +32,9 @@
 | `pending-human` | Mechanical Gate 已通过，等待用户确认 |
 | `approved` | 用户确认通过 |
 | `rejected` | 用户不通过，必须回退处理 |
-| `not-required-by-policy` | 当前 `confirmation_policy` 不要求此处确认，且 Mechanical Gate 已通过 |
+| `not-required-by-policy` | 当前 `confirmation_policy` 明确不要求此处确认，且 Mechanical Gate 已通过 |
+
+非 canonical Human Approval 状态一律视为 Gate `blocked`。`not-required-by-policy` 不能代替 mandatory Phase approval 或 Lite L1/L4 approval。
 
 ## 3. Mechanical Evidence Types
 
@@ -60,11 +62,21 @@
 | Lite-flow | lite spec 存在；checklist 存在且完成/延期明确；验证报告存在；评审摘要存在；Critical=0；Must Fix=0 | `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`、`verification_report.md`、`review_summary.md` | 压缩版 Two-stage Review | 计划确认后、最终验证/交付前检查 | batched |
 | Standard-flow | 对应 Phase 产物存在并符合 `.harness/changes/README.md` 对应模板结构；前置 Phase Lock 满足；Required Skill Load Record 存在；本 Phase 判定条件满足；fresh evidence 列出 | 对应 Phase 报告、命令结果、Skill Load Record、Phase Lock Record | Phase 4 自检 + Phase 5 独立评审 | 每个 Phase 出口检查 | mandatory |
 
-## 6. Standard Phase-level 快速检查表
+## 6. Lite-flow L1-L4 Gate 表
+
+| Step | Mechanical Gate 必查 | Fresh Evidence | Memory | Human Approval |
+|------|----------------------|----------------|--------|----------------|
+| L1 需求确认+简化计划 | `summary.md`、`lite_spec.md`、`checklist.md` 存在；Flow Classification 有 `low_risk_proof`；无 Standard 强制升级风险；Skill trigger evaluation 已记录 | artifact 路径、低风险证据、结构检查 | 计划确认后检查；触发即记录 | batched approval 必须 `approved` 后进入 L2 |
+| L2 实现 | 只修改 checklist 允许范围；未创建 Standard-only 产物；未引入风险扩大 | 变更范围、文件清单、禁止文件搜索结果 | 如触发治理/教训/限制则立即记录 | `not-required-by-policy` 仅在 L1 已 approved 且无风险扩大时可用 |
+| L3 验证/压缩评审 | `verification_report.md`、`review_summary.md` 存在；Critical=0；Must Fix=0；fresh evidence 当前有效；Memory check 完成 | 命令/搜索结果、报告路径、评审结论 | 最终验证/交付前检查；触发即记录 | `not-required-by-policy` 仅表示等待 L4 final approval 前无需中间确认 |
+| L4 交付确认 | Completion Claim Gate 通过；summary completeness checklist 完成；Completion lock 可解锁 | final evidence、summary、approval evidence | Memory status 完整 | final approval 必须 `approved`，否则不得标记已完成 |
+
+## 7. Standard Phase-level 快速检查表
 
 每个 Standard Phase 都必须检查：
 
 - Required Skill Load Record 存在，且 Required Skill 的 `Status` 为 `loaded` 或明确 `blocked`。
+- Conditional Skill 触发但未加载时，Mechanical Gate 必须为 `blocked`。
 - 前置 Phase Lock 状态符合 `.harness/rules/02-development-workflow.md`。
 - 当前 Phase 没有执行 Forbidden/Deferred 动作。
 - fresh verification evidence 为当前阶段新鲜证据。
@@ -105,39 +117,38 @@ Phase 4 Mechanical Gate 必须机械验证以下内容：
 - `regression_verification`：修复后的 fresh verification evidence。
 - `memory_action`：是否写入 `lessons-learned.md` / `known-issues.md` / `decisions.log`；如无则说明 `none`。
 
-## 9. 最小 Gate Record 示例
+## 9. Canonical Markdown Gate Record 模板
 
-```json
-{
-  "scope": "Lite-flow L3 verification/review",
-  "mechanical_gate": {
-    "status": "pass",
-    "checks": [
-      "Flow Classification exists",
-      "required artifacts exist",
-      "Critical == 0",
-      "Must Fix == 0",
-      "fresh verification evidence listed",
-      "memory check completed"
-    ],
-    "evidence_paths": [
-      ".harness/changes/{id}/summary.md",
-      ".harness/changes/{id}/verification_report.md",
-      ".harness/changes/{id}/review_summary.md"
-    ],
-    "fresh_verification_evidence": [
-      "verification command or consistency search result",
-      "review_summary.md path",
-      "Memory recorded: 0 entries / none"
-    ]
-  },
-  "human_approval_gate": {
-    "status": "pending-human",
-    "policy": "batched",
-    "reason": "final verification/review summary"
-  },
-  "rollback_to": "Lite-flow implementation"
-}
+```markdown
+## Gate Record — {Step/Phase}
+
+- Mechanical Gate: {pass/fail/blocked}
+- Checks:
+  - [ ] {mechanical check item}
+  - [ ] {artifact exists / forbidden artifact absent / status canonical / counts pass}
+- Fresh verification evidence:
+  - {command + exit code, search result, report path, review path}
+- Skill Load Record:
+  - Required: {loaded/blocked/not-required-by-policy + evidence}
+  - Conditional trigger evaluation: {triggered/not-triggered + evidence}
+- Memory Check:
+  - Status: {completed/pending/blocked}
+  - Memory recorded: {N} entries / none
+  - Evidence: {memory path or none}
+- Human Approval Gate: {pending-human/approved/rejected/not-required-by-policy}
+- Approval evidence: {user confirmation record or policy reason}
+- Rollback target: {Phase/Step or none}
 ```
 
-附录示例只展示字段形态；实际检查项以本文件快速检查表和对应 Flow/Phase 产物为准。
+## 10. Completion Claim Gate
+
+声明完成、通过、交付，或把 `summary.md` 状态改为 `已完成` 前，必须全部满足：
+
+1. `summary.md` 必填字段完整：Flow Classification、Current step、Resume point、Gate、Skill Load Records、Memory status、Completion lock。
+2. final fresh evidence 存在且可复查。
+3. Memory check 完成；触发项已按完整模板记录。
+4. Human Approval Gate 为 `approved`，或当前点被规则明确允许 `not-required-by-policy`。
+5. Mechanical Gate 无 `fail|blocked`。
+6. Human Approval Gate 状态为 canonical 值。
+
+任一不满足时 Completion Claim Gate=`blocked`，不得声明完成/通过/交付。

@@ -5,6 +5,10 @@ description: Refines ideas iteratively. Refine ideas through structured divergen
 
 # Idea Refine
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/changes/README.md`. Harness Phase 1 output maps to `request_analysis/understanding.md`; do not default to writing `docs/ideas/` unless the user explicitly asks for a separate idea document.
+
 Refines raw ideas into sharp, actionable concepts worth building through structured divergent and convergent thinking.
 
 ## How It Works

@@ -5,6 +5,10 @@ description: Discovers and invokes agent skills. Use when starting a session or 
 
 # Using Agent Skills
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is discovery support only. It must not override `.harness/skills/README.md`, the Harness Skill Matrix, Flow Classification, Phase boundaries, artifact templates, or Gate rules.
+
 ## Overview
 
 Agent Skills is a collection of engineering workflow skills organized by development phase. Each skill encodes a specific process that senior engineers follow. This meta-skill helps you discover and apply the right skill for your current task.

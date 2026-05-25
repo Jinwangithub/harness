@@ -23,6 +23,32 @@
 - `auto-check-and-optimize` 在 Phase 4 只代表 Author/Self Review，不能替代 Phase 5 Independent Review。
 - git 操作只在用户要求或对应发布/版本场景中执行。
 
+## Skill Load Lifecycle
+
+每个 Phase/Step 入口按以下顺序执行：
+
+1. 评估当前 Phase/Step 的 Required Skills 与 Conditional Skills 触发条件。
+2. Required Skill 必须先读取/调用，再产出本阶段 artifact。
+3. Conditional Skill 触发时必须读取/调用；未触发也要记录 trigger evaluation。
+4. 写入 Skill Load Record，字段和状态以 `.harness/changes/README.md` 为准。
+5. Required Skill 未加载，或 Conditional Skill 触发但未加载时，Mechanical Gate=`blocked`。
+
+## Raw Skill Template Suppression
+
+| Skill | Harness Override |
+|-------|------------------|
+| `spec-driven-development` | Harness Phase 2 只输出 `request_analysis/spec.md`；禁止在 Phase 2 输出 plan/tasks/implement。 |
+| `planning-and-task-breakdown` | Harness Phase 3 只输出 `request_analysis/tasks.md`；禁止 `# Implementation Plan` 和 `### Phase 1/2/3` 作为 Harness tasks 模板。 |
+| `idea-refine` | Harness Phase 1 输出映射到 `request_analysis/understanding.md`；不默认写 `docs/ideas/`。 |
+| `incremental-implementation` | Harness Phase 4 中 “commit” 解释为归档实现证据；除非用户明确要求，不执行 git commit。 |
+| `auto-check-and-optimize` | 只作为 Phase 4 Author/Self Review；编译命令来自 `spec.md`，不硬编码 Maven；不替代 Phase 5。 |
+| `documentation-and-adrs` | ADR 不替代 Harness Memory，也不替代 `delivery-summary.md`。 |
+| `using-agent-skills` | 只作发现辅助，不覆盖本文 Harness Skill Matrix。 |
+
+## Lite-flow Skill Mapping
+
+Lite-flow 可借用 Skill 概念完成 lite spec、checklist、verification、review，但只能把必要字段抽取到 Lite artifacts。Lite-flow 不得输出 Standard artifacts（`spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_result/`、`deployment/`、`delivery-summary.md`），除非升级 Standard-flow。
+
 ## Core-meta
 
 | Skill | 路径 | 用途 |
