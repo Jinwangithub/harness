@@ -1,5 +1,17 @@
 # 已知问题
 
+## 失败模式速查表
+
+| 症状 | 根因 | 对应规则 |
+|------|------|---------|
+| Gate 状态无法确认 | 缺少 fresh evidence | `04-quality-gates.md` §Completion Claim Gate |
+| 恢复后重复执行已完成 Phase | INDEX.md 未更新 resume point | `changes/README.md` §Registry |
+| Lite-flow 后发现需要 Standard | Flow Classifier 误判 | `02-development-workflow.md` §强制升级规则 |
+| Memory 记录不完整 | 字段缺失或未用完整模板 | `memory/README.md` §完整模板 |
+| 多个 active auto-resume | INDEX 维护遗漏 | `changes/INDEX.md` §Maintenance Rules |
+| Phase 产物边界混淆 | Work Lock 未执行 | `02-development-workflow.md` §Standard Phase Locks |
+| Skill 加载错误或找不到 | Skill 目录与 README 不同步 | `skills/README.md` §Skill Registry |
+
 ## 格式
 
 ```
@@ -29,3 +41,10 @@
   - 影响范围: Phase 4 进度展示
   - 临时方案: Orchestrator 每次子任务完成后报告「Task i/N 已完成」
   - 计划修复: 依赖规范约束
+
+## 2026-05-26 | 历史 summary 不完全符合新 schema
+
+- 描述: 历史 changes summary 中存在非 canonical Human Approval wording、`resume_from`、缺失 `Completion lock`、`状态: 已完成` + `pending-human` 等与新 schema 不一致的问题。本次治理不批量重写历史归档，避免伪造或重塑审计链。
+- 影响范围: `.harness/changes/docs-flow-friction-reduction-20260519/`、`.harness/changes/docs-harness-slimming-20260520/`、`.harness/changes/fix-harness-executability-20260521/` 等 legacy archive 的自动恢复和 validator 输出。
+- 临时方案: 通过 `.harness/changes/INDEX.md` 标记 `legacy-unfinished`、`legacy-conflict`、`do-not-auto-resume`；validator 对 legacy debt 输出 WARN 而不是默认 FAIL。
+- 计划修复: 仅在用户明确要求历史归档迁移时，按单独治理变更逐个迁移并保留原始 approval evidence，不自动改写历史 Human Approval。

@@ -20,6 +20,19 @@
 | `docs-` | 文档 |
 | `chore-` | 工程维护 |
 
+## Changes Registry — `INDEX.md`
+
+`.harness/changes/INDEX.md` 是全局 changes registry / 恢复索引。会话恢复必须 registry-first：先读取 `INDEX.md`，再扫描各 `summary.md` 做一致性校验。
+
+维护规则：
+
+1. 每次创建新变更时必须新增 registry row，并最多保留一个 `Lifecycle=active` 且 `Resume policy=auto-resume` 的变更。
+2. 历史未完成、状态冲突或被后续治理取代的变更不得自动恢复，使用 `legacy-unfinished`、`legacy-conflict`、`superseded`、`manual-only` 或 `do-not-auto-resume` 标记。
+3. `Human Approval Gate=pending-human` 时，`Completion lock` 必须为 `locked`。
+4. `状态: 已完成` 与 `Human Approval Gate=pending-human` 冲突；新 summary 必须 Gate=`blocked`，历史 summary 通过 INDEX 标记为 `legacy-conflict`。
+5. `INDEX.md` 与 summary 冲突时 Stop-the-Line，报告候选变更和冲突字段，不自行猜测恢复对象。
+6. 历史 summary 可作为 legacy evidence 保留，不批量改写；新 summary 必须使用本文件的新模板字段。
+
 ## Raw Skill Template Rule
 
 Skill 只提供过程指导和内容素材，不能直接复制其原始模板作为 Harness artifact。artifact 路径、字段、Gate、Skill Load Record、Phase/Step 边界，以本文件和对应规则文件为准。
@@ -79,11 +92,11 @@ Lite-flow 不扩展成 Standard-flow 产物结构。Lite-flow 不创建 `spec.md
 - **需求**: {需求名称}
 - **类型**: {feat/fix/refactor/perf/test/docs/chore}
 - **日期**: {YYYYMMDD}
-- **状态**: {进行中/已完成/已回退}
+- **状态**: {进行中/已完成/已回退/已阻塞}
 - **负责人**: Orchestrator
-- **Current step**: {Lite L1-L4 或 Standard Phase N}
-- **Resume point**: {下一步恢复入口；没有则写 none}
-- **Completion lock**: {locked/unlocked；未满足 Completion Claim Gate 时必须 locked}
+- **Current step**: {Lite L1-L4 或 Standard Phase N；必须与 INDEX 当前 row 一致}
+- **Resume point**: {下一步恢复入口；pending-human 时写等待确认点；没有则写 none}
+- **Completion lock**: {locked/unlocked；未满足 Completion Claim Gate 或 Human Approval Gate=pending-human 时必须 locked}
 
 ## Flow Classification
 - **Flow**: {Lite-flow/Standard-flow}
@@ -674,7 +687,9 @@ Required Skill: `documentation-and-adrs`
 1. 每个 Phase 或 Flow step 完成后立即归档对应产物。
 2. 产物按需标记版本号（如 `review_v1` → `review_v2`）。
 3. 回退或流程升级时记录 reason 到 `summary.md`。
-4. 变更完成后，`summary.md` 标记为“已完成”。
+4. 变更完成后，只有 Completion Claim Gate 通过且 Human Approval Gate=`approved` 或规则明确允许 `not-required-by-policy` 时，`summary.md` 才能标记为“已完成”，并把 `Completion lock` 设为 `unlocked`。
 5. 每个 Phase 或 Flow step 的 Mechanical Gate 与 Human Approval Gate 状态必须记录到 `summary.md`。
 6. 根据 Flow Classification 仅保留对应流程进度表，不把未采用流程标记为“跳过”。
 7. 新规则适用于新变更；历史 `.harness/changes/` 作为旧证据保留，不自动重写。
+8. 新 summary 禁止使用 `resume_from`；必须使用 `Resume point`。
+9. 新 summary 的 Human Approval Gate 只能使用 `pending-human`、`approved`、`rejected`、`not-required-by-policy`。历史非 canonical 状态由 `INDEX.md` 和 validator 标记 WARN。

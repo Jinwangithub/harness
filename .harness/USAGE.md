@@ -10,7 +10,7 @@
 启动 Harness 模式
 ```
 
-Claude Code 会读取 `CLAUDE.md`、`.harness/AGENTS.md` 和 Orchestrator 规则，检查 `.harness/changes/` 与 `.harness/memory/`，然后准备处理新需求或恢复进行中的变更。
+Claude Code 会读取 `CLAUDE.md`、`.harness/AGENTS.md`、`.harness/agents/orchestrator.md`，优先检查 `.harness/changes/INDEX.md`，再校验 `.harness/changes/*/summary.md` 与 `.harness/memory/`，然后准备处理新需求或恢复进行中的变更。
 
 ## 如何描述需求
 
@@ -56,8 +56,45 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/review` | 执行评审步骤或单点评审 |
 | `/test` | 执行验证/测试步骤或单点测试 |
 | `/ship` | 执行交付确认 |
-| `恢复上次进度` | 从 `.harness/changes/` 最新未完成项恢复 |
+| `恢复上次进度` | 优先从 `.harness/changes/INDEX.md` 的 active auto-resume row 恢复，再校验 summary |
 | `当前进度` | 查看当前 Phase / Flow step |
+| `运行 Harness 校验` | 执行 `.harness/scripts/harness-validate.sh`，输出 PASS/WARN/FAIL |
+
+## 命令语义边界
+
+| 命令 | Lite-flow | Standard-flow | 不能做什么 |
+|------|-----------|---------------|------------|
+| `/spec` | 产出/更新 L1 lite spec | Phase 1 understanding 或 Phase 2 spec | 不能跳过 Flow Classification 或 approval lock |
+| `/plan` | 产出/更新 L1 checklist | Phase 3 tasks | 不能在 Phase 2 提前创建 tasks |
+| `/build` | L2 实现 | Phase 4 实现 | 不能冒充 Phase 6 测试完成 |
+| `/review` | L3 压缩评审 | Phase 5/7 评审 | 不能替代 Mechanical Gate |
+| `/test` | L3 验证 | Phase 6 测试或阶段验证 | 不能单独声明交付完成 |
+| `/ship` | L4 最终确认 | Phase 10 交付确认 | 不能在 pending-human 时标记已完成 |
+
+## Harness validator
+
+运行：
+
+```bash
+.harness/scripts/harness-validate.sh
+```
+
+输出含义：
+
+- `PASS`: 确定性检查通过。
+- `WARN`: 历史 legacy、不一致但已被 INDEX 标记，或需要人工关注的治理债务。
+- `FAIL`: 新结构或必需文件违反规则；Orchestrator 必须 Stop-the-Line。
+
+validator 只提供 Mechanical Gate evidence，不会自动修复文件，也不代表 Human Approval Gate 已通过。
+
+## pending-human 时你需要做什么
+
+当 Orchestrator 报告 `Human Approval Gate: pending-human`：
+
+1. 查看交付摘要、验证证据和 Gate 状态。
+2. 如果同意，明确回复 `approved` 或说明批准范围。
+3. 如果不同意，回复 `rejected` 并说明问题；Orchestrator 应回退修复。
+4. 在你确认前，`Completion lock` 必须保持 `locked`，变更不得标记为 `已完成`。
 
 ## 用户版验收简表
 

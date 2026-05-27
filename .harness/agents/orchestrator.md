@@ -41,12 +41,17 @@ Orchestrator 可以调度隔离执行上下文，但隔离上下文不能替代 
 每次会话启动：
 
 1. 读取 `.harness/AGENTS.md` 获取项目地图。
-2. 读取 `.harness/memory/README.md`，按需查看 `decisions.log`、`lessons-learned.md`、`known-issues.md`。
-3. 扫描 `.harness/changes/` 最新变更目录的 `summary.md`：
-   - `状态: 进行中` 且存在未完成项 → 报告状态并从第一个未完成 Phase / Flow step 恢复。
-   - 发现多个 `状态: 进行中` → Stop-the-Line，报告候选变更目录、Current step 和 Resume point，不自行猜测恢复对象。
-   - `状态: 已完成` 或无变更目录 → 准备新变更。
-4. 遇到未知业务概念时查 `.harness/wiki/`，不猜测规则。
+2. 读取 `.harness/changes/INDEX.md`，以 registry-first 恢复：
+   - `Lifecycle=active` 且 `Resume policy=auto-resume` 必须唯一。
+   - 按 active row 的 `Current step`、`Resume point`、Gate 和 `Completion lock` 报告恢复入口。
+   - `Human Approval Gate=pending-human` 是合法恢复入口，表示等待用户确认，不表示完成；此时 `Completion lock` 必须为 `locked`。
+3. 读取 `.harness/memory/README.md`，按需查看 `decisions.log`、`lessons-learned.md`、`known-issues.md`。
+4. 扫描 `.harness/changes/` 的 `summary.md` 做一致性校验：
+   - 多个 `状态: 进行中` 且 INDEX 已把非 active 变更标记为 `legacy-*` / `do-not-auto-resume` → 报告 WARN 后按 INDEX active 恢复。
+   - `INDEX.md` 缺失、多个 active auto-resume、active row 与 summary 的 Current step / Resume point / Gate / Completion lock 冲突 → Stop-the-Line，报告候选变更目录、冲突字段和证据，不自行猜测恢复对象。
+   - `状态: 已完成` 与 `Human Approval Gate=pending-human` 冲突 → 视为 legacy-conflict 或 Gate blocked；不得声明完成。
+   - `状态: 已完成` 且 Completion Claim Gate 可证明通过，或无变更目录 → 准备新变更。
+5. 遇到未知业务概念时查 `.harness/wiki/`，不猜测规则。
 
 ## Dispatch Loop
 

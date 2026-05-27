@@ -8,6 +8,11 @@ L3 按需查询层 — 存储业务文档、领域知识、架构说明等 Orche
 
 ## 业务项目接入要求
 
+先读：
+
+- `quickstart.md`：最小填充路径和 `{待确认}` 使用规则。
+- `minimal-example.md`：模板性质示例，不代表本仓库真实业务。
+
 业务项目接入 Harness 时必须至少实例化：
 
 - `project-overview.md`：项目名称、技术栈、模块边界、关键业务域、外部依赖、构建命令、环境说明。
@@ -16,6 +21,8 @@ L3 按需查询层 — 存储业务文档、领域知识、架构说明等 Orche
 
 - 涉及业务领域时：`domain-template.md`
 - 涉及外部系统时：`integration-template.md`
+
+未知业务规则必须写 `{待确认}` 或进入 Phase 1 Open Questions，不得猜测。
 
 ## 推荐内容
 

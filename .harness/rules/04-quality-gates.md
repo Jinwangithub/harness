@@ -47,6 +47,19 @@
 | Coverage/test | 测试命令、测试数、覆盖率阈值可判定 | tests passed、coverage >= threshold |
 | Skill load | Required Skill Load Record 存在且 Status 可判定 | Required skill `loaded` 或 Gate `blocked` |
 | Phase lock | Entry/Exit/Human/Failure Lock 状态字段可判定 | Entry Lock=`open`、Failure Lock=`closed` |
+| Executable Harness validation | `harness-validate.sh` 输出 PASS/WARN/FAIL 和退出码 | `.harness/scripts/harness-validate.sh` |
+
+## 3.1 Executable Gate Validation
+
+`.harness/scripts/harness-validate.sh` 是 Harness 治理仓库的低复杂度 Mechanical Gate evidence source。
+
+规则：
+
+1. validator 只输出 `PASS` / `WARN` / `FAIL`，不得自动修改文件。
+2. 仅 `FAIL` 返回非 0；legacy summary 不一致优先输出 `WARN`，新 summary 违反 canonical 状态或废弃字段输出 `FAIL`。
+3. validator 可检查必需文件、`INDEX.md` 存在性、active auto-resume 唯一性、多个进行中 summary、canonical Human Approval 状态、deprecated `resume_from`、脚本自身可执行等确定性条件。
+4. validator 不替代 Orchestrator Gate 判断；Orchestrator 必须结合 Flow、Phase artifact、fresh evidence、Memory 和 Human Approval Gate 做最终门禁记录。
+5. 新 summary 中出现非 canonical Human Approval 状态时，对应 Mechanical Gate 必须为 `blocked`，不得请求人工放行。
 
 ## 4. Confirmation Policy
 

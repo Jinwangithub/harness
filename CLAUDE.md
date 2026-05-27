@@ -2,15 +2,13 @@
 
 本项目使用 **Harness Engineering**：唯一 Orchestrator、规则权威源、本地 Skills、changes 归档和 memory 沉淀。
 
-## 启动入口
+## 启动检查（每项必须明确完成才能继续）
 
-1. 先读 `.harness/AGENTS.md` 获取项目地图。
-2. 再读 `.harness/agents/orchestrator.md` 进入唯一 Orchestrator 模式。
-3. 按 `.harness/memory/README.md` 检查历史 Memory。
-4. 扫描 `.harness/changes/` 最新 `summary.md`：
-   - `状态: 进行中` → 从第一个未完成 Phase / Flow step 恢复。
-   - `状态: 已完成` 或无变更目录 → 准备新变更。
-5. 遇到未知业务概念时查 `.harness/wiki/`，不猜测规则。
+- [ ] 已读 `.harness/AGENTS.md` → 知道 Authority Index 在哪
+- [ ] 已读 `.harness/agents/orchestrator.md` → 知道当前 Dispatch Loop 规则
+- [ ] 已读 `.harness/changes/INDEX.md` → 知道 active change 和 resume point
+- [ ] 已读 `.harness/memory/lessons-learned.md` → 知道最近 3 条教训
+- [ ] 遇到未知业务概念时查 `.harness/wiki/`，不猜测规则
 
 ## 权威源路径
 

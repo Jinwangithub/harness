@@ -36,11 +36,14 @@
 ## 启动与恢复
 
 1. 读取本地图和 `.harness/agents/orchestrator.md`。
-2. 按 `.harness/memory/README.md` 检查历史 Memory。
-3. 扫描 `.harness/changes/` 最新 `summary.md`：
-   - `状态: 进行中` → 从第一个未完成 Phase / Flow step 恢复。
-   - `状态: 已完成` 或无变更目录 → 准备新变更。
-4. 新需求先执行 Flow Classifier。
+2. 读取 `.harness/changes/INDEX.md`，以 registry-first 方式确定 active change 和 Resume point。
+3. 按 `.harness/memory/README.md` 检查历史 Memory。
+4. 扫描 `.harness/changes/` 的 `summary.md` 做一致性校验：
+   - `INDEX.md` 唯一声明 `active` + `auto-resume` → 按该 Resume point 恢复。
+   - 多个 `状态: 进行中` 但 `INDEX.md` 已标记 legacy/do-not-auto-resume → 报告 WARN，不自行改写历史。
+   - `INDEX.md` 与 summary 冲突、或多个 active auto-resume → Stop-the-Line，报告候选目录和冲突字段，不猜测恢复对象。
+   - `pending-human` 是合法恢复入口，不等于已完成；Completion lock 必须保持 `locked`。
+5. 新需求先执行 Flow Classifier。
 
 ## 不可违反摘要
 

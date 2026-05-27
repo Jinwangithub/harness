@@ -50,6 +50,15 @@
 
 `Template completeness verified` 对触发记录的条目必须为 `yes`；如无法完整记录则当前 Gate=`blocked`。
 
+## Validator 与 Memory Check
+
+`.harness/scripts/harness-validate.sh` 的输出可作为 Mechanical Gate evidence，但不替代 Memory Check。
+
+- validator 输出 `FAIL` 且原因属于流程、模板、Gate、changes 或 Memory 规则缺陷时，必须判断是否触发 `lessons-learned.md` 或 `known-issues.md`。
+- validator 输出 `WARN` 且确认是历史归档不一致、legacy summary 或暂不批量重写的治理债务时，必须判断是否触发 `known-issues.md`。
+- 新增 changes index、validator、project Skill extension slot 等长期治理选择，必须记录 `decisions.log`。
+- 多个 `状态: 进行中`、`已完成` + `pending-human`、summary 字段不一致导致恢复困难，属于流程教训，必须记录 `lessons-learned.md`。
+
 ## 完整模板
 
 ### decisions.log
@@ -92,6 +101,12 @@ YYYY-MM-DD | {标题}
 ```
 
 必填字段：描述、影响范围、临时方案、计划修复。
+
+## Phase 出口 Memory 强制问答（必须逐项回答，有内容才记录）
+
+- Q1: 本 Phase 是否做了任何非显而易见的技术或治理决策？→ 是则记入 `decisions.log`
+- Q2: 本 Phase 是否遇到规则未覆盖的情况或已知限制？→ 是则记入 `known-issues.md`
+- Q3: 本 Phase 是否有"下次应该更早做"的事？→ 是则记入 `lessons-learned.md`
 
 ## 完整性检查
 

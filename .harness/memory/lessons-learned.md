@@ -67,3 +67,27 @@ YYYY-MM-DD | {标题}
 - 影响: 小需求或快捷命令可能绕过 Phase 1-3、合并门禁或缺少阶段证据，导致交付链路不可追溯。
 - 修复: 新增 Full Delivery Mode 与 Standalone Skill Mode；完整交付必须 Phase 1-10 顺序推进，单点 Skill 可直接调用但不得声明完整交付完成。
 - 预防: USAGE 快捷命令表增加模式边界和前置条件；orchestrator 和 quality-gates 强化 Mechanical Gate 通过后才进入 Human Approval Gate。
+
+## 2026-05-26 | 多个进行中变更导致恢复对象不确定
+
+- 问题: `.harness/changes/` 中多个 summary 同时为 `状态: 进行中`，启动时只扫描最新或第一个未完成项会导致恢复目标不确定。
+- 根因: changes 目录缺少全局 registry，恢复规则依赖分散 summary 的自然语言状态，无法表达 superseded、legacy、manual-only 等状态。
+- 影响: Orchestrator 可能恢复错误变更、跳过当前用户需要确认的变更，或自行猜测恢复对象。
+- 修复: 新增 `.harness/changes/INDEX.md`，并更新 AGENTS、orchestrator、workflow 和 changes README 为 registry-first 恢复。
+- 预防: 新变更必须维护 INDEX；多个 active auto-resume 或 INDEX/summary 冲突时 Stop-the-Line。
+
+## 2026-05-26 | completed 与 pending-human 冲突会伪装完成
+
+- 问题: 历史 summary 存在 `状态: 已完成` 但最终 Human Approval Gate 仍为 `pending-human` 的冲突状态。
+- 根因: Completion Claim Gate、Human Approval Gate 和 summary 状态之间缺少可执行一致性校验；`pending-human` 未被明确写成合法恢复状态而非完成状态。
+- 影响: 后续执行者可能把未获用户确认的变更当作完成，破坏审计链和交付确认纪律。
+- 修复: 在 workflow、quality gates、changes README、USAGE 和 INDEX 中明确 `pending-human` 必须保持 Completion lock locked，completed + pending-human 属于 conflict。
+- 预防: validator 对历史冲突输出 WARN，对新 summary 中的 canonical 状态违规输出 FAIL。
+
+## 2026-05-26 | summary 字段不一致降低恢复确定性
+
+- 问题: 历史 summary 中同时出现 `resume_from`、缺失 `Current step` / `Resume point` / `Completion lock`、非 canonical approval wording 等字段差异。
+- 根因: 归档模板演进后没有全局索引和 legacy 策略，新旧字段混用且缺少机械检查。
+- 影响: 弱模型恢复时需要解释多套字段，容易误判当前步骤、门禁状态和是否能完成。
+- 修复: 新 summary 统一使用 `Current step`、`Resume point`、`Completion lock`，历史字段作为 legacy evidence 保留。
+- 预防: changes README 定义新模板，validator 对新 summary 废弃字段输出 FAIL，对历史废弃字段输出 WARN。

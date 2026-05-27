@@ -114,3 +114,27 @@ YYYY-MM-DD | {标题}
 - 理由: 少量权威文件强化能保持单一权威源和现有 Flow 分工，同时把约束放在模型最容易复制的模板位置，降低跳步和模板污染概率。
 - 后果: 新变更的 summary、Lite artifacts、Gate Record、Skill Load Record 和 Memory Check 字段更严格；历史旧归档作为 legacy evidence 保留，不自动重写。
 - 决定人: Orchestrator + 用户计划
+
+2026-05-26 | 新增 changes INDEX 作为 registry-first 恢复索引
+- 背景: 多个 changes 目录同时处于 `状态: 进行中`，且历史 summary 存在 `已完成` 与 `pending-human` 冲突，导致自动恢复对象不确定。
+- 方案: 新增 `.harness/changes/INDEX.md`，唯一标记 active auto-resume change，并把历史未完成、冲突或被取代变更标记为 legacy/manual-only/do-not-auto-resume。
+- 备选: 批量重写历史 summary；继续扫描最新 summary；引入 JSON/YAML registry。
+- 理由: Markdown registry 保持人工可读和现有文档风格，同时能第一时间消除恢复歧义；不重写历史避免重塑审计链。
+- 后果: Orchestrator 启动必须先读 INDEX，再扫描 summary 做一致性校验；INDEX 与 summary 冲突时 Stop-the-Line。
+- 决定人: Orchestrator + 用户计划
+
+2026-05-26 | 新增低复杂度 Harness validator 作为 Gate evidence source
+- 背景: Gate 规则主要是文档规则，弱模型执行时容易漏查必需文件、canonical 状态、legacy 冲突和恢复索引一致性。
+- 方案: 新增 `.harness/scripts/harness-validate.sh`，只做确定性检查并输出 PASS/WARN/FAIL；FAIL 返回非 0，WARN 用于 legacy debt；不自动修改文件。
+- 备选: 不做 validator；引入完整 CI、JSON schema 或 Markdown AST parser；让 validator 自动修复。
+- 理由: shell validator 成本低、无外部依赖、可作为 Mechanical Gate 新鲜证据，同时不替代 Orchestrator 判断。
+- 后果: Gate 文档和 USAGE 需要说明 validator 的 evidence source 边界；新增治理债务需要通过 WARN/FAIL 与 Memory 规则联动。
+- 决定人: Orchestrator + 用户计划
+
+2026-05-26 | 增加 project-specific Skill extension slot
+- 背景: Harness 需要允许业务项目扩展本地 Skill，但不能让项目 Skill 覆盖 workflow、gates、changes、memory 等治理权威源。
+- 方案: 新增 `.harness/skills/project/README.md` 并在 skills registry 中定义项目 Skill 扩展边界和命令语义边界。
+- 备选: 禁止项目 Skill；直接把项目规则写入核心 skills README；新增大量示例 Skill。
+- 理由: 扩展位满足项目定制，同时通过权威源边界避免 Skill 分叉和治理覆盖。
+- 后果: Orchestrator 可按需读取 project Skills，但冲突时必须遵循 Harness 权威源并记录冲突。
+- 决定人: Orchestrator + 用户计划

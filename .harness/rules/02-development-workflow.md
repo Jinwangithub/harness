@@ -35,6 +35,17 @@
 | `confirmation_policy` | `batched` / `mandatory` |
 | `upgrade_triggers` | 风险扩大、门禁失败/阻塞、证据不足、Memory 无法完整记录、需要业务判断等 |
 
+### 强制 Standard-flow 排除法（命中任意一条 → 强制 Standard-flow，不得选 Lite）
+
+- [ ] 涉及文件数 > 3
+- [ ] 涉及数据库 schema 变更
+- [ ] 涉及外部接口（新增或修改）
+- [ ] 需求描述含以下任意关键词：权限、安全、迁移、部署、架构、支付、认证
+- [ ] 需求描述含模糊词：大概、可能、看情况、不确定、待定
+- [ ] 涉及治理规则/模板/Skill Matrix/Gate/Memory/changes 结构变更
+
+以上全部为 NO → 可进入 Lite-flow 机械判定清单。
+
 ### 机械判定清单
 
 Flow Classifier 必须逐项回答并写入 `summary.md` / `lite_spec.md`：
@@ -151,6 +162,21 @@ Orchestrator 责任：
 - 不得运行或冒充 Phase 6 测试职责。
 - 只能按不可变输入包执行受限编码任务并回传结果。
 
+## Recovery Semantics
+
+恢复入口由 `.harness/changes/INDEX.md` registry-first 决定，再扫描各 `summary.md` 做一致性校验。
+
+| 情况 | 处理 |
+|------|------|
+| INDEX 唯一声明 `active` + `auto-resume` | 按该 row 的 Current step / Resume point 恢复 |
+| 多个 `状态: 进行中`，但 INDEX 将非 active 标为 `legacy-*` / `do-not-auto-resume` | 报告 WARN，按 active 恢复，不改写历史 |
+| 多个 active auto-resume、INDEX 缺失或 INDEX 与 summary 冲突 | Stop-the-Line，报告候选目录和冲突字段，不猜测恢复对象 |
+| `Human Approval Gate=pending-human` | 合法恢复入口；表示 Mechanical Gate 已通过、等待用户确认；Completion lock 必须为 `locked` |
+| `状态: 已完成` + `pending-human` | 状态冲突；新 summary Gate=`blocked`，历史归档标记 `legacy-conflict` |
+| governance/templates/gates/memory/changes/skills 变更 | 默认 Standard-flow 或 Governance-Standard，并设置 governance 相关 risk flags |
+
+新 summary 必须使用 `Current step`、`Resume point`、`Completion lock`；`resume_from` 仅作为 legacy 字段保留，不得用于新变更。
+
 ## Confirmation Policy
 
 | Policy | 默认 Flow | 行为 |
@@ -158,7 +184,7 @@ Orchestrator 责任：
 | `mandatory` | Standard-flow | CK1-CK9 按 Phase 请求确认；用户确认前不得进入下一 Phase。 |
 | `batched` | Lite-flow | 需求+简化计划确认一次，最终验证/评审摘要确认一次；中间 Mechanical Gate 通过则可继续。 |
 
-Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。`not-required-by-policy` 只适用于策略明确定义的中间点，不能代替 Standard-flow mandatory Phase approval，也不能代替 Lite L1/L4 batched approval。非 canonical Human Approval 状态视为 Gate blocked。
+Human Approval Gate 的时机可以按风险分级，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。`pending-human` 是等待确认状态，不是完成状态。`not-required-by-policy` 只适用于策略明确定义的中间点，不能代替 Standard-flow mandatory Phase approval，也不能代替 Lite L1/L4 batched approval。非 canonical Human Approval 状态视为 Gate blocked。
 
 ## Memory 检查频率
 
@@ -174,6 +200,12 @@ workflow 只定义“何时检查”；Memory 模板和完整字段以 `.harness
 1. 验证 Entry Lock 与 Work Lock 未被破坏。
 2. 执行本 Phase 产物归档。
 3. 按本文件频率检查 Memory，触发即记录。
+
+**Phase 出口 Memory 强制问答（必须逐项回答，有内容才记录）：**
+- Q1: 本 Phase 是否做了任何非显而易见的技术或治理决策？→ 是则记入 `decisions.log`
+- Q2: 本 Phase 是否遇到规则未覆盖的情况或已知限制？→ 是则记入 `known-issues.md`
+- Q3: 本 Phase 是否有"下次应该更早做"的事？→ 是则记入 `lessons-learned.md`
+
 4. 检查 Required Skill Load Record。
 5. 执行 `.harness/rules/04-quality-gates.md` 对应 Mechanical Gate。
 6. 出口报告列出 Mechanical Gate 状态、fresh verification evidence、`Memory recorded: {N} entries / none`。

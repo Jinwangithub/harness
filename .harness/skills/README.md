@@ -49,6 +49,23 @@
 
 Lite-flow 可借用 Skill 概念完成 lite spec、checklist、verification、review，但只能把必要字段抽取到 Lite artifacts。Lite-flow 不得输出 Standard artifacts（`spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_result/`、`deployment/`、`delivery-summary.md`），除非升级 Standard-flow。
 
+## Slash / Natural Language Command Boundaries
+
+`/spec`、`/plan`、`/build`、`/review`、`/test`、`/ship` 和等价自然语言命令只是请求 Orchestrator 执行对应能力，不是绕过 Flow 的授权。
+
+| Command | Lite-flow meaning | Standard-flow meaning | Boundary |
+|---------|-------------------|-----------------------|----------|
+| `/spec` | L1 lite spec / requirement clarification | Phase 1 understanding or Phase 2 spec, depending on current lock | Cannot skip Flow Classification or pending approval |
+| `/plan` | L1 checklist | Phase 3 tasks after approved spec | Cannot create `tasks.md` before Phase 3 |
+| `/build` | L2 implementation | Phase 4 implementation after approved tasks | Cannot run Phase 6 tests as completion evidence |
+| `/review` | L3 compressed review | Phase 5 independent review or Phase 7 test review | Cannot replace Mechanical Gate |
+| `/test` | L3 verification | Phase 6 tests or Phase-specific validation | Cannot mark delivery complete by itself |
+| `/ship` | L4 final confirmation | Phase 10 delivery confirmation | Requires Completion Claim Gate and Human Approval |
+
+## Project-specific Skills
+
+Project-specific Skills live under `.harness/skills/project/`. They may add local domain or project conventions, but cannot override Harness authority sources for workflow, gates, changes, memory, or Skill role semantics. If a project Skill conflicts with `.harness/rules/02-development-workflow.md`, `.harness/rules/04-quality-gates.md`, `.harness/changes/README.md`, `.harness/memory/README.md`, or this registry, Orchestrator must follow the authority source and record the conflict.
+
 ## Core-meta
 
 | Skill | 路径 | 用途 |
