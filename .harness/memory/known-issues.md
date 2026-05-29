@@ -4,12 +4,12 @@
 
 | 症状 | 根因 | 对应规则 |
 |------|------|---------|
-| Gate 状态无法确认 | 缺少 fresh evidence | `04-quality-gates.md` §Completion Claim Gate |
+| Gate 状态无法确认 | 缺少 fresh evidence | `quality-gates.md` §Completion Claim Gate |
 | 恢复后重复执行已完成 Phase | INDEX.md 未更新 resume point | `changes/README.md` §Registry |
-| Lite-flow 后发现需要 Standard | Flow Classifier 误判 | `02-development-workflow.md` §强制升级规则 |
+| Lite-flow 后发现需要 Standard | Flow Classifier 误判 | `development-workflow.md` §强制升级规则 |
 | Memory 记录不完整 | 字段缺失或未用完整模板 | `memory/README.md` §完整模板 |
 | 多个 active auto-resume | INDEX 维护遗漏 | `changes/INDEX.md` §Maintenance Rules |
-| Phase 产物边界混淆 | Work Lock 未执行 | `02-development-workflow.md` §Standard Phase Locks |
+| Phase 产物边界混淆 | Work Lock 未执行 | `development-workflow.md` §Standard Phase Locks |
 | Skill 加载错误或找不到 | Skill 目录与 README 不同步 | `skills/README.md` §Skill Registry |
 
 ## 格式

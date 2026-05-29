@@ -1,6 +1,6 @@
 # Orchestration Patterns
 
-本文件是非权威参考模式。具体规则以 `.harness/rules/02-development-workflow.md`、`.harness/rules/04-quality-gates.md`、`.harness/skills/README.md`、`.harness/changes/README.md` 为准。
+本文件是非权威参考模式。具体规则以 `.harness/rules/development-workflow.md`、`.harness/rules/quality-gates.md`、`.harness/skills/README.md`、`.harness/changes/README.md` 为准。
 
 ## 唯一 Orchestrator 模式
 
@@ -41,7 +41,7 @@ Standard-flow 使用强 Phase Lock：
 - Human Approval Lock：Mechanical Gate 通过后才能请求确认，确认前不进入下一阶段。
 - Failure Lock：Mechanical Gate fail/blocked 时 Stop-the-Line。
 
-完整判定以 `.harness/rules/02-development-workflow.md` 和 `.harness/rules/04-quality-gates.md` 为准。
+完整判定以 `.harness/rules/development-workflow.md` 和 `.harness/rules/quality-gates.md` 为准。
 
 ## Phase 4 Isolation Pattern
 

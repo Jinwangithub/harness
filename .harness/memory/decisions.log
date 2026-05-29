@@ -1,18 +1,6 @@
 # Architecture Decision Log
 
-## 格式
-
-```
-YYYY-MM-DD | {标题}
-- 背景: {决策背景}
-- 方案: {选择的方案}
-- 备选: {考虑过的方案}
-- 理由: {为什么这样选}
-- 后果: {选择此方案的副作用}
-- 决定人: {谁做的决定}
-```
-
-## 记录
+> 格式见 `.harness/memory/README.md`。
 
 2026-05-07 | Phase 1 产出确定为 understanding.md
 - 背景: Phase 0/1 边界模糊，spec-driven-development 覆盖了第一次的 spec 产出。
@@ -60,15 +48,14 @@ YYYY-MM-DD | {标题}
 - 决定人: Orchestrator
 
 2026-05-12 | 质量门禁拆分为 Mechanical Gate 与 Human Approval Gate
-- 背景: 原门禁规则要求“可程序化验证”，但同时混入用户确认，导致机器证据与人工确认边界不清。
+- 背景: 原门禁规则要求"可程序化验证"，但同时混入用户确认，导致机器证据与人工确认边界不清。
 - 方案: 每个 Phase 先执行 Mechanical Gate，再执行 Human Approval Gate；Mechanical Gate 状态为 pass/fail/blocked，用户等待状态为 pending-human。
 - 备选: 保持单层质量门禁，用自然语言描述验证和确认。
 - 理由: 分层后可明确哪些条件必须有证据，避免用人工确认绕过失败的机器验证。
 - 后果: summary.md 和各 Phase 产物需要记录两层门禁状态与 evidence_paths。
 - 决定人: Orchestrator
 
-## 2026-05-14 | 修复Skill/References/Wiki引用断裂
-
+2026-05-14 | 修复Skill/References/Wiki引用断裂
 - 背景: 22个Skill中11个在orchestrator.md中无显式调用；wiki/和references/目录在启动路径中不可发现
 - 方案: 在AGENTS.md中补充wiki/references/memory导航链接；在orchestrator.md中增加规则9（知识源按需加载）、P4条件Skill触发、P5 code-simplification、P8 git-workflow + debugging、P10 deprecation-and-migration；所有条件Skill均标记触发场景保持简洁
 - 备选: 砍掉11个未使用的Skill（被否决，因为其中9个有合理使用场景，只是orchestrator漏引了）
@@ -87,13 +74,13 @@ YYYY-MM-DD | {标题}
 - 背景: Harness 已有 Mini/Lite/Standard-flow 分级，但旧语义仍偏向默认 Standard-flow，导致低风险 typo、纯文档、小修复也容易被完整十阶段和逐阶段确认拖慢；同时减少确认点可能被误读为取消 Human Approval Gate，需要统一治理表述。
 - 方案: 引入 Flow Classifier + Confirmation Policy：新需求先分类并写入 summary.md 的 flow、selection_basis、risk_flags、confirmation_policy、upgrade_triggers；Mini-flow 使用 exception-only，Lite-flow 使用 batched，Standard-flow 使用 mandatory；风险扩大时 Stop-the-Line 并升级。
 - 备选: 继续默认 Standard-flow 仅允许人工降级；或新增复杂打分模型自动评分；或为 Mini/Lite 新增独立 Agent/JSON schema。
-- 理由: Flow Classifier 能把低风险任务自动导向 Mini/Lite，降低确认摩擦；Confirmation Policy 明确 Human Approval Gate 的触发时机，同时保留 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 和必要用户确认，避免把“少确认”误读为“无门禁”。
+- 理由: Flow Classifier 能把低风险任务自动导向 Mini/Lite，降低确认摩擦；Confirmation Policy 明确 Human Approval Gate 的触发时机，同时保留 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 和必要用户确认，避免把"少确认"误读为"无门禁"。
 - 后果: Orchestrator 必须在每次新需求开始时记录分类依据；summary.md 和变更归档模板需要支持非十阶段流程；低风险任务确认点减少，但执行者必须在风险扩大或门禁失败时立即升级流程。
 - 决定人: Orchestrator
 
 2026-05-19 | 扩展隔离执行上下文至 Phase 4 自检泳道和 Phase 6 测试执行泳道
-- 背景: 隔离执行上下文原则已在 Rule 2 和 rules/02-development-workflow.md 定义，但仅在 Phase 5 三轴并行评审中显式应用；Phase 4 auto-check-and-optimize 自检和 Phase 6 mvn test 执行均在主上下文中运行，缺乏输入/输出/权限隔离约束，存在自检结果污染实现上下文、测试执行意外修改无关文件的风险。
-- 方案: 在 orchestrator.md Phase 4 step 6 和 Phase 6 step 3 追加隔离约束子条目；在 rules/02-development-workflow.md Phase 4/6 块末追加隔离交叉引用；Rule 2 适用范围从 Phase 5/7 扩展到 Phase 4/5/6/7。不修改任何 skills/ 文件。
+- 背景: 隔离执行上下文原则已在 Rule 2 和 rules/development-workflow.md 定义，但仅在 Phase 5 三轴并行评审中显式应用；Phase 4 auto-check-and-optimize 自检和 Phase 6 mvn test 执行均在主上下文中运行，缺乏输入/输出/权限隔离约束，存在自检结果污染实现上下文、测试执行意外修改无关文件的风险。
+- 方案: 在 orchestrator.md Phase 4 step 6 和 Phase 6 step 3 追加隔离约束子条目；在 rules/development-workflow.md Phase 4/6 块末追加隔离交叉引用；Rule 2 适用范围从 Phase 5/7 扩展到 Phase 4/5/6/7。不修改任何 skills/ 文件。
 - 备选: (1) 新增独立 Agent 文件承载隔离上下文 — 违反唯一 Orchestrator 原则，否决；(2) 仅修改 rules 不修改 orchestrator — 规则与执行规程不一致，否决。
 - 理由: 最小侵入性修改，保持单 Orchestrator 架构，消除 Phase 4/6 隔离语义缺失的风险，与现有 Phase 5 隔离模式完全对齐。
 - 后果: Phase 4 自检和 Phase 6 测试执行均受隔离约束，Orchestrator 是唯一汇总和放行节点；无 Skill 文件变更，无流程分级变更。

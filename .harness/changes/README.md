@@ -1,6 +1,6 @@
 # 变更管理 — Audit Trail
 
-本文件是变更目录结构、summary 模板、Skill Load Record、Phase Lock 状态模板和产物模板的权威源。流程规则见 `.harness/rules/02-development-workflow.md`，门禁检查见 `.harness/rules/04-quality-gates.md`。
+本文件是变更目录结构、summary 模板、Skill Load Record 和产物模板的权威源。流程规则见 `.harness/rules/development-workflow.md`，门禁检查见 `.harness/rules/quality-gates.md`。
 
 ## 目录命名
 

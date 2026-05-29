@@ -1,6 +1,7 @@
 # 实战操作指南
 
-面向用户的 Harness 使用说明。完整治理细节见 `.harness/rules/02-development-workflow.md` 和 `.harness/rules/04-quality-gates.md`。
+> 本文件面向人类用户。Agent 不应逐字加载此文件，应阅读 `.harness/agents/orchestrator.md` 和各权威源。
+> 完整治理细节见 `.harness/rules/development-workflow.md` 和 `.harness/rules/quality-gates.md`。
 
 ## 启动方式
 
@@ -10,7 +11,7 @@
 启动 Harness 模式
 ```
 
-Claude Code 会读取 `CLAUDE.md`、`.harness/AGENTS.md`、`.harness/agents/orchestrator.md`，优先检查 `.harness/changes/INDEX.md`，再校验 `.harness/changes/*/summary.md` 与 `.harness/memory/`，然后准备处理新需求或恢复进行中的变更。
+Claude Code 会从 `CLAUDE.md` → `.harness/agents/orchestrator.md` 启动，优先检查 `.harness/changes/INDEX.md` 恢复进行中的变更。
 
 ## 如何描述需求
 
@@ -20,13 +21,7 @@ Claude Code 会读取 `CLAUDE.md`、`.harness/AGENTS.md`、`.harness/agents/orch
 需求：用户下单后发送订单确认通知，支持短信和邮件，用户可以选择偏好。
 ```
 
-Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入：
-
-- Flow
-- Selection basis
-- Risk flags
-- Confirmation policy
-- Upgrade triggers
+Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Selection basis、Risk flags 等。
 
 ## 两种 Flow 简表
 
@@ -56,9 +51,8 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/review` | 执行评审步骤或单点评审 |
 | `/test` | 执行验证/测试步骤或单点测试 |
 | `/ship` | 执行交付确认 |
-| `恢复上次进度` | 优先从 `.harness/changes/INDEX.md` 的 active auto-resume row 恢复，再校验 summary |
+| `恢复上次进度` | 从 `.harness/changes/INDEX.md` 和 `summary.md` 恢复 |
 | `当前进度` | 查看当前 Phase / Flow step |
-| `运行 Harness 校验` | 执行 `.harness/scripts/harness-validate.sh`，输出 PASS/WARN/FAIL |
 
 ## 命令语义边界
 
@@ -71,22 +65,6 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/test` | L3 验证 | Phase 6 测试或阶段验证 | 不能单独声明交付完成 |
 | `/ship` | L4 最终确认 | Phase 10 交付确认 | 不能在 pending-human 时标记已完成 |
 
-## Harness validator
-
-运行：
-
-```bash
-.harness/scripts/harness-validate.sh
-```
-
-输出含义：
-
-- `PASS`: 确定性检查通过。
-- `WARN`: 历史 legacy、不一致但已被 INDEX 标记，或需要人工关注的治理债务。
-- `FAIL`: 新结构或必需文件违反规则；Orchestrator 必须 Stop-the-Line。
-
-validator 只提供 Mechanical Gate evidence，不会自动修复文件，也不代表 Human Approval Gate 已通过。
-
 ## pending-human 时你需要做什么
 
 当 Orchestrator 报告 `Human Approval Gate: pending-human`：
@@ -98,11 +76,12 @@ validator 只提供 Mechanical Gate evidence，不会自动修复文件，也不
 
 ## 用户版验收简表
 
-详细门禁见 `.harness/rules/04-quality-gates.md`。用户验收时重点看：
+详细门禁见 `.harness/rules/quality-gates.md`。用户验收时重点看：
 
 ```text
 □ 选定 Flow 与任务风险匹配
 □ Mechanical Gate 状态为 pass
+□ INDEX.md 与 summary.md 状态一致
 □ fresh verification evidence 已列出
 □ 必需产物已归档到 .harness/changes/{id}/
 □ Memory recorded: {N} entries / none 已报告
@@ -129,4 +108,4 @@ A: 不是。确认点按风险分级减少，但不能绕过 Mechanical Gate、f
 A: 可以使用单点 Skill 任务，但它不等于完整交付流程完成。
 
 **Q: 中途断开后如何继续？**
-A: 输入 `启动 Harness 模式` 或 `恢复上次进度`，Orchestrator 会读取 `.harness/changes/` 和 `.harness/memory/` 恢复上下文。
+A: 输入 `启动 Harness 模式` 或 `恢复上次进度`，Orchestrator 会从 `INDEX.md` 和 `summary.md` 恢复上下文。

@@ -15,6 +15,7 @@
 
 - Required Skill 必须在对应 Phase 产出 artifact 前读取，并写入 Skill Load Record。
 - Conditional Skill 触发依据必须来自 risk flag、任务类型、证据缺口、评审发现或失败现象；未触发也要记录 trigger evaluation。
+- **降级策略**：如果无法确定 Conditional Skill 是否触发 → 加载它。多加载不会 Gate 失败，漏加载会 blocked。
 - Support Skill 只在有明确支持需求时加载。
 
 ## Lite-flow Skill Mapping

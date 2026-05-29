@@ -2,9 +2,11 @@
 
 本文件是 Flow Classifier、Lite/Standard-flow 顺序、Phase 4 隔离原则和回退路径的权威源。
 
-门禁检查表见 `.harness/rules/04-quality-gates.md`；Skill Matrix 见 `.harness/skills/README.md`；Memory 模板见 `.harness/memory/README.md`；变更目录模板见 `.harness/changes/README.md`。
+门禁检查表见 `.harness/rules/quality-gates.md`；Skill Matrix 见 `.harness/skills/README.md`；Memory 模板见 `.harness/memory/README.md`；变更目录模板见 `.harness/changes/README.md`。
 
 ## Flow Classifier
+
+> **安全默认值**：任何时候不确定该选哪个 Flow → 一律选 Standard-flow。Lite-flow 仅用于你 100% 确定安全且完全满足所有 Lite 条件的场景。
 
 收到新需求后，Orchestrator 必须先分类，并把结果写入 `.harness/changes/{id}/summary.md`。
 
@@ -64,7 +66,7 @@
 | 9 | 部署验证 | `deployment/deploy_report.md` | CK9 |
 | 10 | 用户确认 | `delivery-summary.md` | CK10 |
 
-**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。任一不满足则停止。
+**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。任一不满足则停止。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。
 
 关键边界：
 
