@@ -18,7 +18,13 @@
 - **降级策略**：如果无法确定 Conditional Skill 是否触发 → 加载它。多加载不会 Gate 失败，漏加载会 blocked。
 - Support Skill 只在有明确支持需求时加载。
 
-## Lite-flow Skill Mapping
+## Lite-flow Skill Mapping (3 步)
+
+| Step | Skills | Forbidden |
+|------|--------|-----------|
+| L1 需求确认+计划 | `idea-refine` | 不创建 Standard-only 产物；不实现代码 |
+| L2 实现 | `incremental-implementation`、`auto-check-and-optimize` | 不跳过验证；不引入风险扩大 |
+| L3 验证+交付 | `code-review-and-quality`（压缩评审）、`documentation-and-adrs` | 不创建 Standard-only 产物 |
 
 Lite-flow 不得输出 Standard artifacts（`spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_result/`、`deployment/`、`delivery-summary.md`），除非升级 Standard-flow。
 

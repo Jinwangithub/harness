@@ -6,7 +6,7 @@
 
 ## Flow Classifier
 
-> **安全默认值**：任何时候不确定该选哪个 Flow → 一律选 Standard-flow。Lite-flow 仅用于你 100% 确定安全且完全满足所有 Lite 条件的场景。
+> **安全默认值**：任何不确定 → 一律选 Standard-flow。Lite-flow 仅用于 100% 确定安全且满足所有 Lite 条件的场景。
 
 收到新需求后，Orchestrator 必须先分类，并把结果写入 `.harness/changes/{id}/summary.md`。
 
@@ -40,14 +40,13 @@
 
 适用：typo、注释、格式、纯文档、小配置、简单 bugfix、简单测试补充，且 `low_risk_proof` 可机械复核。
 
-必需产物：`summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`、`verification_report.md`、`review_summary.md`
+必需产物：`summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`verification_report.md`（含压缩评审）
 
 执行顺序：
 
-1. **L1** 需求确认+简化计划：写入三个 request_analysis 产物；Mechanical Gate=`pass` 后请求用户确认；未确认前不得进入 L2。
-2. **L2** 实现：按 checklist 修改；风险扩大则 Stop-the-Line 并升级 Standard-flow。
-3. **L3** 验证/压缩评审：生成 `verification_report.md` 和 `review_summary.md`，包含 fresh evidence 和 Memory check。
-4. **L4** 交付：用户最终确认后标记 `已完成`；Mechanical Gate fail/blocked 时不得请求用户放行。
+1. **L1** 需求确认+计划：写入 `summary.md`（含 inline lite spec 内容）和 `checklist.md`；Mechanical Gate=`pass` 后请求用户确认；未确认前不得进入 L2。
+2. **L2** 实现：按 checklist 驱动修改，无独立文件；风险扩大则 Stop-the-Line 并升级 Standard-flow。
+3. **L3** 验证+交付：生成 `verification_report.md`（含压缩评审：Critical/Must Fix 计数、评审结论），包含 fresh evidence 和 Memory check；用户最终确认后标记 `已完成`。
 
 ## Standard-flow
 
@@ -66,7 +65,7 @@
 | 9 | 部署验证 | `deployment/deploy_report.md` | CK9 |
 | 10 | 用户确认 | `delivery-summary.md` | CK10 |
 
-**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。任一不满足则停止。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。
+**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。
 
 关键边界：
 
@@ -75,20 +74,35 @@
 - Phase 4 只做编码实现、编译验证和 Author/Self Review，不运行 Phase 6 测试职责。
 - Phase 5 是 Independent Review，不替代 Phase 4 自检。
 
-## Phase 状态卡
+## Phase 状态卡（Forbidden 列自包含）
 
-每个 Standard Phase 入口，Orchestrator 必须输出以下状态卡，把当前 Phase 的关键约束集中呈现：
+每个 Standard Phase 入口，Orchestrator 必须输出以下状态卡：
 
 ```
 === Phase N 入口状态卡 ===
 当前 Phase: N — {Phase 名称}
 前置确认: {已确认 / 未确认}
-本 Phase 禁止: {直接从 Skill Matrix Forbidden 列复制，不得省略}
+本 Phase 禁止: {Forbidden 约束，从此表直接复制}
 Required Skills: {列出，未加载则 Gate=blocked}
 产物目标: {本 Phase 唯一产物文件名}
 ```
 
 状态卡必须在 Phase 工作开始前输出。
+
+### Phase Forbidden 约束（自包含，每 Phase 入口从此复制）
+
+| Phase | Forbidden 约束 |
+|-------|----------------|
+| 1 | 不创建 `spec.md`、`tasks.md`；不实现代码 |
+| 2 | 不创建 `tasks.md`；不实现代码 |
+| 3 | 不实现代码；不运行 Phase 6 测试职责 |
+| 4 | 不推进 Phase；不请求确认；不判断 Gate；不运行 Phase 6 测试职责；不冒充 Phase 5 |
+| 5 | 不直接实现修复；Must Fix/Critical 回退 Phase 4 |
+| 6 | 不改需求/spec；实现缺陷回退 Phase 4 |
+| 7 | 不扩大测试范围为新需求；发现缺口回退 Phase 6 或更早 |
+| 8 | 不发布；不绕过失败 CI |
+| 9 | 不替代最终交付确认；部署风险回退 Phase 8/9 |
+| 10 | 未经用户要求不执行 git 提交/推送；不改实现代码 |
 
 ## Phase 4 隔离实现原则
 

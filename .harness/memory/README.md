@@ -25,13 +25,13 @@
 | Flow | 检查时机 |
 |------|----------|
 | Standard-flow | 每个 Phase 出口；触发即记录 |
-| Lite-flow | 计划确认后、交付前；触发即记录 |
+| Lite-flow | L1 后 + L3 后；触发即记录 |
 
 每次出口报告必须包含 `Memory recorded: {N} entries / none`。
 
-## Memory Check 块
+## Memory Check 块（Standard-flow — 6 字段）
 
-每个 Phase/Flow step artifact 或 `summary.md` Gate Record 必须填写：
+每个 Standard Phase artifact 或 `summary.md` Gate Record 必须填写：
 
 ```markdown
 ## Memory Check
@@ -44,6 +44,19 @@
 ```
 
 `Template completeness verified` 对触发记录的条目必须为 `yes`；否则当前 Gate=`blocked`。
+
+## Memory Check 块（Lite-flow — 3 字段）
+
+Lite-flow 出口 (L1 后、L3 后) 必须填写：
+
+```markdown
+## Memory Check
+- Architecture/governance decision made: {yes/no; evidence}
+- Agent/process lesson found: {yes/no; evidence}
+- Known issue or governance debt found: {yes/no; evidence}
+```
+
+如有触发条目，必须写完整模板到对应 memory 文件。
 
 validator 输出 `FAIL`/`WARN` 时，必须判断是否触发对应 Memory 文件记录。
 

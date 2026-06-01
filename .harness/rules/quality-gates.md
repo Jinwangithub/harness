@@ -2,13 +2,13 @@
 
 本文件是 Mechanical Gate、Human Approval Gate、证据类型、Phase Gate 检查和失败门禁的权威源。
 
+Iron Laws（操作化）见 `.harness/agents/orchestrator.md`；Gate Record 模板定义仅出现在本文件。
+
 ## 1. 通用规则
 
 - 每个 Phase 或 Flow step 先执行 Mechanical Gate，通过后请求用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
 - 人工偏好、感觉、未定义标准的"审查通过"不能作为 Mechanical Gate。
-- Mechanical Gate=`fail|blocked` 时必须 Stop-the-Line，不得请求用户放行。
-- 出口必须列出 fresh verification evidence，否则不得声明完成、通过或交付。
 
 ## 2. Gate 状态
 
@@ -46,10 +46,9 @@
 
 | Step | Mechanical Gate 必查 | Fresh Evidence | Human Approval |
 |------|----------------------|----------------|----------------|
-| L1 需求确认+简化计划 | `summary.md`、`lite_spec.md`、`checklist.md` 存在；`INDEX.md` 标记为 active；有 `low_risk_proof`；无强制升级风险 | Command / Exit code / Output summary / Artifact path | 用户确认后进入 L2 |
+| L1 需求确认+计划 | `summary.md`（含 inline lite spec）、`checklist.md` 存在；`INDEX.md` 标记为 active；有 `low_risk_proof`；无强制升级风险 | Command / Exit code / Output summary / Artifact path | 用户确认后进入 L2 |
 | L2 实现 | 只修改 checklist 范围；未创建 Standard-only 产物；未引入风险扩大 | Command / Exit code / Output summary / Artifact path | 无需单独确认 |
-| L3 验证/压缩评审 | `verification_report.md`、`review_summary.md` 存在；Critical=0；Must Fix=0；Memory check 完成 | Command / Exit code / Output summary / Artifact path | 无需单独确认 |
-| L4 交付确认 | 所有产物存在；Memory status 完整 | Command / Exit code / Output summary / Artifact path | 用户最终确认后标记已完成 |
+| L3 验证+交付 | `verification_report.md`（含压缩评审）存在；Critical=0；Must Fix=0；Memory check 完成；`INDEX.md` status 同步为 done | Command / Exit code / Output summary / Artifact path | 用户最终确认后标记已完成 |
 
 ## 5. Standard Phase Gate 检查表
 

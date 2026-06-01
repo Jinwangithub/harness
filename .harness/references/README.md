@@ -11,7 +11,6 @@
 | `security-checklist.md` | 安全检查清单、OWASP Top 10 | references/security-checklist.md |
 | `performance-checklist.md` | Core Web Vitals、前后端性能清单 | references/performance-checklist.md |
 | `accessibility-checklist.md` | 键盘导航、屏幕阅读器、ARIA | references/accessibility-checklist.md |
-| `orchestration-patterns.md` | Orchestrator/Skill 编排模式目录 | references/orchestration-patterns.md |
 
 ## 使用方式
 
@@ -22,4 +21,3 @@ Orchestrator 在 Phase 5（编码评审）、Phase 6（测试编写）、Phase 7
 - 性能审查 → `performance-checklist.md`
 - 测试编写 → `testing-patterns.md`
 - 无障碍审查 → `accessibility-checklist.md`
-- 编排设计 → `orchestration-patterns.md`

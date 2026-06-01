@@ -27,7 +27,7 @@ Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Se
 
 | Flow | 适用场景 | 用户会看到的确认点 | 必需产物 |
 |------|----------|--------------------|----------|
-| Lite-flow | typo、注释、格式、纯文档、README 小修、小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | batched：需求+简化计划一次，最终验证/评审摘要一次 | `summary.md`、`request_analysis/lite_spec.md`、`request_analysis/checklist.md`、`verification_report.md`、`review_summary.md` |
+| Lite-flow | typo、注释、格式、纯文档、README 小修、小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | batched：需求+计划一次，最终验证+交付一次 | `summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`verification_report.md`（含压缩评审） |
 | Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：逐 Phase 确认 | 完整 Phase 1-10 产物 |
 
 任何 Flow 都不能绕过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。
@@ -35,7 +35,7 @@ Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Se
 ## 你会看到哪些确认点
 
 - **Standard-flow**：mandatory，需求理解、spec、任务规划、编码、自检/评审、测试、CI/部署、最终交付等逐 Phase 确认。
-- **Lite-flow**：batched，先确认需求+简化计划，再确认最终验证/评审摘要。
+- **Lite-flow**：batched，先确认需求+简化计划，再最终验证+交付确认。
 
 Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。
 
@@ -63,7 +63,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/build` | L2 实现 | Phase 4 实现 | 不能冒充 Phase 6 测试完成 |
 | `/review` | L3 压缩评审 | Phase 5/7 评审 | 不能替代 Mechanical Gate |
 | `/test` | L3 验证 | Phase 6 测试或阶段验证 | 不能单独声明交付完成 |
-| `/ship` | L4 最终确认 | Phase 10 交付确认 | 不能在 pending-human 时标记已完成 |
+| `/ship` | L3 交付确认 | Phase 10 交付确认 | 不能在 pending-human 时标记已完成 |
 
 ## pending-human 时你需要做什么
 
@@ -99,7 +99,7 @@ A: 不一定。Orchestrator 先分类；低风险任务走 Lite-flow，高风险
 A: 也走 Lite-flow。内容可以更短，但仍保留统一产物、机械验证、Memory check 和必要确认。
 
 **Q: Lite-flow 会生成 Standard-flow 的目录吗？**
-A: 不会。Lite-flow 只生成 lite spec、checklist、verification report 和 review summary 等五类产物。
+A: 不会。Lite-flow 只生成 summary（含 inline lite spec）、checklist 和 verification report（含压缩评审）等三类产物。
 
 **Q: 减少确认点是否等于取消 Human Approval Gate？**
 A: 不是。确认点按风险分级减少，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。
