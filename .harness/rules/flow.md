@@ -1,14 +1,15 @@
 # 开发流程规范
 
-本文件是 Flow Classifier、Lite/Standard-flow 顺序、Phase 4 隔离原则和回退路径的权威源。
+> **TL;DR**: 收到需求 → Flow Classifier 分类（Lite/Standard）→ 按 Phase 执行 → 每个 Phase 出口过 Gate → 失败按回退路径处理。
 
-门禁检查表见 `.harness/rules/quality-gates.md`；Skill Matrix 见 `.harness/skills/README.md`；Memory 模板见 `.harness/memory/README.md`；变更目录模板见 `.harness/changes/README.md`。
+本文件是 Flow Classifier、Lite/Standard-flow 执行顺序、Phase 4 隔离原则和回退路径的权威源。
+门禁检查表见 `.harness/rules/gates.md`，Phase Skill Matrix（含 Forbidden 约束）见 `.harness/skills/matrix.md`，Memory 模板见 `.harness/memory/README.md`。
 
 ## Flow Classifier
 
 > **安全默认值**：任何不确定 → 一律选 Standard-flow。Lite-flow 仅用于 100% 确定安全且满足所有 Lite 条件的场景。
 
-收到新需求后，Orchestrator 必须先分类，并把结果写入 `.harness/changes/{id}/summary.md`。
+收到新需求后，必须先分类，并把结果写入 `.harness/changes/{id}/summary.md`。
 
 | 字段 | 含义 |
 |------|------|
@@ -44,7 +45,7 @@
 
 执行顺序：
 
-1. **L1** 需求确认+计划：写入 `summary.md`（含 inline lite spec 内容）和 `checklist.md`；Mechanical Gate=`pass` 后请求用户确认；未确认前不得进入 L2。
+1. **L1** 需求确认+计划：写入 `summary.md`（含 inline lite spec）和 `checklist.md`；Mechanical Gate=`pass` 后请求用户确认；未确认前不得进入 L2。
 2. **L2** 实现：按 checklist 驱动修改，无独立文件；风险扩大则 Stop-the-Line 并升级 Standard-flow。
 3. **L3** 验证+交付：生成 `verification_report.md`（含压缩评审：Critical/Must Fix 计数、评审结论），包含 fresh evidence 和 Memory check；用户最终确认后标记 `已完成`。
 
@@ -74,35 +75,7 @@
 - Phase 4 只做编码实现、编译验证和 Author/Self Review，不运行 Phase 6 测试职责。
 - Phase 5 是 Independent Review，不替代 Phase 4 自检。
 
-## Phase 状态卡（Forbidden 列自包含）
-
-每个 Standard Phase 入口，Orchestrator 必须输出以下状态卡：
-
-```
-=== Phase N 入口状态卡 ===
-当前 Phase: N — {Phase 名称}
-前置确认: {已确认 / 未确认}
-本 Phase 禁止: {Forbidden 约束，从此表直接复制}
-Required Skills: {列出，未加载则 Gate=blocked}
-产物目标: {本 Phase 唯一产物文件名}
-```
-
-状态卡必须在 Phase 工作开始前输出。
-
-### Phase Forbidden 约束（自包含，每 Phase 入口从此复制）
-
-| Phase | Forbidden 约束 |
-|-------|----------------|
-| 1 | 不创建 `spec.md`、`tasks.md`；不实现代码 |
-| 2 | 不创建 `tasks.md`；不实现代码 |
-| 3 | 不实现代码；不运行 Phase 6 测试职责 |
-| 4 | 不推进 Phase；不请求确认；不判断 Gate；不运行 Phase 6 测试职责；不冒充 Phase 5 |
-| 5 | 不直接实现修复；Must Fix/Critical 回退 Phase 4 |
-| 6 | 不改需求/spec；实现缺陷回退 Phase 4 |
-| 7 | 不扩大测试范围为新需求；发现缺口回退 Phase 6 或更早 |
-| 8 | 不发布；不绕过失败 CI |
-| 9 | 不替代最终交付确认；部署风险回退 Phase 8/9 |
-| 10 | 未经用户要求不执行 git 提交/推送；不改实现代码 |
+Phase 入口必须输出 `Phase N 入口状态卡`（Forbidden 约束从 `.harness/skills/matrix.md` 复制）。
 
 ## Phase 4 隔离实现原则
 

@@ -6,11 +6,7 @@
 
 | Change | Status | Resume point | Notes |
 |--------|--------|--------------|-------|
-| chore-harness-operability-index-validation-20260526 | active | Phase 10 用户确认 | 等待用户确认 |
-| fix-harness-executability-20260521 | abandoned | — | 被后续治理工作取代 |
-| docs-harness-slimming-20260520 | abandoned | — | 被后续治理工作取代 |
-| docs-flow-friction-reduction-20260519 | abandoned | — | summary 状态冲突，不自动恢复 |
-| feat-harness-evaluation-20260514 | done | — | 历史归档 |
+
 
 ## 状态说明
 

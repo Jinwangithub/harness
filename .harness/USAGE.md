@@ -1,7 +1,7 @@
 # 实战操作指南
 
 > 本文件面向人类用户。Agent 不应逐字加载此文件，应阅读 `.harness/agents/orchestrator.md` 和各权威源。
-> 完整治理细节见 `.harness/rules/development-workflow.md` 和 `.harness/rules/quality-gates.md`。
+> 完整治理细节见 `.harness/rules/flow.md` 和 `.harness/rules/gates.md`。
 
 ## 启动方式
 
@@ -76,7 +76,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 
 ## 用户版验收简表
 
-详细门禁见 `.harness/rules/quality-gates.md`。用户验收时重点看：
+详细门禁见 `.harness/rules/gates.md`。用户验收时重点看：
 
 ```text
 □ 选定 Flow 与任务风险匹配
