@@ -125,3 +125,11 @@
 - 理由: 扩展位满足项目定制，同时通过权威源边界避免 Skill 分叉和治理覆盖。
 - 后果: Orchestrator 可按需读取 project Skills，但冲突时必须遵循 Harness 权威源并记录冲突。
 - 决定人: Orchestrator + 用户计划
+
+2026-06-04 | 简化移除 validator / project skill slot / Mini-flow，同步 memory 与现实
+- 背景: 近期简化提交删除了 scripts/harness-validate.sh、skills/project/ 扩展位，并将 Mini/Lite/Standard 三级 flow 合并为 Lite/Standard 双轨；但 2026-05-19、2026-05-26 三条决策仍描述这些已不存在的产物，导致 registry-first 恢复时可能引用不存在的文件。
+- 方案: 保留历史决策行作为 audit evidence，新增本条作为当前事实基准；全仓清除指向已删产物的指令性引用。
+- 备选: 直接编辑或删除旧决策行（否决，破坏 append-only audit trail）。
+- 理由: 守 audit 原则的同时消除恢复歧义；读 decisions.log 须以最新条目为现状基准。
+- 后果: 当前现实 = Lite/Standard 双轨、无脚本 validator、无 skills/project 扩展位；旧条目仅作历史 evidence。
+- 决定人: Orchestrator + 用户计划

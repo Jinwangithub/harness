@@ -2,6 +2,8 @@
 
 本文件是 Memory 类型、完整模板和检查频率的权威源。
 
+> **边界**：本文件只定义 Memory 类型、Check 块字段与检查频率。Gate 判定见 `.harness/rules/gates.md`，产物模板见 `.harness/changes/templates.md`；其他文件引用本文件的字段定义，不重述。
+
 ## 文件说明
 
 | 文件 | 用途 | 触发条件 |
@@ -58,7 +60,7 @@ Lite-flow 出口 (L1 后、L3 后) 必须填写：
 
 如有触发条目，必须写完整模板到对应 memory 文件。
 
-validator 输出 `FAIL`/`WARN` 时，必须判断是否触发对应 Memory 文件记录。
+验证或 Gate 输出 `fail`/`blocked` 时，必须判断是否触发对应 Memory 文件记录。
 
 ## 完整模板
 

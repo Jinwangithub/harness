@@ -10,7 +10,7 @@
 | Memory 记录不完整 | 字段缺失或未用完整模板 | `memory/README.md` §完整模板 |
 | 多个 active auto-resume | INDEX 维护遗漏 | `changes/INDEX.md` §Maintenance Rules |
 | Phase 产物边界混淆 | Work Lock 未执行 | `flow.md` §Standard-flow Phase 1-10 |
-| Skill 加载错误或找不到 | Skill 目录与 registry 不同步 | `skills/registry.md` |
+| Skill 加载错误或找不到 | Skill 目录与 matrix 注册表不同步 | `skills/matrix.md` |
 
 ## 格式
 

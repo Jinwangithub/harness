@@ -3,7 +3,9 @@
 > **TL;DR**: 收到需求 → Flow Classifier 分类（Lite/Standard）→ 按 Phase 执行 → 每个 Phase 出口过 Gate → 失败按回退路径处理。
 
 本文件是 Flow Classifier、Lite/Standard-flow 执行顺序、Phase 4 隔离原则和回退路径的权威源。
-门禁检查表见 `.harness/rules/gates.md`，Phase Skill Matrix（含 Forbidden 约束）见 `.harness/skills/matrix.md`，Memory 模板见 `.harness/memory/README.md`。
+门禁检查表见 `.harness/rules/gates.md`，Skill 注册、加载规则、Phase Skill Matrix（含 Forbidden 约束）见 `.harness/skills/matrix.md`，Memory 模板见 `.harness/memory/README.md`。
+
+> **边界**：本文件只定义 Flow 分类与执行顺序。Gate 判定见 `gates.md`，Skill/Forbidden 见 `skills/matrix.md`，产物结构见 `changes/structure.md`；本文件不重述。
 
 ## Flow Classifier
 
@@ -70,8 +72,7 @@
 
 关键边界：
 
-- Phase 1 只产 `understanding.md`，禁止提前创建 `spec.md` 或 `tasks.md`。
-- Phase 2 只产 `spec.md`，禁止提前创建 `tasks.md`。
+- 各 Phase 产物级 Forbidden 约束（不提前创建 `spec.md`/`tasks.md` 等）见 `.harness/skills/matrix.md`，本文件不重述。
 - Phase 4 只做编码实现、编译验证和 Author/Self Review，不运行 Phase 6 测试职责。
 - Phase 5 是 Independent Review，不替代 Phase 4 自检。
 

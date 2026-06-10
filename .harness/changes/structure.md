@@ -4,6 +4,8 @@
 
 本文件是变更目录结构、命名规范和归档规则的权威源。产物模板见 `.harness/changes/templates.md`。
 
+> **边界**：本文件只定义目录结构、命名、INDEX 状态语义与归档规则。产物字段模板见 `templates.md`，Gate 判定见 `.harness/rules/gates.md`；本文件不重述。
+
 ## 目录命名
 
 ```text

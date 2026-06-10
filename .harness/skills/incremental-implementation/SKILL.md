@@ -42,7 +42,7 @@ For each slice:
 1. **Implement** the smallest complete piece of functionality
 2. **Test** — run the test suite (or write a test if none exists)
 3. **Verify** — confirm the slice works as expected (tests pass, build succeeds, manual check)
-4. **Commit** -- save your progress with a descriptive message (see `git-workflow-and-versioning` for atomic commit guidance)
+4. **Checkpoint** -- archive progress and verification evidence in Harness artifacts. Only run `git commit` when the user explicitly requests it.
 5. **Move to the next slice** — carry forward, don't restart
 
 ## Slicing Strategies
@@ -210,7 +210,7 @@ After each increment, verify:
 - [ ] Type checking passes (`npx tsc --noEmit`)
 - [ ] Linting passes (`npm run lint`)
 - [ ] The new functionality works as expected
-- [ ] The change is committed with a descriptive message
+- [ ] Progress and verification evidence are checkpointed in Harness artifacts; `git commit` was only run if explicitly requested by the user
 
 ## Common Rationalizations
 
@@ -238,8 +238,8 @@ After each increment, verify:
 
 After completing all increments for a task:
 
-- [ ] Each increment was individually tested and committed
+- [ ] Each increment was individually tested and checkpointed in Harness artifacts
 - [ ] The full test suite passes
 - [ ] The build is clean
 - [ ] The feature works end-to-end as specified
-- [ ] No uncommitted changes remain
+- [ ] Working tree state is known and reported; git commit was not run unless explicitly requested
