@@ -5,7 +5,7 @@
 本文件是 Mechanical Gate、Human Approval Gate 和 Phase Gate 检查表的权威源。
 Iron Laws 见 `.harness/agents/orchestrator.md`。
 
-> **边界**：本文件只定义 Gate 判定与检查表。Skill 角色、加载规则、Forbidden 约束见 `.harness/skills/matrix.md`，产物模板见 `.harness/changes/templates.md`，Memory 字段见 `.harness/memory/README.md`；本文件不重述。
+> **边界**：本文件只定义 Gate 判定与检查表。Phase/Step 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow.md` 的入口卡片，产物模板见 `.harness/changes/templates.md`，Memory 字段见 `.harness/memory/README.md`；本文件不重述。
 
 ## 1. 通用规则
 
@@ -46,7 +46,7 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
   - Exit code: {数字，不得为空}
   - Output summary: {关键行，不得只写"成功"/"已完成"}
   - Artifact path: {文件路径，不得为空}
-- Skill Load: {Skill 名} = {loaded / blocked + 原因}
+- Skill Load: {Skill 名} = {loaded / not-needed + reason / blocked + reason}
 - Memory: {N entries / none}
 - Human Approval: {approved / rejected / pending}
 ```
@@ -54,7 +54,9 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 **硬约束**：
 - Fresh evidence 任意字段为空 → Mechanical Gate 自动 `blocked`。
 - `Human Approval = pending` 且声明 `已完成` → Mechanical Gate 自动 `fail`。
-- On-demand / Failure-only trigger evaluation 缺失 → Mechanical Gate 自动 `blocked`。
+- 入口卡片列出的“按条件补读 Skills”缺少条件判断记录 → Mechanical Gate 自动 `blocked`。
+- 条件成立但未读取对应 Skill，且无理由 → Mechanical Gate 自动 `blocked`。
+- 入口卡片列出的“失败时补读 Skills”在 fail/blocked/异常时未读取 → Mechanical Gate 自动 `blocked`。
 - 出口报告缺少上述模板任一字段 → Mechanical Gate 自动 `blocked`。
 
 ## 4. Lite-flow Gate 表
@@ -72,7 +74,8 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 ```
 Phase N Exit Checklist:
 [ ] 本 Phase 产物文件已存在（文件名 + 路径）          yes/no
-[ ] Required Skill 已加载（Skill 名 + loaded/blocked）  yes/no
+[ ] 读取 Skills 已加载（Skill 名 + loaded/blocked）  yes/no
+[ ] 按条件补读 Skills 已判断（Skill 名 + needed/not-needed + reason） yes/no
 [ ] Fresh evidence：Command + Exit code + Output + Artifact path  yes/no
 [ ] Memory checkpoint 已填写                             yes/no
 [ ] Mechanical Gate 状态已填写（pass/fail/blocked）     yes/no
@@ -82,16 +85,16 @@ Phase N Exit Checklist:
 
 | Phase | Mechanical Gate 必查 | Evidence | 确认点 |
 |-------|----------------------|----------|--------|
-| 1 | `understanding.md` 存在（Forbidden 见 `.harness/skills/matrix.md`） | `request_analysis/understanding.md` | CK1 |
-| 2 | `spec.md` 存在（Forbidden 见 `.harness/skills/matrix.md`） | `request_analysis/spec.md` | CK2 |
-| 3 | `tasks.md` 存在，每个任务有验收条件（Forbidden 见 `.harness/skills/matrix.md`） | `request_analysis/tasks.md` | CK3 |
-| 4 | 隔离执行证据存在；编译成功；`coding_report_v1.md` 存在；Author/Self Review 完成 | 编译命令结果、`coding/coding_report_v1.md` | CK4 |
-| 5 | 独立评审报告存在；Critical=0；Must Fix=0 | `coding/review/*.md` | CK5 |
-| 6 | 测试通过；测试数 > 0；覆盖率符合项目阈值 | 测试命令结果、`unit_test/test_report.md` | CK6 |
-| 7 | 测试评审报告存在；Must Fix=0 | `unit_test/review/test_review_v1.md` | CK7 |
-| 8 | CI 报告存在且成功 | `ci_result/ci_report.md` | CK8 |
-| 9 | 部署报告存在；冒烟/回滚检查完成 | `deployment/deploy_report.md` | CK9 |
-| 10 | delivery summary 存在；Memory 完整；`INDEX.md` status 同步为 done | `delivery-summary.md` | CK10 |
+| 1 | `understanding.md` 存在；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `request_analysis/understanding.md` | CK1 |
+| 2 | `spec.md` 存在；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `request_analysis/spec.md` | CK2 |
+| 3 | `tasks.md` 存在，每个任务有验收条件；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `request_analysis/tasks.md` | CK3 |
+| 4 | 隔离执行证据存在；编译成功；`coding_report_v1.md` 存在；Author/Self Review 完成；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | 编译命令结果、`coding/coding_report_v1.md` | CK4 |
+| 5 | 独立评审报告存在；Critical=0；Must Fix=0；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `coding/review/*.md` | CK5 |
+| 6 | 测试通过；测试数 > 0；覆盖率符合项目阈值；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | 测试命令结果、`unit_test/test_report.md` | CK6 |
+| 7 | 测试评审报告存在；Must Fix=0；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `unit_test/review/test_review_v1.md` | CK7 |
+| 8 | CI 报告存在且成功；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `ci_result/ci_report.md` | CK8 |
+| 9 | 部署报告存在；冒烟/回滚检查完成；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `deployment/deploy_report.md` | CK9 |
+| 10 | delivery summary 存在；Memory 完整；`INDEX.md` status 同步为 done；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `delivery-summary.md` | CK10 |
 
 ## 6. Phase 4 附加要求
 

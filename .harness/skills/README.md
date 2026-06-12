@@ -2,6 +2,7 @@
 
 本目录是 Skill 库。
 
-- **Skill Matrix**（Skill 注册、角色术语、加载规则、Phase 调度、Forbidden）→ `.harness/skills/matrix.md`
 - 所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`
-- Skill 内部补充 `.md` 是 Internal Reference，默认不加载。
+- Skill 名称必须等于目录名：`{name}`
+- Skill 内部补充 `.md` 默认不加载，仅在当前 Phase/Step 入口卡片、主 Skill、任务证据缺口或用户明确要求时读取
+- Phase/Step 读取哪些 Skills、什么情况下补读、禁止事项和 Gate 提示见 `.harness/rules/flow.md`
