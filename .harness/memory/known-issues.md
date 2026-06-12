@@ -9,8 +9,9 @@
 | Lite-flow 后发现需要 Standard | Flow Classifier 误判 | `flow.md` §Flow Classifier |
 | Memory 记录不完整 | 字段缺失或未用完整模板 | `memory/README.md` §完整模板 |
 | 多个 active auto-resume | INDEX 维护遗漏 | `changes/INDEX.md` §Maintenance Rules |
-| Phase 产物边界混淆 | Work Lock 未执行 | `flow.md` §Standard-flow Phase 1-10 |
-| Skill 加载错误或找不到 | Skill 目录不符合 `.harness/skills/{name}/SKILL.md` 约定，或 flow 入口卡片引用了不存在的 Skill | `skills/README.md` / `rules/flow.md` |
+| Phase 产物边界混淆 | Work Lock 未执行 | `flow-standard.md` §Standard-flow Phase 1-10 |
+| Skill 加载错误或找不到 | Skill 目录不符合 `.harness/skills/{name}/SKILL.md` 约定，或 flow 入口卡片引用了不存在的 Skill | `skills/README.md` / `rules/flow-lite.md` / `rules/flow-standard.md` |
+| 回退或升级路径不确定 | 未读取回退规则或风险扩大后未重分类 | `rollback.md` §通用失败处理 |
 
 ## 格式
 

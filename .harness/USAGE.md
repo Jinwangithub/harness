@@ -1,7 +1,7 @@
 # 实战操作指南
 
 > 本文件面向人类用户。Agent 不应逐字加载此文件，应阅读 `.harness/agents/orchestrator.md` 和各权威源。
-> 完整治理细节见 `.harness/rules/flow.md` 和 `.harness/rules/gates.md`。
+> 完整治理细节见 `.harness/rules/flow.md`、`.harness/rules/flow-lite.md`、`.harness/rules/flow-standard.md`、`.harness/rules/rollback.md` 和 `.harness/rules/gates.md`。
 
 ## 启动方式
 

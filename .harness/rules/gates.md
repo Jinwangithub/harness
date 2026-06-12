@@ -5,7 +5,7 @@
 本文件是 Mechanical Gate、Human Approval Gate 和 Phase Gate 检查表的权威源。
 Iron Laws 见 `.harness/agents/orchestrator.md`。
 
-> **边界**：本文件只定义 Gate 判定与检查表。Phase/Step 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow.md` 的入口卡片，产物模板见 `.harness/changes/templates.md`，Memory 字段见 `.harness/memory/README.md`；本文件不重述。
+> **边界**：本文件只定义 Gate 判定与检查表。Lite Step 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow-lite.md` 的入口卡片，Standard Phase 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow-standard.md` 的入口卡片，回退路径见 `.harness/rules/rollback.md`，产物模板见 `.harness/changes/templates.md`，Memory 字段见 `.harness/memory/README.md`；本文件不重述。
 
 ## 1. 通用规则
 
@@ -85,16 +85,16 @@ Phase N Exit Checklist:
 
 | Phase | Mechanical Gate 必查 | Evidence | 确认点 |
 |-------|----------------------|----------|--------|
-| 1 | `understanding.md` 存在；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `request_analysis/understanding.md` | CK1 |
-| 2 | `spec.md` 存在；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `request_analysis/spec.md` | CK2 |
-| 3 | `tasks.md` 存在，每个任务有验收条件；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `request_analysis/tasks.md` | CK3 |
-| 4 | 隔离执行证据存在；编译成功；`coding_report_v1.md` 存在；Author/Self Review 完成；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | 编译命令结果、`coding/coding_report_v1.md` | CK4 |
-| 5 | 独立评审报告存在；Critical=0；Must Fix=0；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `coding/review/*.md` | CK5 |
-| 6 | 测试通过；测试数 > 0；覆盖率符合项目阈值；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | 测试命令结果、`unit_test/test_report.md` | CK6 |
-| 7 | 测试评审报告存在；Must Fix=0；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `unit_test/review/test_review_v1.md` | CK7 |
-| 8 | CI 报告存在且成功；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `ci_result/ci_report.md` | CK8 |
-| 9 | 部署报告存在；冒烟/回滚检查完成；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `deployment/deploy_report.md` | CK9 |
-| 10 | delivery summary 存在；Memory 完整；`INDEX.md` status 同步为 done；禁止事项见 `.harness/rules/flow.md` 对应入口卡片 | `delivery-summary.md` | CK10 |
+| 1 | `understanding.md` 存在；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/understanding.md` | CK1 |
+| 2 | `spec.md` 存在；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/spec.md` | CK2 |
+| 3 | `tasks.md` 存在，每个任务有验收条件；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/tasks.md` | CK3 |
+| 4 | 隔离执行证据存在；编译成功；`coding_report_v1.md` 存在；Author/Self Review 完成；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | 编译命令结果、`coding/coding_report_v1.md` | CK4 |
+| 5 | 独立评审报告存在；Critical=0；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `coding/review/*.md` | CK5 |
+| 6 | 测试通过；测试数 > 0；覆盖率符合项目阈值；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | 测试命令结果、`unit_test/test_report.md` | CK6 |
+| 7 | 测试评审报告存在；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `unit_test/review/test_review_v1.md` | CK7 |
+| 8 | CI 报告存在且成功；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `ci_result/ci_report.md` | CK8 |
+| 9 | 部署报告存在；冒烟/回滚检查完成；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `deployment/deploy_report.md` | CK9 |
+| 10 | delivery summary 存在；Memory 完整；`INDEX.md` status 同步为 done；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `delivery-summary.md` | CK10 |
 
 ## 6. Phase 4 附加要求
 

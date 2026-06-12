@@ -314,7 +314,7 @@ npx lhci autorun
 
 ## See Also
 
-For detailed performance checklists, optimization commands, and anti-pattern reference, see `references/performance-checklist.md`.
+Use this Skill content as the current repository's authoritative performance guidance.
 
 
 ## Common Rationalizations
