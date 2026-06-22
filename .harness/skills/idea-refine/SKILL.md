@@ -7,7 +7,13 @@ description: Refines ideas iteratively. Refine ideas through structured divergen
 
 ## Harness Integration Constraint
 
-When used inside Harness Engineering, this Skill is subordinate to `.harness/changes/README.md`. Harness Phase 1 output maps to `request_analysis/understanding.md`; do not default to writing `docs/ideas/` unless the user explicitly asks for a separate idea document.
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+Harness outputs are controlled by the active Flow/Step:
+- Standard Phase 1: write `request_analysis/understanding.md` only.
+- Lite L1: update `summary.md` inline lite spec and `request_analysis/checklist.md` only.
+
+Do not create `docs/ideas/` or standalone idea documents unless the user explicitly asks for a separate non-Harness artifact.
 
 Refines raw ideas into sharp, actionable concepts worth building through structured divergent and convergent thinking.
 
@@ -21,10 +27,7 @@ Refines raw ideas into sharp, actionable concepts worth building through structu
 
 This skill is primarily an interactive dialogue. Invoke it with an idea, and the agent will guide you through the process.
 
-```bash
-# Optional: Initialize the ideas directory
-bash /mnt/skills/user/idea-refine/scripts/idea-refine.sh
-```
+Standalone-only helpers, including idea directory initialization scripts, must not be run in Harness mode unless the user explicitly asks for a separate non-Harness idea document.
 
 **Trigger Phrases:**
 - "Help me refine this idea"
@@ -33,7 +36,7 @@ bash /mnt/skills/user/idea-refine/scripts/idea-refine.sh
 
 ## Output
 
-The final output is a markdown one-pager saved to `docs/ideas/[idea-name].md` (after user confirmation), containing:
+In Harness mode, write only the artifact allowed by the current Flow/Step. In standalone mode, and only after explicit user confirmation, the final output may be a markdown one-pager containing:
 - Problem Statement
 - Recommended Direction
 - Key Assumptions
@@ -141,7 +144,7 @@ Produce a concrete artifact — a markdown one-pager that moves work forward:
 
 **The "Not Doing" list is arguably the most valuable part.** Focus is about saying no to good ideas. Make the trade-offs explicit.
 
-Ask the user if they'd like to save this to `docs/ideas/[idea-name].md` (or a location of their choosing). Only save if they confirm.
+In Harness mode, place the refined content into the current Flow/Step artifact. In standalone mode, ask the user before saving a separate idea document, and save only after explicit confirmation.
 
 ### Anti-patterns to Avoid
 

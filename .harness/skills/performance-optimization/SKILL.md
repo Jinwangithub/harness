@@ -5,6 +5,12 @@ description: Optimizes application performance. Use when performance requirement
 
 # Performance Optimization
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+This Skill provides measurement and optimization guidance inside the current Phase/Step. It must not create artifacts outside the current Phase/Step, advance Phase/Step, mark Gate pass, deploy, or request Human Approval.
+
 ## Overview
 
 Measure before optimizing. Performance work without measurement is guessing — and guessing leads to premature optimization that adds complexity without improving what matters. Profile first, identify the actual bottleneck, fix it, measure again. Optimize only what measurements prove matters.

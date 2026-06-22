@@ -7,7 +7,7 @@ description: Creates specs before coding. Use when starting a new project, featu
 
 ## Harness Integration Constraint
 
-When used inside Harness Engineering, this Skill is subordinate to `.harness/skills/README.md` and `.harness/changes/README.md`. In Harness Standard Phase 2, output only `request_analysis/spec.md`; the generic `SPECIFY → PLAN → TASKS → IMPLEMENT` workflow is background guidance and must not create tasks, code, tests, or later-phase artifacts.
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win. In Harness Standard Phase 2, output only `request_analysis/spec.md`; the generic `SPECIFY -> PLAN -> TASKS -> IMPLEMENT` workflow is background guidance and must not create tasks, code, tests, or later-phase artifacts.
 
 ## Overview
 

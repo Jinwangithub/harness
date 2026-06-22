@@ -5,6 +5,12 @@ description: Hardens code against vulnerabilities. Use when handling user input,
 
 # Security and Hardening
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+Security-sensitive changes may require explicit user instruction before implementation. That instruction is not the same as Harness Human Approval Gate, and this Skill must not mark Gate pass or request Phase approval.
+
 ## Overview
 
 Security-first development practices for web applications. Treat every external input as hostile, every secret as sacred, and every authorization check as mandatory. Security isn't a phase — it's a constraint on every line of code that touches user data, authentication, or external systems.
@@ -31,7 +37,7 @@ Security-first development practices for web applications. Treat every external 
 - **Use httpOnly, secure, sameSite cookies** for sessions
 - **Run `npm audit`** (or equivalent) before every release
 
-### Ask First (Requires Human Approval)
+### Ask First (Requires Explicit User Instruction)
 
 - Adding new authentication flows or changing auth logic
 - Storing new categories of sensitive data (PII, payment info)

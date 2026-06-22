@@ -7,7 +7,7 @@ description: Breaks work into ordered tasks. Use when you have a spec or clear r
 
 ## Harness Integration Constraint
 
-When used inside Harness Engineering, this Skill is subordinate to `.harness/skills/README.md` and `.harness/changes/README.md`. In Harness Standard Phase 3, output only `request_analysis/tasks.md`; do not create `# Implementation Plan` or `### Phase 1/2/3` headings. Use `Task Group`, `Slice`, and `Checkpoint`, and map every task to `spec.md` Success Criteria.
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win. In Harness Standard Phase 3, output only `request_analysis/tasks.md`; do not create `# Implementation Plan` or `### Phase 1/2/3` headings. Use `Task Group`, `Slice`, and `Checkpoint`, and map every task to `spec.md` Success Criteria.
 
 ## Overview
 
@@ -145,6 +145,8 @@ If a task is L or larger, it should be broken into smaller tasks. An agent perfo
 - You find yourself writing "and" in the task title (a sign it is two tasks)
 
 ## Plan Document Template
+
+In Harness mode, do not copy this standalone template. Use `.harness/changes/templates.md` Phase 3 (`# Tasks`, `Task Group / Slice`, and spec success criteria mapping). The following template is standalone-only.
 
 ```markdown
 # Implementation Plan: [Feature/Project Name]

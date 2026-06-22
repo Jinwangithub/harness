@@ -7,7 +7,9 @@ description: Delivers changes incrementally. Use when implementing any feature o
 
 ## Harness Integration Constraint
 
-When used inside Harness Engineering, this Skill is subordinate to `.harness/skills/README.md` and `.harness/changes/README.md`. In Harness Phase 4, “commit” means archive implementation evidence in Harness artifacts; do not run `git commit` unless the user explicitly requests it. This Skill must not run or claim Phase 6 test responsibilities.
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+In Harness Phase 4, "commit" means archive implementation evidence in Harness artifacts; do not run `git commit` unless the user explicitly requests it. Phase 4 may run compile/build/typecheck or a narrow smoke check required by the approved spec, but must not create tests, run a full test suite, or claim Phase 6 test responsibilities.
 
 ## Overview
 
@@ -25,23 +27,23 @@ Build in thin vertical slices — implement one piece, test it, verify it, then 
 ## The Increment Cycle
 
 ```
-┌──────────────────────────────────────┐
-│                                      │
-│   Implement ──→ Test ──→ Verify ──┐  │
-│       ▲                           │  │
-│       └───── Commit ◄─────────────┘  │
-│              │                       │
-│              ▼                       │
-│          Next slice                  │
-│                                      │
-└──────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│                                             │
+│   Implement ──→ Compile/Check ──→ Verify ─┐ │
+│       ▲                                   │ │
+│       └───── Checkpoint ◄─────────────────┘ │
+│              │                              │
+│              ▼                              │
+│          Next slice                         │
+│                                             │
+└─────────────────────────────────────────────┘
 ```
 
 For each slice:
 
 1. **Implement** the smallest complete piece of functionality
-2. **Test** — run the test suite (or write a test if none exists)
-3. **Verify** — confirm the slice works as expected (tests pass, build succeeds, manual check)
+2. **Compile/Check** — run compile/build/typecheck or an approved narrow smoke check
+3. **Verify** — confirm the slice matches the approved task without claiming Phase 6 test completion
 4. **Checkpoint** -- archive progress and verification evidence in Harness artifacts. Only run `git commit` when the user explicitly requests it.
 5. **Move to the next slice** — carry forward, don't restart
 
@@ -194,8 +196,7 @@ When directing an agent to implement incrementally:
 Start with just the database schema change and the API endpoint.
 Don't touch the UI yet — we'll do that in the next increment.
 
-After implementing, run `npm test` and `npm run build` to verify
-nothing is broken."
+After implementing, run the approved Phase 4 compile/build/typecheck command and archive the evidence. Do not run or claim Phase 6 test responsibilities."
 ```
 
 Be explicit about what's in scope and what's NOT in scope for each increment.
@@ -205,10 +206,10 @@ Be explicit about what's in scope and what's NOT in scope for each increment.
 After each increment, verify:
 
 - [ ] The change does one thing and does it completely
-- [ ] All existing tests still pass (`npm test`)
-- [ ] The build succeeds (`npm run build`)
-- [ ] Type checking passes (`npx tsc --noEmit`)
-- [ ] Linting passes (`npm run lint`)
+- [ ] Approved Phase 4 compile/build/typecheck command succeeds
+- [ ] Any narrow smoke check is explicitly allowed by the approved spec/tasks
+- [ ] No Phase 6 test completion is claimed
+- [ ] Linting passes if it is the approved Phase 4 command
 - [ ] The new functionality works as expected
 - [ ] Progress and verification evidence are checkpointed in Harness artifacts; `git commit` was only run if explicitly requested by the user
 
@@ -238,8 +239,7 @@ After each increment, verify:
 
 After completing all increments for a task:
 
-- [ ] Each increment was individually tested and checkpointed in Harness artifacts
-- [ ] The full test suite passes
-- [ ] The build is clean
-- [ ] The feature works end-to-end as specified
+- [ ] Each increment was checkpointed in Harness artifacts with approved Phase 4 evidence
+- [ ] The build/compile/typecheck evidence is clean
+- [ ] No Phase 6 test, CI, deploy, or Human Approval claim is made
 - [ ] Working tree state is known and reported; git commit was not run unless explicitly requested

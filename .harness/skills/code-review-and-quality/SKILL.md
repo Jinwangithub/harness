@@ -5,6 +5,12 @@ description: Conducts multi-axis code review. Use before merging any change. Use
 
 # Code Review and Quality
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+A review `Approve` verdict only means no review-blocking findings in this artifact. It does not mean Mechanical Gate pass, Human Approval approved, ready to merge, commit, push, deploy, or complete delivery.
+
 ## Overview
 
 Multi-dimensional code review with quality gates. Every change gets reviewed before merge — no exceptions. Review covers five axes: correctness, readability, architecture, security, and performance.
@@ -307,7 +313,7 @@ Part of code review is dependency review:
 - [ ] Manual verification done (if applicable)
 
 ### Verdict
-- [ ] **Approve** — Ready to merge
+- [ ] **Approve** — No review-blocking findings in this artifact
 - [ ] **Request changes** — Issues must be addressed
 ```
 ## See Also

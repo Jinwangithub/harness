@@ -5,6 +5,12 @@ description: Automates CI/CD pipeline setup. Use when setting up or modifying bu
 
 # CI/CD and Automation
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/rules/rollback.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+In Harness Phase 8/9, this Skill records CI/deployment evidence and diagnoses failures. It must not push, deploy, mark Gate pass, request Human Approval, or fix implementation directly. CI/deployment failures must be routed through `rollback.md`; git commit/push/deploy actions require explicit user instruction and the correct Phase.
+
 ## Overview
 
 Automate quality gates so that no change reaches production without passing tests, lint, type checking, and build. CI/CD is the enforcement mechanism for every other skill — it catches what humans and agents miss, and it does so consistently on every single change.
@@ -161,33 +167,36 @@ jobs:
           path: playwright-report/
 ```
 
-## Feeding CI Failures Back to Agents
+## Feeding CI Failures Back to Harness
 
-The power of CI with AI agents is the feedback loop. When CI fails:
+The power of CI with AI agents is the feedback loop. In Harness mode, CI failure handling stays inside the Gate/rollback discipline:
 
 ```
 CI fails
     │
     ▼
-Copy the failure output
+Record failure output as fresh evidence
     │
     ▼
-Feed it to the agent:
-"The CI pipeline failed with this error:
-[paste specific error]
-Fix the issue and verify locally before pushing again."
+Read `.harness/rules/rollback.md`
     │
     ▼
-Agent fixes → pushes → CI runs again
+Route to the appropriate Phase/Step for repair
+    │
+    ▼
+Verify locally and rerun CI evidence
+    │
+    ▼
+Commit/push only if the user explicitly requested git action
 ```
 
 **Key patterns:**
 
 ```
-Lint failure → Agent runs `npm run lint --fix` and commits
-Type error  → Agent reads the error location and fixes the type
-Test failure → Agent follows debugging-and-error-recovery skill
-Build error → Agent checks config and dependencies
+Lint failure → record evidence, route to the owning implementation/test Phase, then verify
+Type error  → read the error location, route the fix through the owning Phase
+Test failure → use debugging-and-error-recovery for diagnosis, then route via rollback
+Build error → check config and dependencies, then route via rollback
 ```
 
 ## Deployment Strategies

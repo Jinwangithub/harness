@@ -5,6 +5,12 @@ description: Guides stable API and interface design. Use when designing APIs, mo
 
 # API and Interface Design
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+This Skill provides interface design guidance only. It must not create artifacts outside the current Phase/Step, advance Phase/Step, mark Gate pass, or request Human Approval.
+
 ## Overview
 
 Design stable, well-documented interfaces that are hard to misuse. Good interfaces make the right thing easy and the wrong thing hard. This applies to REST APIs, GraphQL schemas, module boundaries, component props, and any surface where one piece of code talks to another.

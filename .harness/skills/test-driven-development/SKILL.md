@@ -5,6 +5,16 @@ description: Drives development with tests. Use when implementing any logic, fix
 
 # Test-Driven Development
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/rules/rollback.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+Harness usage is Phase-bound:
+- Phase 6: create/update tests, run test commands, and write `unit_test/test_report.md`.
+- Phase 7: review test adequacy only and write `unit_test/review/test_review_v1.md`; do not modify tests or implementation. Findings route back to Phase 6 or earlier.
+
+Do not run or claim Phase 6 test responsibilities from Phase 4, and do not mark Gate pass or request Human Approval.
+
 ## Overview
 
 Write a failing test before writing the code that makes it pass. For bug fixes, reproduce the bug with a test before attempting a fix. Tests are proof — "seems right" is not done. A codebase with good tests is an AI agent's superpower; a codebase without tests is a liability.

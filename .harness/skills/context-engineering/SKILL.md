@@ -5,6 +5,12 @@ description: Optimizes agent context setup. Use when starting a new session, whe
 
 # Context Engineering
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+This Skill may recommend context loading and compression strategy, but it must not create artifacts outside the current Phase/Step, advance Phase/Step, mark Gate pass, or request Human Approval.
+
 ## Overview
 
 Feed agents the right information at the right time. Context is the single biggest lever for agent output quality — too little and the agent hallucinates, too much and it loses focus. Context engineering is the practice of deliberately curating what the agent sees, when it sees it, and how it's structured.

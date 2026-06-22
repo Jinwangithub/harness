@@ -5,6 +5,12 @@ description: Guides systematic root-cause debugging. Use when tests fail, builds
 
 # Debugging and Error Recovery
 
+## Harness Integration Constraint
+
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/rollback.md`, `.harness/rules/gates.md`, `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+In Harness mode, this Skill defaults to diagnosis, evidence preservation, root-cause localization, and recovery recommendations. It must not change git state, install dependencies, modify implementation, advance Phase/Step, mark Gate pass, or request Human Approval unless the Orchestrator explicitly routes that action through the current Phase or rollback path.
+
 ## Overview
 
 Systematic debugging with structured triage. When something breaks, stop adding features, preserve evidence, and follow a structured process to find and fix the root cause. Guessing wastes time. The triage checklist works for test failures, build errors, runtime bugs, and production incidents.
@@ -99,8 +105,11 @@ Which layer is failing?
 ```
 
 **Use bisection for regression bugs:**
+
+In Harness mode, bisection is a diagnostic candidate only. Because `git bisect` changes the worktree state, run it only after the Orchestrator records failure evidence, checks the dirty worktree, and explicitly authorizes it through the rollback path.
+
 ```bash
-# Find which commit introduced the bug
+# Standalone / explicitly authorized only: find which commit introduced the bug
 git bisect start
 git bisect bad                    # Current commit is broken
 git bisect good <known-good-sha> # This commit worked
@@ -192,7 +201,7 @@ Build fails:
 ├── Type error → Read the error, check the types at the cited location
 ├── Import error → Check the module exists, exports match, paths are correct
 ├── Config error → Check build config files for syntax/schema issues
-├── Dependency error → Check package.json, run npm install
+├── Dependency error → Check package.json; run install commands only if the Orchestrator explicitly authorizes environment/dependency changes
 └── Environment error → Check Node version, OS compatibility
 ```
 

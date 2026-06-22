@@ -7,7 +7,9 @@ description: Records decisions and documentation. Use when making architectural 
 
 ## Harness Integration Constraint
 
-When used inside Harness Engineering, ADRs and project documentation do not replace `.harness/memory/*` records or `.harness/changes/{id}/delivery-summary.md`. Memory triggers must still be recorded with the full Memory template.
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
+
+ADRs and project documentation do not replace `.harness/memory/*` records or `.harness/changes/{id}/delivery-summary.md`. In Harness Phase 10, the default output is `.harness/changes/{id}/delivery-summary.md`; create ADRs, changelog entries, or README updates only when spec/tasks or the user explicitly require them. Memory triggers must still be recorded with the full Memory template.
 
 ## Overview
 
