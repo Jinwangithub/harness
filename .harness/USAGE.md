@@ -37,7 +37,7 @@ Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Se
 - **Standard-flow**：mandatory，需求理解、spec、任务规划、编码、自检/评审、测试、CI/部署、最终交付等逐 Phase 确认。
 - **Lite-flow**：batched，先确认需求+简化计划，再最终验证+交付确认。
 
-Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。
+Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。每个 Gate 请求你确认前，Orchestrator 应已运行 `python3 .harness/tools/validate_change.py --change {change-id}`；该命令失败时不得进入人工确认。
 
 ## 常用命令
 
@@ -53,6 +53,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/ship` | 执行交付确认 |
 | `恢复上次进度` | 从 `.harness/changes/INDEX.md` 和 `summary.md` 恢复 |
 | `当前进度` | 查看当前 Phase / Flow step |
+| `检查 Harness 结构` | 运行 `python3 .harness/tools/validate_change.py` 或指定 `--change {change-id}` |
 
 ## 命令语义边界
 
@@ -81,6 +82,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 ```text
 □ 选定 Flow 与任务风险匹配
 □ Mechanical Gate 状态为 pass
+□ validator 已通过，或只有明确可接受的 WARN
 □ INDEX.md 与 summary.md 状态一致
 □ fresh verification evidence 已列出
 □ 必需产物已归档到 .harness/changes/{id}/

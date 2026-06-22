@@ -11,6 +11,8 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 
 - 每个 Phase 或 Flow step 先执行 Mechanical Gate，通过后请求用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
+- 每个 Phase/Step 出口写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`。
+- validator 是 Mechanical Gate 的必要非充分条件：validator FAIL → Gate 不得为 `pass`；validator PASS 只证明 Harness artifact 结构合格，不替代构建、测试、评审和业务验证。
 - 人工偏好、感觉、未定义标准的"审查通过"不能作为 Mechanical Gate。
 
 ## 2. Gate 状态
@@ -53,6 +55,7 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 
 **硬约束**：
 - Fresh evidence 任意字段为空 → Mechanical Gate 自动 `blocked`。
+- validator exit code 非 0 且含 FAIL → Mechanical Gate 自动 `blocked` 或 `fail`，不得请求 Human Approval。
 - `Human Approval = pending` 且声明 `已完成` → Mechanical Gate 自动 `fail`。
 - 入口卡片列出的“按条件补读 Skills”缺少条件判断记录 → Mechanical Gate 自动 `blocked`。
 - 条件成立但未读取对应 Skill，且无理由 → Mechanical Gate 自动 `blocked`。
