@@ -91,7 +91,7 @@ Phase N Exit Checklist:
 | 1 | `understanding.md` 存在；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/understanding.md` | CK1 |
 | 2 | `spec.md` 存在；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/spec.md` | CK2 |
 | 3 | `tasks.md` 存在，每个任务有验收条件；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/tasks.md` | CK3 |
-| 4 | 隔离执行证据存在；编译成功；`coding_report_v1.md` 存在；Author/Self Review 完成；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | 编译命令结果、`coding/coding_report_v1.md` | CK4 |
+| 4 | subagent 隔离四件套存在；subagent status 已处理；边界检查通过；编译成功；`coding_report_v1.md` 存在；Author/Self Review 完成；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `coding/isolation/*`、编译命令结果、`coding/coding_report_v1.md` | CK4 |
 | 5 | 独立评审报告存在；Critical=0；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `coding/review/*.md` | CK5 |
 | 6 | 测试通过；测试数 > 0；覆盖率符合项目阈值；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | 测试命令结果、`unit_test/test_report.md` | CK6 |
 | 7 | 测试评审报告存在；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `unit_test/review/test_review_v1.md` | CK7 |
@@ -101,9 +101,16 @@ Phase N Exit Checklist:
 
 ## 6. Phase 4 附加要求
 
-- 隔离执行证据：不可变输入包、子上下文输出或变更摘要存在。
-- 编译证据：编译命令、退出码和结果存在。
-- Author/Self Review 记录存在，不能记作 Independent Review（Phase 5）或测试（Phase 6）。
+Phase 4 必须使用 fresh subagent 执行当前 slice，并归档隔离四件套：
+
+- `coding/isolation/input_packet.md`：Orchestrator 提取的当前 slice 完整任务文本和必要上下文。
+- `coding/isolation/subagent_prompt.md`：实际发送给 subagent 的自包含 prompt；不得要求 subagent 自行读取完整计划或 Harness 流程文件。
+- `coding/isolation/subagent_output.md`：subagent 返回内容，必须包含 `Status: DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT`。
+- `coding/isolation/merge_report.md`：Orchestrator status 处理、边界检查和合并决策。
+
+`merge_report.md` 必须记录并通过：allowed files only、forbidden artifacts absent、no Phase advancement claim、no Gate judgment claim、no Human Approval request、no Phase 6 test claim、no commit/push/deploy。
+
+编译证据：编译命令、退出码和结果存在。Author/Self Review 记录存在，不能记作 Independent Review（Phase 5）或测试（Phase 6）。
 
 缺少任一项 → Mechanical Gate=`blocked`。
 

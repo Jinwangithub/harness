@@ -133,3 +133,11 @@
 - 理由: 守 audit 原则的同时消除恢复歧义；读 decisions.log 须以最新条目为现状基准。
 - 后果: 当前现实 = Lite/Standard 双轨、无脚本 validator、无 skills/project 扩展位；旧条目仅作历史 evidence。
 - 决定人: Orchestrator + 用户计划
+
+2026-06-22 | Phase 4 采用 controller/subagent 真隔离协议
+- 背景: 当前 Phase 4 只有“隔离上下文”声明，缺少可审计的 subagent prompt、输出和边界检查；用户要求参考本地 superpowers plugin 的 fresh subagent per task 机制，而不是凭空设计。
+- 方案: Phase 4 由 Orchestrator 作为 controller 提取当前 slice 完整文本和必要上下文，归档 `coding/isolation/input_packet.md`，构造并归档自包含 `subagent_prompt.md`，调度 fresh subagent 实现，归档 `subagent_output.md`，再由 Orchestrator 写 `merge_report.md`、编译验证和 `coding_report_v1.md`；validator 对 Phase 4 隔离四件套和 merge_report 边界字段做机械检查。
+- 备选: 继续保留软隔离声明；让 subagent 自行读取完整 `tasks.md` / Harness 规则；照搬 superpowers 的测试、commit 和两阶段 review 到 Phase 4。
+- 理由: superpowers 的关键是 controller 精确构造上下文、fresh subagent 不继承历史、不自行读取计划；Harness 需保留 Phase 4/5/6 职责边界，因此不照搬测试、commit 或 Phase 5 review 职责。
+- 后果: Phase 4 产物增加隔离四件套，文档和 validator 更严格；Orchestrator 准备成本增加，但上下文污染、越权放行和假隔离风险下降。
+- 决定人: Orchestrator + 用户要求

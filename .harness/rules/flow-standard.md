@@ -110,9 +110,15 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - 不运行 Phase 6 测试职责
   - 不冒充 Phase 5
 - 产物提示:
+  - `coding/isolation/input_packet.md`
+  - `coding/isolation/subagent_prompt.md`
+  - `coding/isolation/subagent_output.md`
+  - `coding/isolation/merge_report.md`
   - `coding/coding_report_v1.md`
 - Gate 提示:
-  - 隔离执行证据存在
+  - fresh subagent 隔离执行证据四件套存在
+  - subagent status 已处理（DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT）
+  - 边界检查通过（allowed files、禁止 Phase/Gate/确认/测试职责声明）
   - 编译证据存在
   - Author/Self Review 完成
 
@@ -229,14 +235,34 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - `INDEX.md` status 同步为 done
   - Human Approval=approved
 
-## Phase 4 隔离实现原则
+## Phase 4 Subagent 隔离实现原则
 
-Orchestrator 责任：
+Phase 4 采用 controller/subagent 协议：Orchestrator 是 controller，fresh subagent 是受限 implementer。subagent 不继承主会话历史；Orchestrator 必须构造自包含 prompt，把当前 slice 的完整任务文本和必要上下文直接放入 prompt，不得要求 subagent 自行读取完整计划或 Harness 流程文件。
 
-1. 准备不可变输入包：需求、spec、tasks、相关代码路径、禁止范围、验收条件。
-2. 调度隔离上下文执行受限实现任务。
-3. 汇总变更，执行编译验证。
-4. 调度或执行 Author/Self Review。
-5. 归档隔离执行证据、编译证据、`coding_report_v1.md` 和 CK4 门禁状态。
+### Orchestrator 责任
 
-隔离上下文不得：推进 Phase、请求用户确认、判断 Gate、修改无关文件、运行或冒充 Phase 6 测试职责。
+1. 从 approved `spec.md` / `tasks.md` 提取当前 Task Group / Slice 的完整文本、验收条件、相关代码路径、允许文件、禁止文件和 Phase 4 允许命令。
+2. 归档 `coding/isolation/input_packet.md`。
+3. 基于 input packet 构造实际发送给 subagent 的自包含 prompt，并归档 `coding/isolation/subagent_prompt.md`。
+4. 使用 fresh subagent 执行实现；同一 slice 不复用历史 subagent 上下文。
+5. 归档 subagent 返回为 `coding/isolation/subagent_output.md`。
+6. 按 status 协议处理结果：
+   - `DONE`：进入边界检查和编译验证。
+   - `DONE_WITH_CONCERNS`：先处理 concerns；若影响范围、正确性或证据完整性，Gate 不得 pass。
+   - `NEEDS_CONTEXT`：补充上下文后重新构造 prompt 并重新 dispatch。
+   - `BLOCKED`：Stop-the-Line，记录 blocker、根因和回退/澄清路径。
+7. 写入 `coding/isolation/merge_report.md`，检查 allowed files、禁止产物、禁止声明和 subagent status 处理结果。
+8. 执行 Phase 4 compile/build/typecheck 或 approved narrow smoke check，归档编译证据、Author/Self Review、`coding_report_v1.md` 和 CK4 门禁状态。
+
+### Subagent 约束
+
+subagent 只执行 prompt 中指定的当前 slice。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建 Phase 5+ 产物、修改 forbidden files、运行或冒充 Phase 6 测试职责、提交/推送/部署、要求读取完整 `summary.md` / `tasks.md` / Harness 规则来重新解释任务。
+
+### Subagent Prompt 必含字段
+
+- Task description：当前 slice 完整文本，直接粘贴，不让 subagent 自行读取计划文件。
+- Approved context：spec 摘要、相关代码路径、依赖、架构约束。
+- Allowed files / forbidden files。
+- Allowed commands / forbidden commands。
+- Status protocol：`DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`。
+- Report format：status、what changed、files changed、commands run、exit codes、self-review、concerns、boundary compliance。

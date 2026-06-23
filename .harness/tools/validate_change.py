@@ -65,6 +65,21 @@ STANDARD_PHASE_ARTIFACTS = {
     9: Path("deployment/deploy_report.md"),
     10: Path("delivery-summary.md"),
 }
+PHASE4_ISOLATION_REQUIRED = [
+    Path("coding/isolation/input_packet.md"),
+    Path("coding/isolation/subagent_prompt.md"),
+    Path("coding/isolation/subagent_output.md"),
+    Path("coding/isolation/merge_report.md"),
+]
+PHASE4_MERGE_REQUIRED_YES = [
+    "Allowed files only",
+    "Forbidden artifacts absent",
+    "No Phase advancement claim",
+    "No Gate judgment claim",
+    "No Human Approval request",
+    "No Phase 6 test claim",
+    "No commit/push/deploy",
+]
 
 
 @dataclass(frozen=True)
@@ -241,10 +256,34 @@ class Validator:
                 for number, rel in STANDARD_PHASE_ARTIFACTS.items():
                     if number <= phase and not (change_dir / rel).exists():
                         self.fail("artifact.missing", f"{change_dir.name}: Phase {number} requires {rel}")
+                if phase >= 4:
+                    self.validate_phase4_isolation(change_dir)
                 if phase >= 5 and not any((change_dir / "coding/review").glob("*.md")):
                     self.fail("artifact.missing", f"{change_dir.name}: Phase 5 requires coding/review/*.md")
             if status == "done" and not (change_dir / "delivery-summary.md").exists():
                 self.fail("artifact.missing", f"{change_dir.name}: done Standard-flow requires delivery-summary.md")
+
+    def validate_phase4_isolation(self, change_dir: Path) -> None:
+        for rel in PHASE4_ISOLATION_REQUIRED:
+            if not (change_dir / rel).exists():
+                self.fail("phase4.isolation_missing", f"{change_dir.name}: Phase 4 requires {rel}")
+
+        output_path = change_dir / "coding/isolation/subagent_output.md"
+        if output_path.exists():
+            output_text = output_path.read_text(encoding="utf-8")
+            status = self.extract_named_value(output_text, "Status")
+            if status not in {"DONE", "DONE_WITH_CONCERNS", "BLOCKED", "NEEDS_CONTEXT"}:
+                self.fail("phase4.subagent_status_invalid", f"{change_dir.name}: invalid Phase 4 subagent status `{status}`")
+
+        merge_path = change_dir / "coding/isolation/merge_report.md"
+        if merge_path.exists():
+            merge_text = merge_path.read_text(encoding="utf-8")
+            for field in PHASE4_MERGE_REQUIRED_YES:
+                value = self.extract_named_value(merge_text, field)
+                if value is None:
+                    self.fail("phase4.merge_field_missing", f"{change_dir.name}: merge_report.md missing `{field}`")
+                elif value.lower() != "yes":
+                    self.fail("phase4.merge_field_not_yes", f"{change_dir.name}: merge_report.md `{field}` must be yes, got `{value}`")
 
     def validate_gate_records(self, change_dir: Path, text: str, fields: dict[str, str]) -> None:
         records = list(GATE_RECORD_RE.finditer(text))

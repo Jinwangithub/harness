@@ -60,7 +60,8 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Archive → R
 
 - **Load**：读取相关代码、规则、历史 Memory、wiki。
 - **Classify**：执行 Flow Classifier（`.harness/rules/flow.md`），写入 `summary.md`。
-- **Dispatch**：按已选 Flow 读取执行规范：Lite 读取 `.harness/rules/flow-lite.md`，Standard 读取 `.harness/rules/flow-standard.md`；按当前 Phase/Step 入口卡片读取 Skills，并判断是否需要补读条件性 Skills；需隔离时创建受限泳道。Skill 文件路径按 `.harness/skills/{name}/SKILL.md` 约定解析。
+- **Dispatch**：按已选 Flow 读取执行规范：Lite 读取 `.harness/rules/flow-lite.md`，Standard 读取 `.harness/rules/flow-standard.md`；按当前 Phase/Step 入口卡片读取 Skills，并判断是否需要补读条件性 Skills。Skill 文件路径按 `.harness/skills/{name}/SKILL.md` 约定解析。
+  - Standard Phase 4 必须使用 controller/subagent 隔离协议：Orchestrator 提取当前 slice 完整文本和必要上下文，归档 `coding/isolation/input_packet.md`，构造并归档自包含 `coding/isolation/subagent_prompt.md`，调度 fresh subagent 实现，归档 `coding/isolation/subagent_output.md`，再由 Orchestrator 写 `coding/isolation/merge_report.md`。subagent 不得自行读取完整计划或 Harness 流程文件，不得推进 Phase、请求确认或判断 Gate。
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。
 - **Confirm**：Gate=`pass` 且 validator 通过后请求用户确认。
