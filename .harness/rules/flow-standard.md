@@ -22,7 +22,7 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 | 7 | 测试评审 | `unit_test/review/test_review_v1.md` | CK7 |
 | 8 | CI 验证 | `ci_result/ci_report.md` | CK8 |
 | 9 | 部署验证 | `deployment/deploy_report.md` | CK9 |
-| 10 | 用户确认 | `delivery-summary.md` | CK10 |
+| 10 | 用户确认 | `delivery-summary.md`, `wiki/candidates.md` | CK10 |
 
 **进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。
 
@@ -220,6 +220,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 - 读取 Skills:
   - `documentation-and-adrs`
+  - `business-wiki-curation`
 - 按条件补读 Skills:
   - 无
 - 失败时补读 Skills:
@@ -229,8 +230,13 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - 不改实现代码
 - 产物提示:
   - `delivery-summary.md`
+  - `wiki/candidates.md`
 - Gate 提示:
   - delivery summary 存在
+  - Business Wiki candidate check complete
+  - human Wiki approval status recorded
+  - if approved, `.harness/wiki/index.md` and `.harness/wiki/log.md` are synchronized
+  - if rejected/deferred, reason is recorded in candidate artifact and delivery summary
   - Memory 完整
   - `INDEX.md` status 同步为 done
   - Human Approval=approved

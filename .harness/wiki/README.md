@@ -8,6 +8,19 @@ L3 按需查询层 — 存储业务文档、领域知识、架构说明等 Orche
 
 当前仓库是 Harness Engineering 框架模板，不内置具体业务知识。不要在模板仓库中虚构业务域、外部系统或部署环境。
 
+## Candidate-first 更新策略
+
+业务 Wiki 采用 candidate-first：每个完成需求先把可沉淀的业务知识写入 `.harness/changes/{change-id}/wiki/candidates.md`，该文件只是候选层，不是 canonical knowledge。未经明确人工批准，不得把候选事实直接写入 `.harness/wiki/`。
+
+边界定义：
+
+- `.harness/changes/{change-id}/wiki/candidates.md`：变更本地候选知识，非 canonical，可记录 `none`、`blocked`、`rejected` 或 `deferred` 理由。
+- `.harness/wiki/*`：已获人工确认的正式业务 Wiki。
+- `.harness/wiki/index.md`：正式 Wiki catalog，只登记已批准条目。
+- `.harness/wiki/log.md`：approved/deferred/rejected Wiki 决策的 append-only 记录。
+
+Rejected 或 deferred candidates 保留在对应 change artifact 中，不复制到正式 Wiki。未知业务规则必须保留 `{待确认}` 或进入 Phase 1 Open Questions，不得猜测。
+
 ## 业务项目接入要求
 
 先读：

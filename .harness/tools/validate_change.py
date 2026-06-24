@@ -80,6 +80,13 @@ PHASE4_MERGE_REQUIRED_YES = [
     "No Phase 6 test claim",
     "No commit/push/deploy",
 ]
+WIKI_CANDIDATES = Path("wiki/candidates.md")
+WIKI_CANDIDATE_REQUIRED_HEADINGS = [
+    "# Business Wiki Candidates",
+    "## Source Change",
+    "## Extraction Summary",
+    "## Human Wiki Approval",
+]
 
 
 @dataclass(frozen=True)
@@ -245,6 +252,7 @@ class Validator:
                 for rel in LITE_FINAL_REQUIRED:
                     if not (change_dir / rel).exists():
                         self.fail("artifact.missing", f"{change_dir.name}: Lite-flow final delivery requires {rel}")
+                self.validate_wiki_candidates(change_dir)
             for rel in LITE_FORBIDDEN:
                 if (change_dir / rel).exists():
                     self.fail("artifact.forbidden", f"{change_dir.name}: Lite-flow must not contain {rel}")
@@ -262,6 +270,18 @@ class Validator:
                     self.fail("artifact.missing", f"{change_dir.name}: Phase 5 requires coding/review/*.md")
             if status == "done" and not (change_dir / "delivery-summary.md").exists():
                 self.fail("artifact.missing", f"{change_dir.name}: done Standard-flow requires delivery-summary.md")
+            if status == "done" or (phase is not None and phase >= 10):
+                self.validate_wiki_candidates(change_dir)
+
+    def validate_wiki_candidates(self, change_dir: Path) -> None:
+        path = change_dir / WIKI_CANDIDATES
+        if not path.exists():
+            self.fail("wiki.candidates_missing", f"{change_dir.name}: final delivery requires {WIKI_CANDIDATES}")
+            return
+        text = path.read_text(encoding="utf-8")
+        for heading in WIKI_CANDIDATE_REQUIRED_HEADINGS:
+            if heading not in text:
+                self.fail("wiki.candidates_heading_missing", f"{change_dir.name}: wiki/candidates.md missing `{heading}`")
 
     def validate_phase4_isolation(self, change_dir: Path) -> None:
         for rel in PHASE4_ISOLATION_REQUIRED:

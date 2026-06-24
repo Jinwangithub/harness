@@ -11,9 +11,11 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 
 - 每个 Phase 或 Flow step 先执行 Mechanical Gate，通过后请求用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
-- 每个 Phase/Step 出口写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`。
-- validator 是 Mechanical Gate 的必要非充分条件：validator FAIL → Gate 不得为 `pass`；validator PASS 只证明 Harness artifact 结构合格，不替代构建、测试、评审和业务验证。
+- 每个 Phase/Step 出口写入 Gate Record 后，必须运行 canonical wrapper：`.harness/tools/validate_change.sh --change {change-id}`。
+- wrapper 优先调用 `.harness/tools/validate_change.py` 执行 full validation；Python 不可用时才执行 shell fallback。
+- validator 是 Mechanical Gate 的必要非充分条件：validator FAIL → Gate 不得为 `pass`；full validator PASS 只证明 Harness artifact 结构合格，不替代构建、测试、评审和业务验证；shell fallback PASS 仅证明 reduced structural checks 通过。
 - 人工偏好、感觉、未定义标准的"审查通过"不能作为 Mechanical Gate。
+- Wiki candidates are not canonical business knowledge. Candidate content may be copied into `.harness/wiki/` only after explicit human approval. If formal Wiki was updated, approval evidence and `.harness/wiki/index.md` / `.harness/wiki/log.md` synchronization evidence must be present.
 
 ## 2. Gate 状态
 
@@ -68,7 +70,7 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 |------|----------------------|----------------|----------------|
 | L1 需求确认+计划 | `summary.md`（含 inline lite spec）、`checklist.md` 存在；`INDEX.md` 标记为 active；有 `low_risk_proof`；无强制升级风险 | Command / Exit code / Output summary / Artifact path | 用户确认后进入 L2 |
 | L2 实现 | 只修改 checklist 范围；未创建 Standard-only 产物；未引入风险扩大 | Command / Exit code / Output summary / Artifact path | 无需单独确认 |
-| L3 验证+交付 | `verification_report.md`（含压缩评审）存在；Critical=0；Must Fix=0；Memory check 完成；`INDEX.md` status 同步为 done | Command / Exit code / Output summary / Artifact path | 用户最终确认后标记已完成 |
+| L3 验证+交付 | `verification_report.md`（含压缩评审）存在；`wiki/candidates.md` exists；Business Wiki candidate check complete；Critical=0；Must Fix=0；Memory check 完成；`INDEX.md` status 同步为 done | Command / Exit code / Output summary / Artifact path | 用户最终确认后标记已完成 |
 
 ## 5. Standard Phase Gate 检查表
 
@@ -97,7 +99,7 @@ Phase N Exit Checklist:
 | 7 | 测试评审报告存在；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `unit_test/review/test_review_v1.md` | CK7 |
 | 8 | CI 报告存在且成功；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `ci_result/ci_report.md` | CK8 |
 | 9 | 部署报告存在；冒烟/回滚检查完成；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `deployment/deploy_report.md` | CK9 |
-| 10 | delivery summary 存在；Memory 完整；`INDEX.md` status 同步为 done；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `delivery-summary.md` | CK10 |
+| 10 | delivery summary 存在；`wiki/candidates.md` exists；Business Wiki candidate check complete；Memory 完整；`INDEX.md` status 同步为 done；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `delivery-summary.md`, `wiki/candidates.md` | CK10 |
 
 ## 6. Phase 4 附加要求
 

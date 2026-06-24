@@ -14,7 +14,7 @@
 | `.harness/rules/flow-standard.md` | Standard-flow Phase 入口卡片、Phase 4 隔离原则时读 |
 | `.harness/rules/rollback.md` | Gate fail/blocked、风险扩大或回退路径时读 |
 | `.harness/rules/gates.md` | 每个 Phase/Step 出口时读 |
-| `.harness/tools/validate_change.py` | Session Startup 后、每个 Gate 前、完成声明前运行 |
+| `.harness/tools/validate_change.sh` | Session Startup 后、每个 Gate 前、完成声明前运行；shell 入口优先调用 Python full validator，Python 不可用时才执行 reduced fallback |
 | `.harness/skills/README.md` | 需要确认 Skill 路径约定时读 |
 | `.harness/changes/structure.md` | 创建新变更或归档时读 |
 | `.harness/changes/templates.md` | 需要产物模板时读 |
@@ -22,4 +22,7 @@
 | `.harness/memory/lessons-learned.md` | 开始新任务时读最近 3 条 |
 | `.harness/memory/known-issues.md` | 遇到异常行为时读 |
 | `.harness/wiki/README.md` | 遇到未知业务概念时读 |
+| `.harness/wiki/index.md` | 正式业务 Wiki catalog |
+| `.harness/wiki/log.md` | 已批准 Wiki 更新历史和 rejected/deferred 决策记录 |
+| `.harness/skills/business-wiki-curation/SKILL.md` | 最终交付业务 Wiki candidate curation 和 approval-controlled Wiki 更新 |
 | `.harness/USAGE.md` | 人类用户指南，Agent 不逐字加载 |

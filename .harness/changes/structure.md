@@ -58,6 +58,8 @@ INDEX.md 格式：
 ├── summary.md          （含 inline lite spec）
 ├── request_analysis/
 │   └── checklist.md
+├── wiki/
+│   └── candidates.md
 └── verification_report.md  （含压缩评审）
 ```
 
@@ -81,6 +83,8 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_resu
 │   └── review/
 ├── ci_result/
 ├── deployment/
+├── wiki/
+│   └── candidates.md
 └── delivery-summary.md
 ```
 
@@ -89,4 +93,6 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_resu
 1. 每个 Phase 或 Flow step 完成后立即归档对应产物。
 2. 产物按需标记版本号（如 `review_v1` → `review_v2`）。
 3. 回退或流程升级时记录 reason 到 `summary.md`。
-4. 用户确认后将 `summary.md` 状态改为 `done`，同步更新 `INDEX.md`。
+4. 每个完成需求必须归档 `wiki/candidates.md`；如果没有 durable business knowledge，也必须记录 `none` 和原因。
+5. 正式 `.harness/wiki/` 更新必须获得明确人工批准；未批准、rejected 或 deferred candidates 只保留在 change artifact 中。
+6. 用户确认后将 `summary.md` 状态改为 `done`，同步更新 `INDEX.md`。

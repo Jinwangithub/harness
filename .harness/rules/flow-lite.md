@@ -11,7 +11,7 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 
 适用：typo、注释、格式、纯文档、小配置、简单 bugfix、简单测试补充，且 `low_risk_proof` 可机械复核。
 
-必需产物：`summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`verification_report.md`（含压缩评审）
+必需产物：`summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`wiki/candidates.md`、`verification_report.md`（含压缩评审）
 
 执行顺序：
 
@@ -66,6 +66,7 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 - 读取 Skills:
   - `code-review-and-quality`
   - `documentation-and-adrs`
+  - `business-wiki-curation`
 - 按条件补读 Skills:
   - 无
 - 失败时补读 Skills:
@@ -75,9 +76,14 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
   - 未完成验证和 Memory check 前不得标记完成
 - 产物提示:
   - `verification_report.md`（含压缩评审）
+  - `wiki/candidates.md`
 - Gate 提示:
   - Critical=0
   - Must Fix=0
   - Memory check 完成
+  - Business Wiki candidate check complete
+  - `wiki/candidates.md` exists
+  - formal Wiki is updated only with human approval
+  - deferred/rejected/no-candidate decisions are recorded
   - `INDEX.md` status 同步为 done
   - Fresh evidence 四字段完整
