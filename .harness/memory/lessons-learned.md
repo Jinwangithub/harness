@@ -67,8 +67,8 @@
 - 问题: 历史 summary 存在 `状态: 已完成` 但最终 Human Approval Gate 仍为 `pending-human` 的冲突状态。
 - 根因: Completion Claim Gate、Human Approval Gate 和 summary 状态之间缺少可执行一致性校验；`pending-human` 未被明确写成合法恢复状态而非完成状态。
 - 影响: 后续执行者可能把未获用户确认的变更当作完成，破坏审计链和交付确认纪律。
-- 修复: 在 workflow、quality gates、changes README、USAGE 和 INDEX 中明确 `pending-human` 必须保持 Completion lock locked，completed + pending-human 属于 conflict。
-- 预防: validator 对历史冲突输出 WARN，对新 summary 中的 canonical 状态违规输出 FAIL。
+- 修复: 当前协议以 final Gate `Human Approval = pending` 表示等待确认；`pending-human` 保留为历史 archive 的旧拼写。`done + pending` 属于 conflict。
+- 预防: 新 Gate Record 只允许 `approved` / `rejected` / `pending`；validator 对新的 canonical 状态违规输出 FAIL，不迁移历史审计产物。
 
 2026-05-26 | summary 字段不一致降低恢复确定性
 - 问题: 历史 summary 中同时出现 `resume_from`、缺失 `Current step` / `Resume point` / `Completion lock`、非 canonical approval wording 等字段差异。

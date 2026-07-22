@@ -17,7 +17,7 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 
 1. **L1** 需求确认+计划：写入 `summary.md`（含 inline lite spec）和 `checklist.md`；Mechanical Gate=`pass` 后请求用户确认；未确认前不得进入 L2。
 2. **L2** 实现：按 checklist 驱动修改，无独立文件；风险扩大则 Stop-the-Line 并升级 Standard-flow。
-3. **L3** 验证+交付：生成 `verification_report.md`（含压缩评审：Critical/Must Fix 计数、评审结论），包含 fresh evidence 和 Memory check；用户最终确认后标记 `已完成`。
+3. **L3** 验证+交付分两段：先生成 `verification_report.md`（含压缩评审：Critical/Must Fix 计数、评审结论）、完成 fresh evidence 和 Memory check，写 final Gate=`pass` + Human Approval=`pending`，并保持 summary / INDEX 均为 `active`；获得用户最终批准后，将 final Gate 更新为 `approved`，同步 summary / INDEX 为 `done`、Resume point=`none`，再运行 validator。仅重验 PASS 后可声明完成。
 
 ## Lite Step Cards
 
@@ -74,6 +74,8 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 - 禁止事项:
   - 不创建 Standard-only 产物
   - 未完成验证和 Memory check 前不得标记完成
+  - final Gate 为 `pending` 时不得将 summary 或 INDEX 标为 `done`
+  - 用户批准后不得省略状态同步后的 validator 重验
 - 产物提示:
   - `verification_report.md`（含压缩评审）
   - `wiki/candidates.md`
@@ -85,5 +87,7 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
   - `wiki/candidates.md` exists
   - formal Wiki is updated only with human approval
   - deferred/rejected/no-candidate decisions are recorded
-  - `INDEX.md` status 同步为 done
+  - 确认前：final Gate=`pass`、Human Approval=`pending`，summary / INDEX 均为 `active`
+  - 批准后：final Gate Approval=`approved`，summary / INDEX 同步为 `done`、Resume point=`none`
+  - 状态同步后运行 validator，PASS 后才可声明完成
   - Fresh evidence 四字段完整

@@ -57,6 +57,17 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - {产出的文件/功能清单}
 ```
 
+### 新变更最终状态协议
+
+`summary.md` 的 `状态` 与 `INDEX.md` 的 Status 必须相同，且两处非空 `Resume point` 必须相同。最终 Gate 的 `Human Approval` 仅可为 `approved`、`rejected` 或 `pending`：
+
+- `active` + final `pending`：验证完成，等待用户最终确认；不得声明完成。
+- `done` + final `approved`：唯一完成状态；final Mechanical Gate 必须为 `pass`。
+- `done` + final `pending` 或 `rejected`：冲突，validator FAIL。
+- `active` + `approved` 可用于 Standard-flow 中间 Phase，不代表最终完成。
+
+`pending-human` 是历史 archive 的旧拼写，不得写入新的 Gate Record。Gate Record 模板与最终完成时序见 `.harness/rules/gates.md`；本模板不定义额外的 Completion lock 字段。
+
 ### Lite-flow 阶段进度片段
 
 ```markdown

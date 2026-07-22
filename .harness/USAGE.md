@@ -64,16 +64,16 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/build` | L2 实现 | Phase 4 实现 | 不能冒充 Phase 6 测试完成 |
 | `/review` | L3 压缩评审 | Phase 5/7 评审 | 不能替代 Mechanical Gate |
 | `/test` | L3 验证 | Phase 6 测试或阶段验证 | 不能单独声明交付完成 |
-| `/ship` | L3 交付确认 | Phase 10 交付确认 | 不能在 pending-human 时标记已完成 |
+| `/ship` | L3 交付确认 | Phase 10 交付确认 | 不能在 final `pending` 时标记已完成 |
 
-## pending-human 时你需要做什么
+## pending 时你需要做什么
 
-当 Orchestrator 报告 `Human Approval Gate: pending-human`：
+当 Orchestrator 报告 final `Human Approval Gate: pending`：
 
 1. 查看交付摘要、验证证据和 Gate 状态。
 2. 如果同意，明确回复 `approved` 或说明批准范围。
 3. 如果不同意，回复 `rejected` 并说明问题；Orchestrator 应回退修复。
-4. 在你确认前，`Completion lock` 必须保持 `locked`，变更不得标记为 `已完成`。
+4. 在你确认前，`INDEX.md` 与 `summary.md` 均保持 `active`，不得标记为 `done`。批准后 Orchestrator 会同步 final Gate、Status 和 Resume point，再运行 validator；仅 PASS 后声明完成。
 
 ## 用户版验收简表
 
@@ -83,7 +83,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 □ 选定 Flow 与任务风险匹配
 □ Mechanical Gate 状态为 pass
 □ validator 已通过，或只有明确可接受的 WARN
-□ INDEX.md 与 summary.md 状态一致
+□ INDEX.md 与 summary.md 的 Status 与 Resume point 一致
 □ fresh verification evidence 已列出
 □ 必需产物已归档到 .harness/changes/{id}/
 □ Memory recorded: {N} entries / none 已报告
@@ -101,7 +101,7 @@ A: 不一定。Orchestrator 先分类；低风险任务走 Lite-flow，高风险
 A: 也走 Lite-flow。内容可以更短，但仍保留统一产物、机械验证、Memory check 和必要确认。
 
 **Q: Lite-flow 会生成 Standard-flow 的目录吗？**
-A: 不会。Lite-flow 只生成 summary（含 inline lite spec）、checklist 和 verification report（含压缩评审）等三类产物。
+A: 不会。Lite-flow 生成 summary（含 inline lite spec）、checklist、verification report（含压缩评审）和 `wiki/candidates.md`，但不生成 Standard-flow 专用目录。
 
 **Q: 减少确认点是否等于取消 Human Approval Gate？**
 A: 不是。确认点按风险分级减少，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。

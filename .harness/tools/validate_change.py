@@ -219,25 +219,27 @@ class Validator:
                     "summary.index_status_mismatch",
                     f"{change_dir.name}: summary status `{status}` differs from INDEX status `{entry.status}`",
                 )
+        if entry:
             resume = fields.get("Resume point")
             if resume and entry.resume_point and entry.resume_point != resume:
-                self.warn(
+                self.fail(
                     "summary.index_resume_mismatch",
                     f"{change_dir.name}: summary Resume point `{resume}` differs from INDEX `{entry.resume_point}`",
                 )
 
+        if status == "done" and fields.get("Resume point") != "none":
+            self.fail(
+                "summary.done_resume_not_none",
+                f"{change_dir.name}: done summary requires Resume point `none`, got `{fields.get('Resume point')}`",
+            )
+        if entry and entry.status == "done" and entry.resume_point != "none":
+            self.fail(
+                "index.done_resume_not_none",
+                f"{change_dir.name}: done INDEX entry requires Resume point `none`, got `{entry.resume_point}`",
+            )
+
         if "resume_from" in text:
             self.warn("summary.legacy_field", f"{change_dir.name}: legacy field `resume_from` found")
-
-        completion_lock = self.extract_named_value(text, "Completion lock")
-        human_pending = re.search(r"Human Approval\s*:\s*\{?pending\}?", text, re.IGNORECASE)
-        if human_pending and completion_lock and completion_lock.lower() != "locked":
-            self.fail(
-                "completion_lock.invalid",
-                f"{change_dir.name}: Human Approval pending requires Completion lock locked",
-            )
-        if human_pending and status == "done":
-            self.fail("completion.pending_done", f"{change_dir.name}: pending Human Approval cannot be done")
 
     def validate_flow_artifacts(self, change_dir: Path, fields: dict[str, str]) -> None:
         flow = fields.get("Flow")
@@ -349,8 +351,27 @@ class Validator:
                     self.fail("gate.artifact_missing", f"{change_dir.name} {label}: Artifact path does not exist: {artifact}")
             if any(self.is_placeholder_or_empty(value) for value in evidence.values()) and mechanical == "pass":
                 self.fail("gate.pass_without_evidence", f"{change_dir.name} {label}: pass requires complete fresh evidence")
-            if human == "pending" and fields.get("状态") == "done":
-                self.fail("gate.pending_done", f"{change_dir.name} {label}: pending Human Approval cannot be done")
+
+        final_label = records[-1].group(1).strip()
+        final_body = records[-1].group(2)
+        final_mechanical = self.extract_bullet_value(final_body, "Mechanical Gate")
+        final_human = self.extract_bullet_value(final_body, "Human Approval")
+        if status == "done":
+            if final_mechanical != "pass":
+                self.fail(
+                    "gate.final_mechanical_not_pass",
+                    f"{change_dir.name} {final_label}: done change requires final Mechanical Gate `pass`, got `{final_mechanical}`",
+                )
+            if final_human != "approved":
+                self.fail(
+                    "gate.final_approval_not_approved",
+                    f"{change_dir.name} {final_label}: done change requires final Human Approval `approved`, got `{final_human}`",
+                )
+        if status == "done" and final_human in {"pending", "rejected"}:
+            self.fail(
+                "gate.final_approval_done_conflict",
+                f"{change_dir.name} {final_label}: done change cannot have final Human Approval `{final_human}`",
+            )
 
     def extract_phase(self, current_step: str) -> int | None:
         match = re.search(r"Phase\s+(\d+)", current_step, re.IGNORECASE)

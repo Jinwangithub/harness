@@ -133,7 +133,10 @@ if [ ! -f "$harness_dir/tools/validate_change.py" ]; then
 fi
 
 change_name_valid() {
-    expr "$1" : '\(feat\|fix\|refactor\|perf\|test\|docs\|chore\)-[a-z0-9][a-z0-9-]*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$' >/dev/null
+    printf '%s\n' "$1" | awk '
+        /^(feat|fix|refactor|perf|test|docs|chore)-[a-z0-9][a-z0-9-]*-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]$/ { valid=1 }
+        END { exit !valid }
+    '
 }
 
 entries=""
@@ -167,7 +170,8 @@ if [ -f "$index_path" ]; then
                 if [ ! -d "$changes_dir/$change" ]; then
                     fail "change.dir_missing" "$change: directory listed in INDEX.md does not exist"
                 fi
-                entries=${entries}${change}'|'${status}'
+                resume_point=$(printf '%s\n' "$trimmed" | awk -F'|' '{gsub(/^[ `]+|[ `]+$/, "", $4); print $4}')
+                entries=${entries}${change}'|'${status}'|'${resume_point}'
 '
                 ;;
         esac
@@ -195,9 +199,25 @@ has_gate_record() {
     grep -E '^## Gate Record[[:space:]]*[—-]' "$1" >/dev/null 2>&1
 }
 
+final_gate_value() {
+    file=$1
+    field=$2
+    awk -v field="$field" '
+        /^## Gate Record[[:space:]]*[—-]/ { in_final=1; value=""; next }
+        in_final && $0 ~ "^[[:space:]]*-[[:space:]]*" field ":" {
+            line=$0
+            sub("^[[:space:]]*-[[:space:]]*" field ":[[:space:]]*", "", line)
+            gsub(/^`+|`+$/, "", line)
+            value=line
+        }
+        END { print value }
+    ' "$file"
+}
+
 validate_change_dir() {
     change=$1
     index_status=$2
+    index_resume=$3
     change_dir="$changes_dir/$change"
     summary_path="$change_dir/summary.md"
 
@@ -220,6 +240,7 @@ validate_change_dir() {
     done
 
     summary_status=$(extract_summary_field "$summary_path" "状态")
+    summary_resume=$(extract_summary_field "$summary_path" "Resume point")
     flow=$(extract_summary_field "$summary_path" "Flow")
 
     if [ -n "$summary_status" ]; then
@@ -230,6 +251,15 @@ validate_change_dir() {
     fi
     if [ -n "$index_status" ] && [ -n "$summary_status" ] && [ "$summary_status" != "$index_status" ]; then
         fail "summary.index_status_mismatch" "$change: summary status \`$summary_status\` differs from INDEX status \`$index_status\`"
+    fi
+    if [ -n "$summary_resume" ] && [ -n "$index_resume" ] && [ "$summary_resume" != "$index_resume" ]; then
+        fail "summary.index_resume_mismatch" "$change: summary Resume point \`$summary_resume\` differs from INDEX \`$index_resume\`"
+    fi
+    if [ "$summary_status" = "done" ] && [ "$summary_resume" != "none" ]; then
+        fail "summary.done_resume_not_none" "$change: done summary requires Resume point \`none\`, got \`$summary_resume\`"
+    fi
+    if [ "$index_status" = "done" ] && [ "$index_resume" != "none" ]; then
+        fail "index.done_resume_not_none" "$change: done INDEX entry requires Resume point \`none\`, got \`$index_resume\`"
     fi
     if [ -n "$flow" ]; then
         case "$flow" in
@@ -244,8 +274,26 @@ validate_change_dir() {
         warn "gate.none" "$change: no Gate Record found yet"
     fi
 
-    if [ "$summary_status" = "done" ] && grep -E 'Human Approval:[[:space:]]*\{?pending\}?' "$summary_path" >/dev/null 2>&1; then
-        fail "gate.pending_done" "$change: done change must not contain pending Human Approval"
+    if has_gate_record "$summary_path"; then
+        final_mechanical=$(final_gate_value "$summary_path" "Mechanical Gate")
+        final_human=$(final_gate_value "$summary_path" "Human Approval")
+        case "$final_mechanical" in
+            pass|fail|blocked) ;;
+            *) fail "gate.mechanical_invalid" "$change: invalid final Mechanical Gate \`$final_mechanical\`" ;;
+        esac
+        case "$final_human" in
+            approved|rejected|pending) ;;
+            *) fail "gate.human_invalid" "$change: invalid final Human Approval \`$final_human\`" ;;
+        esac
+        if [ "$summary_status" = "done" ] && [ "$final_mechanical" != "pass" ]; then
+            fail "gate.final_mechanical_not_pass" "$change: done change requires final Mechanical Gate \`pass\`, got \`$final_mechanical\`"
+        fi
+        if [ "$summary_status" = "done" ] && [ "$final_human" != "approved" ]; then
+            fail "gate.final_approval_not_approved" "$change: done change requires final Human Approval \`approved\`, got \`$final_human\`"
+        fi
+        if [ "$summary_status" = "done" ] && { [ "$final_human" = "pending" ] || [ "$final_human" = "rejected" ]; }; then
+            fail "gate.final_approval_done_conflict" "$change: done change cannot have final Human Approval \`$final_human\`"
+        fi
     fi
 }
 
@@ -259,11 +307,13 @@ if [ -n "$change_arg" ]; then
     for entry in $entries; do
         IFS=$old_ifs
         change=${entry%%|*}
-        status=${entry#*|}
+        remainder=${entry#*|}
+        status=${remainder%%|*}
+        resume_point=${remainder#*|}
         if [ "$change" = "$change_arg" ]; then
             listed_change_found=1
             selected_count=$((selected_count + 1))
-            validate_change_dir "$change" "$status"
+            validate_change_dir "$change" "$status" "$resume_point"
         fi
         IFS='
 '
@@ -279,10 +329,12 @@ else
     for entry in $entries; do
         IFS=$old_ifs
         change=${entry%%|*}
-        status=${entry#*|}
+        remainder=${entry#*|}
+        status=${remainder%%|*}
+        resume_point=${remainder#*|}
         if [ "$all_arg" -eq 1 ] || [ "$status" = "active" ]; then
             selected_count=$((selected_count + 1))
-            validate_change_dir "$change" "$status"
+            validate_change_dir "$change" "$status" "$resume_point"
         fi
         IFS='
 '

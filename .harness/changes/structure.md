@@ -44,9 +44,9 @@ INDEX.md 格式：
 | `abandoned` | 已放弃或被取代，不自动恢复 |
 
 ## 维护规则
-1. 新建变更时新增一行，状态设为 `active`，同时将原 `active` 行改为 `done` 或 `abandoned`。
+1. 新建变更时新增一行，状态设为 `active`。不得为创建新变更而直接将旧 `active` 改为 `done`：旧 change 只有满足最终完成条件才可 `done`，否则改为 `abandoned` 并在 Notes 说明原因。
 2. 任意时刻最多一个 `active`。
-3. Registry 与 `summary.md` 冲突时 Stop-the-Line，不自行猜测。
+3. Registry 与 `summary.md` 的 Status，或任一非空 Resume point，出现冲突时均为 Stop-the-Line / validator FAIL；不得自行择一覆盖。
 ```
 
 ## Flow 产物结构
@@ -95,4 +95,4 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_resu
 3. 回退或流程升级时记录 reason 到 `summary.md`。
 4. 每个完成需求必须归档 `wiki/candidates.md`；如果没有 durable business knowledge，也必须记录 `none` 和原因。
 5. 正式 `.harness/wiki/` 更新必须获得明确人工批准；未批准、rejected 或 deferred candidates 只保留在 change artifact 中。
-6. 用户确认后将 `summary.md` 状态改为 `done`，同步更新 `INDEX.md`。
+6. 最终用户批准后的归档顺序必须为：更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `validate_change.sh --change {id}` → 仅 PASS 后声明完成。确认前两处均保持 `active`。

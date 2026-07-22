@@ -45,7 +45,7 @@
 
 ## 2026-05-26 | 历史 summary 不完全符合新 schema
 
-- 描述: 历史 changes summary 中存在非 canonical Human Approval wording、`resume_from`、缺失 `Completion lock`、`状态: 已完成` + `pending-human` 等与新 schema 不一致的问题。本次治理不批量重写历史归档，避免伪造或重塑审计链。
+- 描述: 历史 changes summary 中存在非 canonical Human Approval wording、`resume_from`、`状态: 已完成` + `pending-human` 等与当前 schema 不一致的问题。`pending-human` 是历史 archive 的 legacy spelling；本次治理不批量重写历史归档，避免伪造或重塑审计链。
 - 影响范围: `.harness/changes/docs-flow-friction-reduction-20260519/`、`.harness/changes/docs-harness-slimming-20260520/`、`.harness/changes/fix-harness-executability-20260521/` 等 legacy archive 的自动恢复和 validator 输出。
-- 临时方案: 通过 `.harness/changes/INDEX.md` 标记 `legacy-unfinished`、`legacy-conflict`、`do-not-auto-resume`；validator 对 legacy debt 输出 WARN 而不是默认 FAIL。
+- 临时方案: Registry Status 只使用 `active`、`done` 或 `abandoned`；legacy 状态或恢复建议记录在 INDEX Notes，不得写入非法 Status。默认只验证 active；`--all` 按明确选择严格检查，不自动迁移历史产物。
 - 计划修复: 仅在用户明确要求历史归档迁移时，按单独治理变更逐个迁移并保留原始 approval evidence，不自动改写历史 Human Approval。

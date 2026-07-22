@@ -24,7 +24,7 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 | 9 | 部署验证 | `deployment/deploy_report.md` | CK9 |
 | 10 | 用户确认 | `delivery-summary.md`, `wiki/candidates.md` | CK10 |
 
-**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。
+**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。Phase 10 是 finalization 例外：先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后才更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
 
 关键边界：
 
@@ -238,8 +238,10 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - if approved, `.harness/wiki/index.md` and `.harness/wiki/log.md` are synchronized
   - if rejected/deferred, reason is recorded in candidate artifact and delivery summary
   - Memory 完整
-  - `INDEX.md` status 同步为 done
-  - Human Approval=approved
+  - 确认前：final Gate=`pass`、Human Approval=`pending`，summary / INDEX 均为 `active`
+  - 用户批准后：final Gate Approval=`approved`，summary / INDEX 同步为 `done`、Resume point=`none`
+  - 状态同步后 validator PASS
+  - 不将 `done` 作为批准前 Gate 条件
 
 ## Phase 4 Subagent 隔离实现原则
 
