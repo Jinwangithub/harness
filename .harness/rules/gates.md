@@ -11,9 +11,9 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 
 - 每个 Phase 或 Flow step 先执行 Mechanical Gate，通过后请求用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
-- 每个 Phase/Step 出口写入 Gate Record 后，必须运行 canonical wrapper：`.harness/tools/validate_change.sh --change {change-id}`。
-- wrapper 优先调用 `.harness/tools/validate_change.py` 执行 full validation；Python 不可用时才执行 shell fallback。
-- validator 是 Mechanical Gate 的必要非充分条件：validator FAIL → Gate 不得为 `pass`；full validator PASS 只证明 Harness artifact 结构合格，不替代构建、测试、评审和业务验证；shell fallback PASS 仅证明 reduced structural checks 通过。
+- 每个 Phase/Step 出口写入 Gate Record 后，必须运行 canonical validator：`python3 .harness/tools/validate_change.py --change {change-id}`。
+- validation requires `python3`; `.harness/tools/validate_change.py` performs full mechanical artifact validation。
+- validator 是 Mechanical Gate 的必要非充分条件：validator exit code 非 0 → Gate 不得为 `pass`；validator PASS 只证明 Harness artifact 结构合格，不替代构建、测试、评审和业务验证。
 - 人工偏好、感觉、未定义标准的"审查通过"不能作为 Mechanical Gate。
 - Wiki candidates are not canonical business knowledge. Candidate content may be copied into `.harness/wiki/` only after explicit human approval. If formal Wiki was updated, approval evidence and `.harness/wiki/index.md` / `.harness/wiki/log.md` synchronization evidence must be present.
 
@@ -145,4 +145,4 @@ Mechanical Gate=`fail|blocked` 时，记录必须包含：
 4. 最终 Gate 为 Mechanical=`pass` 且 `Human Approval = approved`。
 5. Mechanical Gate 无 `fail|blocked`。
 6. `summary.md` 与 `INDEX.md` 均为 `done`，且 Resume point 均为 `none`。
-7. 状态同步后执行 `.harness/tools/validate_change.sh --change {change-id}` 并 PASS。
+7. 状态同步后执行 `python3 .harness/tools/validate_change.py --change {change-id}` 并 PASS。

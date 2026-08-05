@@ -95,4 +95,4 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_resu
 3. 回退或流程升级时记录 reason 到 `summary.md`。
 4. 每个完成需求必须归档 `wiki/candidates.md`；如果没有 durable business knowledge，也必须记录 `none` 和原因。
 5. 正式 `.harness/wiki/` 更新必须获得明确人工批准；未批准、rejected 或 deferred candidates 只保留在 change artifact 中。
-6. 最终用户批准后的归档顺序必须为：更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `validate_change.sh --change {id}` → 仅 PASS 后声明完成。确认前两处均保持 `active`。
+6. 最终用户批准后的归档顺序必须为：更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `python3 .harness/tools/validate_change.py --change {id}`（requires `python3`；执行完整的机械产物验证）→ 仅 PASS 后声明完成。确认前两处均保持 `active`。

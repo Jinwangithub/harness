@@ -45,8 +45,8 @@ description: 工程协调者 — 唯一 Agent，负责分类、调度、验证�
         - 找到 active → 读取对应 changes/{id}/summary.md，确认当前 Phase、Gate 状态。
         - 无 active → 准备新变更目录。
         - 多个 active → Stop-the-Line，报告冲突，不猜测恢复对象。
-[ ] 2. 运行 `.harness/tools/validate_change.sh`。
-        - shell 入口优先调用 Python full validator；Python 不可用时 reduced fallback 只做结构子集检查，不等价于完整 Python validation。
+[ ] 2. 运行 `python3 .harness/tools/validate_change.py`。
+        - validation requires `python3`; `validate_change.py` performs full mechanical artifact validation.
         - exit code 非 0 且含 FAIL → Stop-the-Line，按输出定位 INDEX/summary/artifact/Gate 结构问题。
         - 仅 `index.no_active` WARN → 允许继续准备新变更。
 [ ] 3. 开始新任务时，读取 .harness/memory/lessons-learned.md 最近 3 条。
@@ -64,7 +64,7 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
 - **Dispatch**：按已选 Flow 读取执行规范：Lite 读取 `.harness/rules/flow-lite.md`，Standard 读取 `.harness/rules/flow-standard.md`；按当前 Phase/Step 入口卡片读取 Skills，并判断是否需要补读条件性 Skills。Skill 文件路径按 `.harness/skills/{name}/SKILL.md` 约定解析。
   - Standard Phase 4 必须使用 controller/subagent 隔离协议：Orchestrator 提取当前 slice 完整文本和必要上下文，归档 `coding/isolation/input_packet.md`，构造并归档自包含 `coding/isolation/subagent_prompt.md`，调度 fresh subagent 实现，归档 `coding/isolation/subagent_output.md`，再由 Orchestrator 写 `coding/isolation/merge_report.md`。subagent 不得自行读取完整计划或 Harness 流程文件，不得推进 Phase、请求确认或判断 Gate。
 - **Verify**：执行验证，生成 fresh evidence。
-- **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `.harness/tools/validate_change.sh --change {change-id}`；validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。fallback validation 为 reduced 结构检查，不等价于 full Python validation。
+- **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。
 - **Confirm**：Gate=`pass` 且 validator 通过后请求用户确认；最终批准后才将 final Gate 改为 `approved`，同步 summary / INDEX 为 `done`、Resume point=`none`，并在同步后重跑 validator。
 - **Wiki Candidate Curation**：最终 Step/Phase 声明交付完成前读取 `.harness/skills/business-wiki-curation/SKILL.md`，归档 `.harness/changes/{change-id}/wiki/candidates.md`；未经明确用户批准不得更新正式 `.harness/wiki/`；最终用户可见完成摘要必须报告 Wiki candidate status。
 - **Archive**：归档产物、Skill Load、Gate 状态。最终完成仅按两段式顺序执行：用户批准 → final Gate Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done`、Resume point=`none` → validator 重验 PASS → 声明完成。validator 报 INDEX/summary Status 或 Resume point 冲突时必须 Stop-the-Line，禁止自行择一覆盖。

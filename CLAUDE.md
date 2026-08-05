@@ -14,7 +14,7 @@
 | `.harness/rules/flow-standard.md` | Standard-flow Phase 入口卡片、Phase 4 隔离原则时读 |
 | `.harness/rules/rollback.md` | Gate fail/blocked、风险扩大或回退路径时读 |
 | `.harness/rules/gates.md` | 每个 Phase/Step 出口时读 |
-| `.harness/tools/validate_change.sh` | Session Startup 后、每个 Gate 前、完成声明前运行；shell 入口优先调用 Python full validator，Python 不可用时才执行 reduced fallback |
+| `python3 .harness/tools/validate_change.py` | Session Startup 后、每个 Gate 前、完成声明前运行；需要 Python 3，执行完整的机械产物验证 |
 | `.harness/skills/README.md` | 需要确认 Skill 路径约定时读 |
 | `.harness/changes/structure.md` | 创建新变更或归档时读 |
 | `.harness/changes/templates.md` | 需要产物模板时读 |
