@@ -96,3 +96,9 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_resu
 4. 每个完成需求必须归档 `wiki/candidates.md`；如果没有 durable business knowledge，也必须记录 `none` 和原因。
 5. 正式 `.harness/wiki/` 更新必须获得明确人工批准；未批准、rejected 或 deferred candidates 只保留在 change artifact 中。
 6. 最终用户批准后的归档顺序必须为：更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `python3 .harness/tools/validate_change.py --change {id}`（requires `python3`；执行完整的机械产物验证）→ 仅 PASS 后声明完成。确认前两处均保持 `active`。
+
+## 已完成变更保留
+
+`changes/` 是短期工作区；正式 `.harness/wiki/` 与 Git 是长期记录。Registry 中 `done` 超过 5 时，Session Startup 按表内顺序审阅最旧的一项，一次只处理一项。
+
+仅在完成 Wiki 审阅、取得明确人工批准、同步正式 Wiki 页面（如有）、Wiki index 与 append-only Wiki log，并通过删除工具预检后，才可删除该目录和精确对应的 Registry 行。`active`、`abandoned`、未登记路径以及任何证据不完整的 `done` 均不得删除。明确无可沉淀知识也必须记录人工“无正式 Wiki 更新且可删除”的决策和 Wiki log 记录，之后方可删除。

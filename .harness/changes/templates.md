@@ -145,11 +145,21 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - {approve / reject / defer / no formal Wiki update} because {reason}
 
 ## Human Wiki Approval
-- Status: {pending / approved / rejected / partially-approved / not-requested}
-- Decision evidence: {用户批准/拒绝/延期证据；没有则写 none}
+- Status: {pending / approved / rejected / deferred / partially-approved / not-requested}
+- Decision evidence: {明确用户决定；没有则写 none}
 - Official Wiki updates:
-  - `{path}` / none
+  - `.harness/wiki/{path}` / none
+- Wiki index synchronized: {yes / no / not-applicable}
+- Wiki log synchronized: {yes / no}
+- Source evidence summary: {将被正式 Wiki 长期保留的产物章节/事实摘要}
 ```
+
+删除超额 `done` change 的资格规则：
+
+- `approved`：至少一个正式 Wiki 页面存在，且 Wiki index 与 Wiki log 均为 `yes`。
+- `not-requested`：`Official Wiki updates: none`、Wiki index 为 `not-applicable`、Wiki log 为 `yes`；Decision evidence 必须是明确的人工“无正式 Wiki 更新且可删除”决定。
+- `pending`、`rejected`、`deferred`、`partially-approved` 均不具备删除资格。
+- Decision evidence 的批准文字必须同时涵盖本次正式 Wiki 处置和删除该 change 的授权；不得把旧 final Gate 的交付批准用作删除授权。
 
 ## Lite-flow 产物模板
 
@@ -186,7 +196,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Business Wiki Candidate Check
 - Candidate artifact: `wiki/candidates.md`
 - Extraction status: {candidates-found / none / blocked}
-- Human Wiki Approval: {pending / approved / rejected / partially-approved / not-requested}
+- Human Wiki Approval: {pending / approved / rejected / deferred / partially-approved / not-requested}; cite `wiki/candidates.md` synchronization result
 - Formal Wiki updated: {yes/no}; paths: {`.harness/wiki/...` / none}
 
 ## Memory Check
@@ -620,7 +630,7 @@ Return one of: `DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`.
 ## Business Wiki Curation
 - Candidate artifact: `wiki/candidates.md`
 - Extraction status: {candidates-found / none / blocked}
-- Human Wiki Approval: {pending / approved / rejected / partially-approved / not-requested}
+- Human Wiki Approval: {pending / approved / rejected / deferred / partially-approved / not-requested}; cite `wiki/candidates.md` synchronization result
 - Formal Wiki updated: {yes/no}; paths: {`.harness/wiki/...` / none}
 - Decision reason: {批准、拒绝、延期或无需更新的理由}
 

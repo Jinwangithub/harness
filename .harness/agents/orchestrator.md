@@ -49,8 +49,17 @@ description: 工程协调者 — 唯一 Agent，负责分类、调度、验证�
         - validation requires `python3`; `validate_change.py` performs full mechanical artifact validation.
         - exit code 非 0 且含 FAIL → Stop-the-Line，按输出定位 INDEX/summary/artifact/Gate 结构问题。
         - 仅 `index.no_active` WARN → 允许继续准备新变更。
-[ ] 3. 开始新任务时，读取 .harness/memory/lessons-learned.md 最近 3 条。
-[ ] 4. 遇到未知业务概念时查 .harness/wiki/，不猜测规则。
+[ ] 3. 在 validator 成功后检查 `INDEX.md` 的 done 保留上限。
+        - 仅统计 Registry 中 `done`；`active` 和 `abandoned` 永不自动删除。
+        - `done` 不超过 5：继续正常启动。
+        - `done` 超过 5：只选择 Registry 表中最先出现的 `done` 作为唯一候选；不得一次处理多项或选择较新的项。
+        - 读取候选的 `summary.md`、`wiki/candidates.md` 和交付证据，按 `business-wiki-curation` 审阅可复用业务知识。
+        - 向用户明确说明正式 Wiki 更新（或无更新结论）、审批证据，以及批准后删除该 change 目录和唯一 INDEX 行；等待明确决定。
+        - 获批后，先同步正式 Wiki 页面（如有）、`wiki/index.md`、append-only `wiki/log.md`，并在 candidate 中写完整同步结果；再运行 `python3 .harness/tools/cleanup_done_changes.py --change {change-id}`。
+        - candidate、审批、正式 Wiki 或同步信息缺失、冲突或不确定时，保留目录和 INDEX 行，仅报告需要用户处理；不得猜测或删除。
+        - 清理等待或失败只阻止该旧目录删除，不阻断 active change 恢复或新任务处理。工具成功后运行 `python3 .harness/tools/validate_change.py`，通过后继续启动。
+[ ] 4. 开始新任务时，读取 .harness/memory/lessons-learned.md 最近 3 条。
+[ ] 5. 遇到未知业务概念时查 .harness/wiki/，不猜测规则。
 ```
 
 ## Dispatch Loop

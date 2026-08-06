@@ -14,12 +14,12 @@ L3 按需查询层 — 存储业务文档、领域知识、架构说明等 Orche
 
 边界定义：
 
-- `.harness/changes/{change-id}/wiki/candidates.md`：变更本地候选知识，非 canonical，可记录 `none`、`blocked`、`rejected` 或 `deferred` 理由。
-- `.harness/wiki/*`：已获人工确认的正式业务 Wiki。
+- `.harness/changes/{change-id}/wiki/candidates.md`：目录保留期间的变更本地候选知识与审阅来源，非 canonical，可记录 `none`、`blocked`、`rejected` 或 `deferred` 理由；批准同步后，超额 `done` 目录可被清理。
+- `.harness/wiki/*`：已获人工确认的正式业务 Wiki；长期来源使用稳定的 change ID、人工批准证据和来源产物摘要，不能依赖可能被清理的 candidate 路径。
 - `.harness/wiki/index.md`：正式 Wiki catalog，只登记已批准条目。
-- `.harness/wiki/log.md`：approved/deferred/rejected Wiki 决策的 append-only 记录。
+- `.harness/wiki/log.md`：approved/deferred/rejected/no-update Wiki 决策的 append-only 记录。
 
-Rejected 或 deferred candidates 保留在对应 change artifact 中，不复制到正式 Wiki。未知业务规则必须保留 `{待确认}` 或进入 Phase 1 Open Questions，不得猜测。
+清理超额 `done` 目录前，必须完成正式页面（如有）、Wiki index 和 append-only Wiki log 的同步；无正式 Wiki 更新也必须在 log 记录人工决策。Rejected 或 deferred candidates 保留在对应 change artifact 中，不复制到正式 Wiki。未知业务规则必须保留 `{待确认}` 或进入 Phase 1 Open Questions，不得猜测。
 
 ## 业务项目接入要求
 
