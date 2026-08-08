@@ -38,6 +38,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ### Phase 1 — 需求分析
 
+- Agent: Planner (`.harness/agents/planner.md`)
 - 读取 Skills:
   - `idea-refine`
 - 按条件补读 Skills:
@@ -57,6 +58,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ### Phase 2 — 需求评审
 
+- Agent: Planner (`.harness/agents/planner.md`)
 - 读取 Skills:
   - `spec-driven-development`
 - 按条件补读 Skills:
@@ -77,6 +79,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ### Phase 3 — 任务规划
 
+- Agent: Planner (`.harness/agents/planner.md`)
 - 读取 Skills:
   - `planning-and-task-breakdown`
 - 按条件补读 Skills:
@@ -97,6 +100,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ### Phase 4 — 编码实现
 
+- Agent: Implementer (`.harness/agents/implementer.md`)
 - 读取 Skills:
   - `incremental-implementation`
 - 按条件补读 Skills:
@@ -124,6 +128,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ### Phase 5 — 编码评审
 
+- Agent: Reviewer (`.harness/agents/reviewer.md`)
 - 读取 Skills:
   - `code-review-and-quality`
 - 按条件补读 Skills:
@@ -144,6 +149,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ### Phase 6 — 单元测试
 
+- Agent: Implementer (`.harness/agents/implementer.md`)
 - 读取 Skills:
   - `test-driven-development`
 - 按条件补读 Skills:
@@ -163,6 +169,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ### Phase 7 — 测试评审
 
+- Agent: Reviewer (`.harness/agents/reviewer.md`)
 - 读取 Skills:
   - `code-review-and-quality`
   - `test-driven-development`
@@ -243,34 +250,38 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - 状态同步后 validator PASS
   - 不将 `done` 作为批准前 Gate 条件
 
-## Phase 4 Subagent 隔离实现原则
+## Agent 隔离实现原则
 
-Phase 4 采用 controller/subagent 协议：Orchestrator 是 controller，fresh subagent 是受限 implementer。subagent 不继承主会话历史；Orchestrator 必须构造自包含 prompt，把当前 slice 的完整任务文本和必要上下文直接放入 prompt，不得要求 subagent 自行读取完整计划或 Harness 流程文件。
+Standard-flow Phase 1-7 采用 controller/subagent 协议：Orchestrator 是 controller，Planner/Implementer/Reviewer Agent 是受限执行者。完整的隔离协议定义在 `.harness/agents/orchestrator.md` 的 Dispatch 步骤中。Agent 定义文件（planner.md / implementer.md / reviewer.md）规定各 Agent 的具体职责、允许/禁止操作、Status Protocol 和 Report Format。
+
+Phase 4 的 Implementer 定义见 `.harness/agents/implementer.md`，Phase 5/7 的 Reviewer 定义见 `.harness/agents/reviewer.md`。subagent 不继承主会话历史；Orchestrator 必须构造自包含 prompt，把当前 slice 的完整任务文本和必要上下文直接放入 prompt，不得要求 subagent 自行读取完整计划或 Harness 流程文件。
 
 ### Orchestrator 责任
 
-1. 从 approved `spec.md` / `tasks.md` 提取当前 Task Group / Slice 的完整文本、验收条件、相关代码路径、允许文件、禁止文件和 Phase 4 允许命令。
-2. 归档 `coding/isolation/input_packet.md`。
-3. 基于 input packet 构造实际发送给 subagent 的自包含 prompt，并归档 `coding/isolation/subagent_prompt.md`。
-4. 使用 fresh subagent 执行实现；同一 slice 不复用历史 subagent 上下文。
-5. 归档 subagent 返回为 `coding/isolation/subagent_output.md`。
+1. 从 approved 产物中提取当前 Phase 的完整上下文、验收条件、相关代码路径、允许文件、禁止文件和允许命令。
+2. 归档 `isolation/{agent}_prompt_{phase}.md`。
+3. 基于上下文构造实际发送给 subagent 的自包含 prompt，并归档为 `isolation/{agent}_prompt_{phase}.md`。
+4. 使用 fresh subagent 执行；同一 Phase 不复用历史 subagent 上下文。
+5. 归档 subagent 返回为 `isolation/{agent}_output_{phase}.md`。
 6. 按 status 协议处理结果：
-   - `DONE`：进入边界检查和编译验证。
+   - `DONE`：进入边界检查和验证。
    - `DONE_WITH_CONCERNS`：先处理 concerns；若影响范围、正确性或证据完整性，Gate 不得 pass。
    - `NEEDS_CONTEXT`：补充上下文后重新构造 prompt 并重新 dispatch。
    - `BLOCKED`：Stop-the-Line，记录 blocker、根因和回退/澄清路径。
-7. 写入 `coding/isolation/merge_report.md`，检查 allowed files、禁止产物、禁止声明和 subagent status 处理结果。
-8. 执行 Phase 4 compile/build/typecheck 或 approved narrow smoke check，归档编译证据、Author/Self Review、`coding_report_v1.md` 和 CK4 门禁状态。
+7. 写入 `isolation/{agent}_merge_report_{phase}.md`，检查边界合规和 Agent status 处理结果。
+8. 执行当前 Phase 的验证步骤，归档证据和门禁状态。
 
-### Subagent 约束
+### Subagent 约束（通用）
 
-subagent 只执行 prompt 中指定的当前 slice。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建 Phase 5+ 产物、修改 forbidden files、运行或冒充 Phase 6 测试职责、提交/推送/部署、要求读取完整 `summary.md` / `tasks.md` / Harness 规则来重新解释任务。
+subagent 只执行 prompt 中指定的当前 task。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建非当前 Phase 产物、修改 forbidden files、提交/推送/部署、要求读取完整 `summary.md` / Harness 规则来重新解释任务。
+
+Phase 专用约束见对应 Agent 文件的禁止操作节。
 
 ### Subagent Prompt 必含字段
 
-- Task description：当前 slice 完整文本，直接粘贴，不让 subagent 自行读取计划文件。
-- Approved context：spec 摘要、相关代码路径、依赖、架构约束。
+- Task description：当前 Phase 完整任务文本，直接粘贴，不让 subagent 自行读取计划文件。
+- Approved context：spec/tasks 摘要、相关代码路径、依赖、架构约束。
 - Allowed files / forbidden files。
 - Allowed commands / forbidden commands。
 - Status protocol：`DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`。
-- Report format：status、what changed、files changed、commands run、exit codes、self-review、concerns、boundary compliance。
+- Report format：按对应 Agent 文件 Report Format 节规定的结构。

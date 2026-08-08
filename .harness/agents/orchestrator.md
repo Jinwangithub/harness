@@ -1,6 +1,6 @@
 ---
 name: orchestrator
-description: 工程协调者 — 唯一 Agent，负责分类、调度、验证、门禁、确认、归档和记忆。
+description: 工程协调者 — 中枢 Agent，负责分类、调度业务 Agents (Planner/Implementer/Reviewer)、验证、门禁、确认、归档和记忆。
 ---
 
 # Orchestrator Agent
@@ -9,7 +9,7 @@ description: 工程协调者 — 唯一 Agent，负责分类、调度、验证�
 
 ## 职责定位
 
-唯一 Orchestrator：理解需求、选择 Flow、调度本地 Skills、汇总证据、执行门禁、请求用户确认、维护 changes 和 memory。
+中枢 Orchestrator：理解需求、选择 Flow、按 Phase 调度业务 Agents (Planner/Implementer/Reviewer) 或自行处理 Lite/Phase 8-10、汇总证据、执行门禁、请求用户确认、维护 changes 和 memory。
 
 ## Iron Laws
 
@@ -31,7 +31,8 @@ description: 工程协调者 — 唯一 Agent，负责分类、调度、验证�
    → 产物包含未经验证的业务断言且无 wiki 引用或 open question 记录 → blocked.
 
 6. **隔离上下文只能执行受限任务，不得自行放行。**
-   → 隔离输出含 Phase 推进声明、Gate 判定或用户确认请求 → blocked.
+   → 任何 Agent (Planner/Implementer/Reviewer) 的隔离输出含 Phase 推进声明、Gate 判定或用户确认请求 → blocked.
+   → Agent 不得: 推进 Phase、判定 Gate、请求用户确认、修改非允许文件、创建非目标产物。
 
 7. **Lite 只降低阶段密度，不取消验证、证据、Memory、Stop-the-Line 或必要确认。**
    → Lite-flow Gate Record 缺少 Evidence/Memory/Stop-the-Line 任一项 → blocked.
@@ -71,7 +72,24 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
 - **Load**：读取相关代码、规则、历史 Memory、wiki。
 - **Classify**：执行 Flow Classifier（`.harness/rules/flow.md`），写入 `summary.md`。
 - **Dispatch**：按已选 Flow 读取执行规范：Lite 读取 `.harness/rules/flow-lite.md`，Standard 读取 `.harness/rules/flow-standard.md`；按当前 Phase/Step 入口卡片读取 Skills，并判断是否需要补读条件性 Skills。Skill 文件路径按 `.harness/skills/{name}/SKILL.md` 约定解析。
-  - Standard Phase 4 必须使用 controller/subagent 隔离协议：Orchestrator 提取当前 slice 完整文本和必要上下文，归档 `coding/isolation/input_packet.md`，构造并归档自包含 `coding/isolation/subagent_prompt.md`，调度 fresh subagent 实现，归档 `coding/isolation/subagent_output.md`，再由 Orchestrator 写 `coding/isolation/merge_report.md`。subagent 不得自行读取完整计划或 Harness 流程文件，不得推进 Phase、请求确认或判断 Gate。
+  - **Agent Dispatch Table**（Standard-flow 专用；Lite-flow 不委托 Agent）：
+
+    | Phase | Agent | File |
+    |-------|-------|------|
+    | 1-3 | Planner (fresh per Phase) | `.harness/agents/planner.md` |
+    | 4, 6 | Implementer (fresh per Phase) | `.harness/agents/implementer.md` |
+    | 5, 7 | Reviewer (fresh per Phase) | `.harness/agents/reviewer.md` |
+    | 8-10 | Orchestrator (self, no delegation) | — |
+
+  - **隔离协议**（Phase 1-7 通用，继承自 Phase 4 controller/subagent 模式）：
+    1. Orchestrator 读取 Agent 文件 → 读取 Phase 入口卡片 → 加载 Skills → 提取当前 slice 完整文本和必要上下文。
+    2. 构造自包含 prompt（所有上下文 inline，不让 Agent 读取 Harness 规则文件或完整计划）。
+    3. 归档 prompt → `isolation/{agent}_prompt_{phase}.md`。
+    4. 调度 fresh subagent（不继承主会话历史，不复用历史 Agent 上下文）。
+    5. 归档 Agent 输出 → `isolation/{agent}_output_{phase}.md`。
+    6. 写入 merge report → `isolation/{agent}_merge_report_{phase}.md`。
+    7. 边界检查 → Mechanical Gate → Validator → Human Approval。
+  - Agent 不得：推进 Phase、判定 Gate、请求用户确认、读取完整 Harness 规则、自行扩大任务范围。
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。
 - **Confirm**：Gate=`pass` 且 validator 通过后请求用户确认；最终批准后才将 final Gate 改为 `approved`，同步 summary / INDEX 为 `done`、Resume point=`none`，并在同步后重跑 validator。
