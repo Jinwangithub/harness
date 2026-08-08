@@ -270,7 +270,7 @@ Phase 4 的 Implementer 定义见 `.harness/agents/implementer.md`，Phase 5/7 �
 
 ### Subagent 约束（通用）
 
-subagent 只执行 prompt 中指定的当前 task。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建非当前 Phase 产物、修改 forbidden files、提交/推送/部署、要求读取完整 `summary.md` / Harness 规则来重新解释任务。
+subagent 只执行 prompt 中指定的当前 task。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建非当前 Phase 产物、修改 forbidden files、提交/推送/部署、读取 `.harness/rules/` / `.harness/agents/` / `.harness/changes/INDEX.md` 等 Harness 元文件来重新解释任务。subagent 可以读取 `.harness/wiki/`（业务知识）、项目源码和已批准产物。
 
 Phase 专用约束见对应 Agent 文件的禁止操作节。
 

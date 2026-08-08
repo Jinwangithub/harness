@@ -51,7 +51,7 @@ Reviewer Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负责�
 - Phase 7 专属禁止：
   - 不扩大测试范围为新需求。
   - 不创建新测试代码。
-- **不得要求读取完整 `summary.md` / Harness 规则来重新解释任务**。
+- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 reviewer.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 `.harness/wiki/`（业务知识）和项目源码。
 
 ## Status Protocol
 

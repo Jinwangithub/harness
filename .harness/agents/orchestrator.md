@@ -86,7 +86,7 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
     2. 构造自包含 prompt，调度 fresh subagent（不继承主会话历史，不复用历史 Agent 上下文）。
     3. Agent 返回后，Orchestrator 按 Status Protocol 处理结果、检查边界合规。
     4. Orchestrator 将 Agent 输出写入当前 Phase 最终产物 → Mechanical Gate → Validator → Human Approval。
-  - Agent 不得：推进 Phase、判定 Gate、请求用户确认、读取完整 Harness 规则、自行扩大任务范围。
+  - Agent 不得：推进 Phase、判定 Gate、请求用户确认、读取 `.harness/rules/` / `.harness/agents/` / `.harness/changes/INDEX.md` 等 Harness 元文件、自行扩大任务范围。Agent 可以读取 `.harness/wiki/`（业务知识）、项目源码和已批准产物。
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。
 - **Confirm**：Gate=`pass` 且 validator 通过后请求用户确认；最终批准后才将 final Gate 改为 `approved`，同步 summary / INDEX 为 `done`、Resume point=`none`，并在同步后重跑 validator。

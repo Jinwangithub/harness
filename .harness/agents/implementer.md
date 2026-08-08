@@ -52,7 +52,7 @@ Implementer Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负�
   - 不修改非测试代码（不改需求/spec）。
   - 不运行 Phase 7 测试评审。
   - 不修改 forbidden files（由 Orchestrator 指定）。
-- **不得要求读取完整 `summary.md` / Harness 规则来重新解释任务**。
+- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 implementer.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 `.harness/wiki/`（业务知识）和项目源码。
 
 ## Status Protocol
 

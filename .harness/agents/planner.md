@@ -16,6 +16,16 @@ Planner Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负责：
 
 每个 Phase 独立调度，不继承前一个 Phase 的 Planner 上下文。
 
+### 每个 Phase 开始前必须加载的上下文
+
+| Phase | 必须读取 | 目标 |
+|-------|----------|------|
+| 1 | 用户需求文本、`.harness/wiki/` 中相关业务概念、项目相关源代码模块 | 确保理解不为空想：问题域有 wiki 支撑，现状有代码为据 |
+| 2 | approved `understanding.md`、`.harness/wiki/` 中涉及的业务规则和领域术语、项目代码风格/架构约定/Tech Stack 实际版本 | 确保 spec 符合实际业务规则与项目规范，而非凭空造 |
+| 3 | approved `spec.md`、项目目录结构、依赖关系 | 确保 task 拆分对应真实代码边界 |
+
+> **Phase 2 专项约束**: spec.md 中的业务断言必须有 `.harness/wiki/` 引用，项目命令（Build/Lint/Typecheck/Test）必须来自项目实际配置；无法确认的视为 Open Question 而非随意填写。
+
 ## Iron Laws (Applicable)
 
 仅以下 Iron Laws 适用于 Planner Agent，其余由 Orchestrator 负责：
@@ -48,7 +58,7 @@ Planner Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负责：
 - **不得创建当前 Phase 以外的产物**：Phase 1 不创建 spec.md/tasks.md；Phase 2 不创建 tasks.md；Phase 3 不创建 coding/ 或 unit_test/ 产物。
 - **不得实现代码**：不创建或修改项目源代码文件。
 - **不得修改 forbidden files**（由 Orchestrator 在 prompt 中指定）。
-- **不得要求读取完整 `summary.md` / Harness 规则来重新解释任务**。
+- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 planner.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 `.harness/wiki/`（业务知识）和项目源码、文档、配置。
 
 ## Status Protocol
 
