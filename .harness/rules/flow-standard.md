@@ -259,17 +259,14 @@ Phase 4 的 Implementer 定义见 `.harness/agents/implementer.md`，Phase 5/7 �
 ### Orchestrator 责任
 
 1. 从 approved 产物中提取当前 Phase 的完整上下文、验收条件、相关代码路径、允许文件、禁止文件和允许命令。
-2. 归档 `isolation/{agent}_prompt_{phase}.md`。
-3. 基于上下文构造实际发送给 subagent 的自包含 prompt，并归档为 `isolation/{agent}_prompt_{phase}.md`。
-4. 使用 fresh subagent 执行；同一 Phase 不复用历史 subagent 上下文。
-5. 归档 subagent 返回为 `isolation/{agent}_output_{phase}.md`。
-6. 按 status 协议处理结果：
+2. 构造自包含 prompt，调度 fresh subagent（不继承主会话历史，不复用历史 Agent 上下文）。
+3. 按 status 协议处理结果：
    - `DONE`：进入边界检查和验证。
    - `DONE_WITH_CONCERNS`：先处理 concerns；若影响范围、正确性或证据完整性，Gate 不得 pass。
    - `NEEDS_CONTEXT`：补充上下文后重新构造 prompt 并重新 dispatch。
    - `BLOCKED`：Stop-the-Line，记录 blocker、根因和回退/澄清路径。
-7. 写入 `isolation/{agent}_merge_report_{phase}.md`，检查边界合规和 Agent status 处理结果。
-8. 执行当前 Phase 的验证步骤，归档证据和门禁状态。
+4. 将 Agent 输出写入当前 Phase 最终产物，检查边界合规。
+5. 执行当前 Phase 的验证步骤，归档证据和门禁状态。
 
 ### Subagent 约束（通用）
 

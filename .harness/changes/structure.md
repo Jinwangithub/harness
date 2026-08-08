@@ -74,41 +74,13 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_resu
 │   ├── understanding.md
 │   ├── spec.md
 │   ├── tasks.md
-│   ├── isolation/
-│   │   ├── planner_prompt_1.md
-│   │   ├── planner_output_1.md
-│   │   ├── planner_merge_report_1.md
-│   │   ├── planner_prompt_2.md
-│   │   ├── planner_output_2.md
-│   │   ├── planner_merge_report_2.md
-│   │   ├── planner_prompt_3.md
-│   │   ├── planner_output_3.md
-│   │   └── planner_merge_report_3.md
 │   └── review/
 ├── coding/
 │   ├── coding_report_v1.md
-│   ├── isolation/
-│   │   ├── implementer_prompt_4.md
-│   │   ├── implementer_output_4.md
-│   │   └── implementer_merge_report_4.md
 │   └── review/
-│       ├── review_v1.md
-│       └── isolation/
-│           ├── reviewer_prompt_5.md
-│           ├── reviewer_output_5.md
-│           └── reviewer_merge_report_5.md
 ├── unit_test/
 │   ├── test_report.md
-│   ├── isolation/
-│   │   ├── implementer_prompt_6.md
-│   │   ├── implementer_output_6.md
-│   │   └── implementer_merge_report_6.md
 │   └── review/
-│       ├── test_review_v1.md
-│       └── isolation/
-│           ├── reviewer_prompt_7.md
-│           ├── reviewer_output_7.md
-│           └── reviewer_merge_report_7.md
 ├── ci_result/
 ├── deployment/
 ├── wiki/

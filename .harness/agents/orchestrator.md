@@ -81,14 +81,11 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
     | 5, 7 | Reviewer (fresh per Phase) | `.harness/agents/reviewer.md` |
     | 8-10 | Orchestrator (self, no delegation) | — |
 
-  - **隔离协议**（Phase 1-7 通用，继承自 Phase 4 controller/subagent 模式）：
+  - **隔离协议**（Phase 1-7 通用）：
     1. Orchestrator 读取 Agent 文件 → 读取 Phase 入口卡片 → 加载 Skills → 提取当前 slice 完整文本和必要上下文。
-    2. 构造自包含 prompt（所有上下文 inline，不让 Agent 读取 Harness 规则文件或完整计划）。
-    3. 归档 prompt → `isolation/{agent}_prompt_{phase}.md`。
-    4. 调度 fresh subagent（不继承主会话历史，不复用历史 Agent 上下文）。
-    5. 归档 Agent 输出 → `isolation/{agent}_output_{phase}.md`。
-    6. 写入 merge report → `isolation/{agent}_merge_report_{phase}.md`。
-    7. 边界检查 → Mechanical Gate → Validator → Human Approval。
+    2. 构造自包含 prompt，调度 fresh subagent（不继承主会话历史，不复用历史 Agent 上下文）。
+    3. Agent 返回后，Orchestrator 按 Status Protocol 处理结果、检查边界合规。
+    4. Orchestrator 将 Agent 输出写入当前 Phase 最终产物 → Mechanical Gate → Validator → Human Approval。
   - Agent 不得：推进 Phase、判定 Gate、请求用户确认、读取完整 Harness 规则、自行扩大任务范围。
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。
