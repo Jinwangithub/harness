@@ -33,6 +33,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Memory status
 - **Memory recorded**: {N} entries / none
 - **Memory evidence**: {decisions.log / lessons-learned.md / known-issues.md / none}
+- **Self-evolution trigger**: {yes 记录在 Gate Record 中 / none}
 
 ## Lite Spec (Lite-flow 专用)
 {以下内容仅在 Lite-flow 时填写，Standard-flow 不填写此节}

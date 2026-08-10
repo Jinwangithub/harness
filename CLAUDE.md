@@ -24,5 +24,7 @@
 | `.harness/wiki/README.md` | 遇到未知业务概念时读 |
 | `.harness/wiki/index.md` | Module→Wiki 映射表，按域查找 wiki 页面时读（由 `generate_wiki_index.py` 自动生成） |
 | `.harness/wiki/log.md` | 已批准 Wiki 更新历史和 rejected/deferred 决策记录 |
+| `.harness/rules/evolution.md` | 自演化协议：触发条件、分析范围、批准路径、安全检查时读 |
+| `python3 .harness/tools/analyze_failures.py` | 变更交付后、Session Startup 检查 pending candidates 时运行 |
 | `.harness/skills/business-wiki-curation/SKILL.md` | 最终交付业务 Wiki candidate curation 和 approval-controlled Wiki 更新 |
 | `.harness/USAGE.md` | 人类用户指南，Agent 不逐字加载 |

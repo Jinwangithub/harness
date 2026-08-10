@@ -59,14 +59,15 @@ description: 工程协调者 — 中枢 Agent，负责分类、调度业务 Agen
         - 获批后，先同步正式 Wiki 页面（如有）、`wiki/index.md`、append-only `wiki/log.md`，并在 candidate 中写完整同步结果；再运行 `python3 .harness/tools/cleanup_done_changes.py --change {change-id}`。
         - candidate、审批、正式 Wiki 或同步信息缺失、冲突或不确定时，保留目录和 INDEX 行，仅报告需要用户处理；不得猜测或删除。
         - 清理等待或失败只阻止该旧目录删除，不阻断 active change 恢复或新任务处理。工具成功后运行 `python3 .harness/tools/validate_change.py`，通过后继续启动。
-[ ] 4. 开始新任务时，读取 .harness/memory/lessons-learned.md 最近 3 条。
-[ ] 5. 遇到未知业务概念时查 .harness/wiki/，不猜测规则。
+[ ] 4. 检查 `.harness/evolution/candidates.md` 是否有 pending candidates，向用户报告。
+[ ] 5. 开始新任务时，读取 .harness/memory/lessons-learned.md 最近 3 条。
+[ ] 6. 遇到未知业务概念时查 .harness/wiki/，不猜测规则。
 ```
 
 ## Dispatch Loop
 
 ```
-Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidate Curation → Archive → Remember
+Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidate Curation → Archive → Remember → Evolve
 ```
 
 - **Load**：读取相关代码、规则、历史 Memory、wiki。
@@ -93,6 +94,7 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
 - **Wiki Candidate Curation**：最终 Step/Phase 声明交付完成前读取 `.harness/skills/business-wiki-curation/SKILL.md`，归档 `.harness/changes/{change-id}/wiki/candidates.md`；未经明确用户批准不得更新正式 `.harness/wiki/`。批准后：更新对应子目录正式页面（`project/`、`domains/`、`integrations/`、`modules/`）→ 运行 `python3 .harness/tools/generate_wiki_index.py` 重生成 `index.md` → append `log.md`。最终用户可见完成摘要必须报告 Wiki candidate status。
 - **Archive**：归档产物、Skill Load、Gate 状态。最终完成仅按两段式顺序执行：用户批准 → final Gate Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done`、Resume point=`none` → validator 重验 PASS → 声明完成。validator 报 INDEX/summary Status 或 Resume point 冲突时必须 Stop-the-Line，禁止自行择一覆盖。
 - **Remember**：触发即记录（`.harness/memory/README.md`）；出口报告记录数量或 none。
+- **Evolve**：最终批准交付后，如有 gate fail/blocked，运行 `python3 .harness/tools/analyze_failures.py`。新 pattern 写入 `evolution/candidates.md`。用户确认后按 `evolution.md` 协议处理。演化分析失败不阻断变更完成。详见 `.harness/rules/evolution.md`。
 
 ## 责任边界
 

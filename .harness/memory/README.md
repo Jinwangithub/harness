@@ -11,6 +11,7 @@
 | `decisions.log` | 架构决策记录 | 做出架构、流程、治理或长期维护决策 |
 | `lessons-learned.md` | 经验教训 | 发现 Agent 错误、流程缺陷、可复用失败模式 |
 | `known-issues.md` | 已知问题 | 遇到暂未修复的技术限制、环境限制或治理债务 |
+| `../evolution/log.md` | 自演化决策日志 | 批准/拒绝/延期 evolution candidate |
 
 ## 触发即记录
 
@@ -19,6 +20,7 @@
 - 做了架构或治理决策（规则、模板、Skill、Gate、Flow、changes 结构等）→ `decisions.log`
 - 发现 Agent 错误、流程教训、模板误导或 Skill 冲突 → `lessons-learned.md`
 - 遇到已知限制、暂无法修复的问题或治理债务 → `known-issues.md`
+- 批准、拒绝或延期 evolution candidate → `../evolution/log.md`
 
 记录必须使用下方完整模板，禁止简化字段。历史旧格式可作为 legacy evidence 保留；新记录必须使用完整模板。
 
@@ -28,6 +30,7 @@
 |------|----------|
 | Standard-flow | 每个 Phase 出口；触发即记录 |
 | Lite-flow | L1 后 + L3 后；触发即记录 |
+| Evolution | approve/reject/defer candidate 时记录 |
 
 每次出口报告必须包含 `Memory recorded: {N} entries / none`。
 

@@ -18,6 +18,7 @@ Mechanical Gate=`fail|blocked`、执行异常、证据缺失或发现风险扩�
 5. **修复并重验证**：修复后生成 fresh evidence；不得复用旧 evidence 作为通过依据。
 6. **Memory**：命中 Memory 触发条件时立即记录；未触发也要在出口报告写 `Memory: none`。
 7. **风险扩大重分类**：Lite-flow 中发现跨模块、公共契约、安全、数据、性能、迁移、架构、部署或治理风险时，重新执行 Flow Classifier；命中强制 Standard 条件则升级 Standard-flow。
+8. **Self-evolution trigger**：失败已解决后，标记当前变更需进行演化分析。最终交付完成后由 Orchestrator 统一运行 `analyze_failures.py`。演化分析失败不阻断变更完成。详见 `.harness/rules/evolution.md`。
 
 ## 回退路径
 
