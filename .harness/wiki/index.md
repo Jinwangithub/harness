@@ -1,21 +1,17 @@
-# Business Wiki Index
+# Wiki Index
 
-Entries are added only after explicit human approval. Each formal entry records its formal Wiki page and stable `Source change ID`; detailed provenance for multi-source pages belongs in that page itself.
+> 由 `generate_wiki_index.py` 自动生成。不要手工编辑此文件。
 
-Entry format:
+## Module → Wiki 映射
 
-```markdown
-- `{title}` — `.harness/wiki/{path}`; Source change ID: `{change-id}`
-```
+| 代码模块 | 所属业务域 | 相关 Wiki 页面 |
+|----------|-----------|---------------|
 
-## Project
+## 按业务域
 
-No approved project entries yet.
+### global
 
-## Domains
+| 页面 | 类型 | 标题 |
+|------|------|------|
+| project/overview.md |  | 项目概览 |
 
-No approved domain entries yet.
-
-## Integrations
-
-No approved integration entries yet.

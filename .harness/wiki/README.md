@@ -1,55 +1,100 @@
 # 项目知识库
 
-## 用途
+> Orchestrator L3 按需查询层 — 存储项目业务域名、术语、集成、模块映射等已获人工确认的正式知识。
 
-L3 按需查询层 — 存储业务文档、领域知识、架构说明等 Orchestrator 按需查阅的内容。
+## 目录结构
 
-> **当前状态：所有 wiki 文件均为模板，尚未填充任何项目业务知识。** 查到这里是空的 ≠ 不需要查 —— 意味着此项目的业务知识还没有被记录。Agent 应在 Phase 1 将缺失的业务知识作为疑问点询问用户。
+```text
+.harness/wiki/
+├── README.md                # 本文件：原则 + 实例化指南
+├── index.md                 # 自动生成：Module→Wiki 映射 + 按域分类索引
+├── log.md                   # Append-only：approved/rejected/deferred 决策记录
+├── project/
+│   └── overview.md          # 项目概览：技术栈 + 模块→域映射表 + 构建 + 环境
+├── domains/
+│   ├── _TEMPLATE.md         # 模板（_ 前缀不纳入 index）
+│   └── {domain}.md          # 业务域知识：术语、实体、状态机、流程、异常规则
+├── integrations/
+│   ├── _TEMPLATE.md         # 模板
+│   └── {system}.md          # 外部系统集成：协议、鉴权、超时、重试、降级
+└── modules/
+    ├── _TEMPLATE.md         # 模板
+    └── {module}.md          # 模块级业务知识：输入输出约束、边界条件、非功能要求
+```
 
-当前仓库是 Harness Engineering 框架模板，不内置具体业务知识。不要在模板仓库中虚构业务域、外部系统或部署环境。
+- `_TEMPLATE.md` 文件不会被 `generate_wiki_index.py` 扫描入索引。
+- 所有正式页面头部必须有 YAML frontmatter（见各模板）。
 
 ## Candidate-first 更新策略
 
-业务 Wiki 采用 candidate-first：每个完成需求先把可沉淀的业务知识写入 `.harness/changes/{change-id}/wiki/candidates.md`，该文件只是候选层，不是 canonical knowledge。未经明确人工批准，不得把候选事实直接写入 `.harness/wiki/`。
+1. 每个完成需求的业务知识先写入 `.harness/changes/{change-id}/wiki/candidates.md`（候选层，非 canonical）。
+2. 未经明确人类批准，不得将候选内容写入 `.harness/wiki/`。
+3. 批准后：更新正式 wiki 页面 → 运行 `python3 .harness/tools/generate_wiki_index.py` 重生成 `index.md` → append 到 `log.md`。
+4. Rejected / deferred 的候选仅保留在 change artifact 中。
 
-边界定义：
+## 实例化指南
 
-- `.harness/changes/{change-id}/wiki/candidates.md`：目录保留期间的变更本地候选知识与审阅来源，非 canonical，可记录 `none`、`blocked`、`rejected` 或 `deferred` 理由；批准同步后，超额 `done` 目录可被清理。
-- `.harness/wiki/*`：已获人工确认的正式业务 Wiki；长期来源使用稳定的 change ID、人工批准证据和来源产物摘要，不能依赖可能被清理的 candidate 路径。
-- `.harness/wiki/index.md`：正式 Wiki catalog，只登记已批准条目。
-- `.harness/wiki/log.md`：approved/deferred/rejected/no-update Wiki 决策的 append-only 记录。
+### 最小填充路径
 
-清理超额 `done` 目录前，必须完成正式页面（如有）、Wiki index 和 append-only Wiki log 的同步；无正式 Wiki 更新也必须在 log 记录人工决策。Rejected 或 deferred candidates 保留在对应 change artifact 中，不复制到正式 Wiki。未知业务规则必须保留 `{待确认}` 或进入 Phase 1 Open Questions，不得猜测。
+1. 填写 `project/overview.md`：项目名、技术栈、**模块→域映射表**、构建命令。
+2. 只填写已知事实，未知业务规则写 `{待确认}`。
+3. 当前需求涉及某业务域时，才创建 `domains/{domain}.md`。
+4. 当前需求涉及外部系统时，才创建 `integrations/{system}.md`。
+5. 当前需求涉及某模块的特定业务约束时，才创建 `modules/{module}.md`。
 
-## 业务项目接入要求
+### 原则
 
-先读：
+- 不得猜测：未知业务规则写 `{待确认}` 或记入 Phase 1 Open Questions。
+- 模板文件以 `_TEMPLATE.md` 命名，正式页面按实际名称。
+- `generate_wiki_index.py` 自动同步 `index.md`，不要手工编辑。
 
-- `quickstart.md`：最小填充路径和 `{待确认}` 使用规则。
-- `minimal-example.md`：模板性质示例，不代表本仓库真实业务。
+### Minimal Example
 
-业务项目接入 Harness 时必须至少实例化：
+以下是 `project/overview.md` 的最小实例化形式：
 
-- `project-overview.md`：项目名称、技术栈、模块边界、关键业务域、外部依赖、构建命令、环境说明。
+```markdown
+---
+title: 示例订单服务
+domain: order-management
+updated: 2026-01-01
+---
 
-按需实例化：
+# 项目概览
 
-- 涉及业务领域时：`domain-template.md`
-- 涉及外部系统时：`integration-template.md`
+## 项目
+- 名称：示例订单服务
+- 目的：演示 wiki 最小实例化。
 
-未知业务规则必须写 `{待确认}` 或进入 Phase 1 Open Questions，不得猜测。
+## 技术栈
+- Runtime: {待确认}
+- Build: {待确认}
+- Test: {待确认}
 
-## 推荐内容
+## 模块映射
 
-- 业务领域概念说明
-- 核心业务流程文档
-- 上下游系统集成说明
-- 部署架构图
-- 数据库 ER 图
-- API 接口文档
-- 环境信息（开发/测试/生产）
-- 第三方服务对接说明
+| 代码路径 | 业务域 | 说明 |
+|----------|--------|------|
+| src/orders/ | order-management | 订单录入、状态流转 |
+| src/notifications/ | notification | 通知偏好、消息发送 |
 
-## 使用方式
+## 关键业务域
+- order-management: 订单完整生命周期管理，精确状态和流转规则为 {待确认}。
+- notification: 消息通知渠道规则为 {待确认}。
 
-Orchestrator 在遇到不清楚的业务概念时，主动查阅此目录。若必需的业务知识未实例化，应在 Phase 1 作为疑问点询问用户，而不是猜测。
+## 外部依赖
+- 邮件服务：{待确认}
+- 短信服务：{待确认}
+
+## 构建命令
+{待确认}
+
+## 环境说明
+- 开发：{待确认}
+- 测试：{待确认}
+- 生产：{待确认}
+```
+
+## Orchestrator 使用规则
+
+- 遇到不清的业务概念时，先查 `index.md` 的 Module→Wiki 映射表找到对应域/模块页面。
+- 若必要业务知识未实例化或标记 `{待确认}`，在 Phase 1 作为 Open Question 询问用户，不猜测。

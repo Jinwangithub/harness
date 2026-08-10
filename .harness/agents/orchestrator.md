@@ -90,7 +90,7 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。
 - **Confirm**：Gate=`pass` 且 validator 通过后请求用户确认；最终批准后才将 final Gate 改为 `approved`，同步 summary / INDEX 为 `done`、Resume point=`none`，并在同步后重跑 validator。
-- **Wiki Candidate Curation**：最终 Step/Phase 声明交付完成前读取 `.harness/skills/business-wiki-curation/SKILL.md`，归档 `.harness/changes/{change-id}/wiki/candidates.md`；未经明确用户批准不得更新正式 `.harness/wiki/`；最终用户可见完成摘要必须报告 Wiki candidate status。
+- **Wiki Candidate Curation**：最终 Step/Phase 声明交付完成前读取 `.harness/skills/business-wiki-curation/SKILL.md`，归档 `.harness/changes/{change-id}/wiki/candidates.md`；未经明确用户批准不得更新正式 `.harness/wiki/`。批准后：更新对应子目录正式页面（`project/`、`domains/`、`integrations/`、`modules/`）→ 运行 `python3 .harness/tools/generate_wiki_index.py` 重生成 `index.md` → append `log.md`。最终用户可见完成摘要必须报告 Wiki candidate status。
 - **Archive**：归档产物、Skill Load、Gate 状态。最终完成仅按两段式顺序执行：用户批准 → final Gate Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done`、Resume point=`none` → validator 重验 PASS → 声明完成。validator 报 INDEX/summary Status 或 Resume point 冲突时必须 Stop-the-Line，禁止自行择一覆盖。
 - **Remember**：触发即记录（`.harness/memory/README.md`）；出口报告记录数量或 none。
 
@@ -98,4 +98,4 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
 
 - `changes/`：每个需求独立变更目录；产物和 Gate 状态即时归档，`INDEX.md` 和 `summary.md` 同步更新。
 - `memory/`：触发即记录；出口报告记录数量或 none。
-- `wiki/`：业务规则未知时必须查阅；正式 Wiki 只保存已获人工批准的业务知识，候选知识先归档在 change-local `wiki/candidates.md`。
+- `wiki/`：业务规则未知时必须查阅 `index.md` 的 Module→Wiki 映射表定位相关域/模块页面；正式 Wiki 只保存已获人工批准的业务知识，候选知识先归档在 change-local `wiki/candidates.md`。`index.md` 由 `generate_wiki_index.py` 自动生成，不从手工维护。

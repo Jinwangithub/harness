@@ -59,12 +59,16 @@ Unknown business rules must remain `{待确认}` or Phase 1 Open Questions. Do n
 
 1. Inspect the completed change artifacts for the current `{change-id}`.
 2. Identify durable business knowledge and separate it from implementation-only details.
-3. Search existing `.harness/wiki/` pages before proposing updates to avoid duplicates or contradictions.
-4. Generate `.harness/changes/{change-id}/wiki/candidates.md` using the template in `.harness/changes/templates.md`.
+3. Before proposing updates, search existing `.harness/wiki/` pages and check `project/overview.md` module mapping to identify which domain/module this knowledge belongs to.
+4. Generate `.harness/changes/{change-id}/wiki/candidates.md` using the template in `.harness/changes/templates.md`. Set `Proposed target` to the correct subdirectory path:
+   - `wiki/project/overview.md` — project-level facts
+   - `wiki/domains/{domain}.md` — business domain knowledge
+   - `wiki/integrations/{system}.md` — external system integration
+   - `wiki/modules/{module}.md` — module-level constraints
 5. At delivery, ask for human approval for any formal Wiki update.
-6. If approved, update the relevant formal Wiki pages and synchronize:
-   - `.harness/wiki/index.md`
-   - `.harness/wiki/log.md`
+6. If approved, update the relevant formal Wiki pages (with YAML frontmatter per template), then synchronize:
+   - Run `python3 .harness/tools/generate_wiki_index.py` to regenerate `.harness/wiki/index.md`.
+   - Append decision to `.harness/wiki/log.md`.
 7. If rejected, deferred, partially approved, or no candidates exist, record the decision and reason in `wiki/candidates.md` and delivery artifacts.
 
 ## Verification Checklist
@@ -76,5 +80,5 @@ Unknown business rules must remain `{待确认}` or Phase 1 Open Questions. Do n
 - [ ] Candidate content avoids guesses and secrets.
 - [ ] Human Wiki Approval status is recorded.
 - [ ] Formal Wiki was updated only after explicit human approval.
-- [ ] If formal Wiki was updated, `.harness/wiki/index.md` and `.harness/wiki/log.md` were synchronized.
+- [ ] If formal Wiki was updated, `generate_wiki_index.py` was run and `.harness/wiki/log.md` was appended.
 - [ ] If no durable knowledge exists, `none` and the reason are recorded.

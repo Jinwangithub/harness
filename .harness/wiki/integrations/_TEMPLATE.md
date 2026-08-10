@@ -1,10 +1,14 @@
-# Integration Template
+---
+title: {系统名称}
+domain: {domain-name}
+modules:
+  - {src/path}
+type: integration-fact
+tags: [{tag1}, {tag2}]
+updated: {YYYY-MM-DD}
+---
 
-用于外部系统接入说明。不要在模板中填写虚构系统信息。
-
-## 系统名称
-
-- {system name}
+# {系统名称}
 
 ## 接入用途
 
@@ -18,7 +22,7 @@
 
 ## 鉴权
 
-- 鉴权方式：{OAuth2/API Key/mTLS/etc.}
+- 方式：{OAuth2/API Key/mTLS/etc.}
 - 密钥存储：{配置中心/环境变量/密钥管理服务}
 - 注意：不得提交真实 token、cookie、密钥。
 
@@ -36,7 +40,7 @@
 
 ## 降级
 
-- 降级触发条件：{condition}
+- 触发条件：{condition}
 - 降级行为：{behavior}
 - 用户可见影响：{impact}
 
@@ -45,10 +49,10 @@
 - 成功率：{metric}
 - 延迟：{metric}
 - 错误码：{metric}
-- 告警规则：{alert}
+- 告警：{alert}
 
 ## 测试环境
 
-- 测试 Endpoint / Topic：{placeholder}
+- 测试 Endpoint：{placeholder, no secrets}
 - 测试账号：{placeholder, no secrets}
 - Mock / Sandbox：{description}
