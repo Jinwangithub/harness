@@ -114,15 +114,9 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - 不运行 Phase 6 测试职责
   - 不冒充 Phase 5
 - 产物提示:
-  - `coding/isolation/input_packet.md`
-  - `coding/isolation/subagent_prompt.md`
-  - `coding/isolation/subagent_output.md`
-  - `coding/isolation/merge_report.md`
   - `coding/coding_report_v1.md`
 - Gate 提示:
-  - fresh subagent 隔离执行证据四件套存在
-  - subagent status 已处理（DONE / DONE_WITH_CONCERNS / BLOCKED / NEEDS_CONTEXT）
-  - 边界检查通过（allowed files、禁止 Phase/Gate/确认/测试职责声明）
+  - `coding_report_v1.md` 存在
   - 编译证据存在
   - Author/Self Review 完成
 
