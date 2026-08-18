@@ -53,13 +53,16 @@ LITE_FORBIDDEN = [
     Path("delivery-summary.md"),
 ]
 STANDARD_PHASE_ARTIFACTS = {
-    1: Path("request_analysis/understanding.md"),
-    2: Path("request_analysis/spec.md"),
-    3: Path("request_analysis/tasks.md"),
-    4: Path("coding/coding_report_v1.md"),
-    6: Path("unit_test/test_report.md"),
-    7: Path("unit_test/review/test_review_v1.md"),
-    8: Path("delivery-summary.md"),
+    1: [Path("request_analysis/understanding.md")],
+    2: [Path("request_analysis/spec.md")],
+    3: [Path("request_analysis/tasks.md")],
+    4: [Path("coding/coding_report_v1.md")],
+    5: [Path("unit_test/test_report.md")],
+    6: [Path("delivery-summary.md")],
+}
+STANDARD_SUBSTEPS = {
+    4: {"implementation", "code-review", "complete"},
+    5: {"unit-test", "test-review", "complete"},
 }
 WIKI_CANDIDATES = Path("wiki/candidates.md")
 WIKI_CANDIDATE_REQUIRED_HEADINGS = [
@@ -241,22 +244,52 @@ class Validator:
                     self.fail("artifact.forbidden", f"{change_dir.name}: Lite-flow must not contain {rel}")
         elif flow == "Standard-flow":
             phase = self.extract_phase(current_step)
+            substep = fields.get("Substep", "")
+            if "Substep" not in fields:
+                self.fail("summary.field_missing", f"{change_dir.name}: Standard-flow requires summary field `Substep`")
             if re.search(r"Phase\s+\d+", current_step, re.IGNORECASE) and phase is None:
                 self.fail(
                     "summary.phase_invalid",
-                    f"{change_dir.name}: Standard-flow Current step must be Phase 1-8, got `{current_step}`",
+                    f"{change_dir.name}: Standard-flow Current step must be Phase 1-6, got `{current_step}`",
                 )
             if phase is None and status == "done":
-                phase = 8
+                phase = 6
+            if phase in STANDARD_SUBSTEPS:
+                if substep not in STANDARD_SUBSTEPS[phase]:
+                    self.fail(
+                        "summary.substep_invalid",
+                        f"{change_dir.name}: Phase {phase} Substep must be one of "
+                        f"{', '.join(sorted(STANDARD_SUBSTEPS[phase]))}, got `{substep}`",
+                    )
+                expected_resume = f"Phase {phase} / {substep}"
+                if status == "active" and substep in STANDARD_SUBSTEPS[phase] and fields.get("Resume point") != expected_resume:
+                    self.fail(
+                        "summary.substep_resume_mismatch",
+                        f"{change_dir.name}: Phase {phase} Substep `{substep}` requires Resume point `{expected_resume}`",
+                    )
+            elif substep and substep != "none":
+                self.fail(
+                    "summary.substep_invalid",
+                    f"{change_dir.name}: Phase {phase} does not accept Substep `{substep}`",
+                )
             if phase:
-                for number, rel in STANDARD_PHASE_ARTIFACTS.items():
-                    if number <= phase and not (change_dir / rel).exists():
-                        self.fail("artifact.missing", f"{change_dir.name}: Phase {number} requires {rel}")
-                if phase >= 5 and not any((change_dir / "coding/review").glob("*.md")):
-                    self.fail("artifact.missing", f"{change_dir.name}: Phase 5 requires coding/review/*.md")
+                for number, artifacts in STANDARD_PHASE_ARTIFACTS.items():
+                    if number <= phase:
+                        for rel in artifacts:
+                            if not (change_dir / rel).exists():
+                                self.fail("artifact.missing", f"{change_dir.name}: Phase {number} requires {rel}")
+                needs_code_review = phase > 4 or (phase == 4 and substep in {"code-review", "complete"})
+                if needs_code_review and not any((change_dir / "coding/review").glob("*.md")):
+                    self.fail("artifact.missing", f"{change_dir.name}: Phase 4 requires coding/review/*.md")
+                needs_test_review = phase > 5 or (phase == 5 and substep in {"test-review", "complete"})
+                if needs_test_review and not (change_dir / "unit_test/review/test_review_v1.md").exists():
+                    self.fail(
+                        "artifact.missing",
+                        f"{change_dir.name}: Phase 5 requires unit_test/review/test_review_v1.md",
+                    )
             if status == "done" and not (change_dir / "delivery-summary.md").exists():
                 self.fail("artifact.missing", f"{change_dir.name}: done Standard-flow requires delivery-summary.md")
-            if status == "done" or (phase is not None and phase >= 8):
+            if status == "done" or (phase is not None and phase >= 6):
                 self.validate_wiki_candidates(change_dir)
 
     def validate_wiki_candidates(self, change_dir: Path) -> None:
@@ -340,7 +373,7 @@ class Validator:
         if not match:
             return None
         phase = int(match.group(1))
-        return phase if 1 <= phase <= 8 else None
+        return phase if 1 <= phase <= 6 else None
 
     def extract_named_value(self, text: str, name: str) -> str | None:
         patterns = [

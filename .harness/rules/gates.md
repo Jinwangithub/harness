@@ -10,6 +10,7 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 ## 1. 通用规则
 
 - 每个 Phase 或 Flow step 先执行 Mechanical Gate，通过后请求用户确认。
+- Phase 4/5 的 implementation 与 review 子步骤先后执行，但只在两个子步骤及其证据全部完成后写入一次 Composite Mechanical Gate 和请求一次用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
 - 每个 Phase/Step 出口写入 Gate Record 后，必须运行 canonical validator：`python3 .harness/tools/validate_change.py --change {change-id}`。
 - validation requires `python3`; `.harness/tools/validate_change.py` performs full mechanical artifact validation。
@@ -64,6 +65,16 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 - Human Approval: {approved / rejected / pending}
 ```
 
+Phase 4/5 Composite Gate 还必须追加以下子步骤证据表；两行任一四字段不完整时 Gate=`blocked`：
+
+```markdown
+## Substep Evidence
+| Substep | Command | Exit code | Output summary | Artifact path |
+|---------|---------|-----------|----------------|---------------|
+| {implementation / unit-test} | {完整命令} | {数字} | {关键输出} | {实现或测试报告} |
+| {code-review / test-review} | {完整命令或确定性检查} | {数字} | {评审结论与计数} | {独立评审报告} |
+```
+
 **硬约束**：
 - Fresh evidence 任意字段为空 → Mechanical Gate 自动 `blocked`。
 - validator exit code 非 0 且含 FAIL → Mechanical Gate 自动 `blocked` 或 `fail`，不得请求 Human Approval。
@@ -102,11 +113,9 @@ Phase N Exit Checklist:
 | 1 | `understanding.md` 存在；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/understanding.md` | CK1 |
 | 2 | `spec.md` 存在；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/spec.md` | CK2 |
 | 3 | `tasks.md` 存在，每个任务有验收条件；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/tasks.md` | CK3 |
-| 4 | `coding_report_v1.md` 存在；编译成功；Author/Self Review 完成；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | 编译命令结果、`coding/coding_report_v1.md` | CK4 |
-| 5 | 独立评审报告存在；Critical=0；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `coding/review/*.md` | CK5 |
-| 6 | 测试通过；测试数 > 0；覆盖率符合项目阈值；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | 测试命令结果、`unit_test/test_report.md` | CK6 |
-| 7 | 测试评审报告存在；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `unit_test/review/test_review_v1.md` | CK7 |
-| 8 | 确认前：delivery summary、`wiki/candidates.md`、Business Wiki candidate check、Memory 完整、summary / INDEX=`active`、final Gate=`pass + pending`；批准后：final Approval=`approved`、两处同步 `done`、Resume point=`none`、重验 PASS；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `delivery-summary.md`, `wiki/candidates.md` | CK8 |
+| 4 | `coding/coding_report_v1.md` 和 `coding/review/*.md` 均存在；编译成功；Author/Self Review 与 Independent Code Review 完成；Critical=0；Must Fix=0；对应两类 Evidence 完整 | 编译命令结果、实现报告、独立评审报告 | CK4 |
+| 5 | `unit_test/test_report.md` 和 `unit_test/review/test_review_v1.md` 均存在；测试通过；测试数 > 0；覆盖率符合项目阈值；Critical=0；Must Fix=0；对应两类 Evidence 完整 | 测试命令结果、测试报告、独立测试评审报告 | CK5 |
+| 6 | 确认前：delivery summary、`wiki/candidates.md`、Business Wiki candidate check、Memory 完整、summary / INDEX=`active`、final Gate=`pass + pending`；批准后：final Approval=`approved`、两处同步 `done`、Resume point=`none`、重验 PASS；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `delivery-summary.md`, `wiki/candidates.md` | CK6 |
 
 ## 6. Failure Gate 记录
 

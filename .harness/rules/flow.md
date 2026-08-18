@@ -5,7 +5,7 @@
 本文件是 Flow Classifier 与 Flow 路由索引的权威源。
 门禁检查表见 `.harness/rules/gates.md`，Lite-flow 执行见 `.harness/rules/flow-lite.md`，Standard-flow 执行见 `.harness/rules/flow-standard.md`，失败处理和回退路径见 `.harness/rules/rollback.md`，Memory 模板见 `.harness/memory/README.md`。
 
-> **边界**：本文件只定义 Flow 分类、路由索引和 Phase/Step 入口卡片字段定义。Lite Step Cards 见 `flow-lite.md`，Standard Phase Cards 和 Phase 4 隔离原则见 `flow-standard.md`，回退路径见 `rollback.md`，Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件路径约定见 `.harness/skills/README.md`；本文件不定义 Skill role 或加载类型术语。
+> **边界**：本文件只定义 Flow 分类、路由索引和 Phase/Step 入口卡片字段定义。Lite Step Cards 见 `flow-lite.md`，Standard Phase Cards、Phase 4/5 子步骤和隔离原则见 `flow-standard.md`，回退路径见 `rollback.md`，Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件路径约定见 `.harness/skills/README.md`；本文件不定义 Skill role 或加载类型术语。
 
 ## Flow Classifier
 
@@ -46,7 +46,7 @@
 | Flow | 读取文件 | 用途 |
 |------|----------|------|
 | `Lite-flow` | `.harness/rules/flow-lite.md` | Lite-flow 执行顺序、L1/L2/L3 Step Cards |
-| `Standard-flow` | `.harness/rules/flow-standard.md` | Standard-flow Phase 1-8、Phase Cards、Phase 4 隔离原则 |
+| `Standard-flow` | `.harness/rules/flow-standard.md` | Standard-flow Phase 1-6、Phase 4/5 子步骤、隔离原则 |
 | `fail` / `blocked` / 风险扩大 / 需要回退 | `.harness/rules/rollback.md` | Stop-the-Line、failure evidence、根因、恢复点、重验证、回退路径 |
 
 Gate 判定始终读取 `.harness/rules/gates.md`。

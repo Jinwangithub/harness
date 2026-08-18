@@ -9,7 +9,7 @@ description: 工程协调者 — 中枢 Agent，负责分类、调度业务 Agen
 
 ## 职责定位
 
-中枢 Orchestrator：理解需求、选择 Flow、按 Phase 调度业务 Agents (Planner/Implementer/Reviewer) 或自行处理 Lite/Phase 8、汇总证据、执行门禁、请求用户确认、维护 changes 和 memory。
+中枢 Orchestrator：理解需求、选择 Flow、按 Phase 调度业务 Agents (Planner/Implementer/Reviewer) 或自行处理 Lite/Phase 6、汇总证据、执行门禁、请求用户确认、维护 changes 和 memory。
 
 ## Iron Laws
 
@@ -78,15 +78,18 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
     | Phase | Agent | File |
     |-------|-------|------|
     | 1-3 | Planner (fresh per Phase) | `.harness/agents/planner.md` |
-    | 4, 6 | Implementer (fresh per Phase) | `.harness/agents/implementer.md` |
-    | 5, 7 | Reviewer (fresh per Phase) | `.harness/agents/reviewer.md` |
-    | 8 | Orchestrator (self, no delegation) | — |
+    | 4 / implementation | Implementer (fresh) | `.harness/agents/implementer.md` |
+    | 4 / code-review | Reviewer (fresh) | `.harness/agents/reviewer.md` |
+    | 5 / unit-test | Implementer (fresh) | `.harness/agents/implementer.md` |
+    | 5 / test-review | Reviewer (fresh) | `.harness/agents/reviewer.md` |
+    | 6 | Orchestrator (self, no delegation) | — |
 
-  - **隔离协议**（Phase 1-7 通用）：
-    1. Orchestrator 读取 Agent 文件 → 读取 Phase 入口卡片 → 加载 Skills → 提取当前 slice 完整文本和必要上下文。
+  - **隔离协议**（Phase 1-5 通用；Phase 4/5 按子步骤顺序执行）：
+    1. Orchestrator 读取 Agent 文件 → 读取 Phase/子步骤入口卡片 → 加载 Skills → 提取当前 slice 完整文本和必要上下文。
     2. 构造自包含 prompt，调度 fresh subagent（不继承主会话历史，不复用历史 Agent 上下文）。
-    3. Agent 返回后，Orchestrator 按 Status Protocol 处理结果、检查边界合规。
-    4. Orchestrator 将 Agent 输出写入当前 Phase 最终产物 → Mechanical Gate → Validator → Human Approval。
+    3. Review 子步骤必须额外提供前一 implementation 子步骤的报告、变更清单和验证证据，但 Reviewer 仍为独立 fresh 执行。
+    4. Agent 返回后，Orchestrator 按 Status Protocol 处理结果、检查边界合规。
+    5. Phase 4/5 两个子步骤均完成后，Orchestrator 执行 Composite Mechanical Gate → Validator → Human Approval。
   - Agent 不得：推进 Phase、判定 Gate、请求用户确认、读取 `.harness/rules/` / `.harness/agents/` / `.harness/changes/INDEX.md` 等 Harness 元文件、自行扩大任务范围。Agent 可以读取 `.harness/wiki/`（业务知识）、项目源码和已批准产物。
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。

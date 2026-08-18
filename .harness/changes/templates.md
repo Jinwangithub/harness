@@ -20,7 +20,8 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - **状态**: {active/done/abandoned}
 - **Flow**: {Lite-flow/Standard-flow}
 - **Current step**: {Standard Phase N 或 Lite L1-L3}
-- **Resume point**: {下一步恢复入口；没有则写 none}
+- **Substep**: {implementation / code-review / unit-test / test-review / none}
+- **Resume point**: {Phase 4/5 时写 `Phase N / {Substep}`；其他 Phase 写下一步入口；没有则写 none}
 
 ## Flow Classification
 - **flow**: {Lite-flow/Standard-flow}
@@ -83,11 +84,9 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - [ ] Phase 1: 需求分析
 - [ ] Phase 2: 需求评审
 - [ ] Phase 3: 任务规划
-- [ ] Phase 4: 编码实现
-- [ ] Phase 5: 编码评审
-- [ ] Phase 6: 单元测试
-- [ ] Phase 7: 测试评审
-- [ ] Phase 8: 用户确认
+- [ ] Phase 4: 实现 + 独立代码评审
+- [ ] Phase 5: 单元测试 + 独立测试评审
+- [ ] Phase 6: 用户确认
 ```
 
 ## Skill Load Record 模板
@@ -302,7 +301,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 边界：禁止使用 `Phase 1/2/3` 作为实现步骤标题；每个 Task Group/Slice 必须映射到 `spec.md` Success Criteria。
 
-### Phase 4 — coding/coding_report_v1.md
+### Phase 4 / implementation — coding/coding_report_v1.md
 
 ```markdown
 # Coding Report v1
@@ -321,7 +320,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Result: {exit code / key output}
 
 ## Author / Self Review
-- {Orchestrator 自检结果、发现和处理；不得替代 Phase 5 code review}
+- {Orchestrator 自检结果、发现和处理；不得替代 Phase 4 / code-review}
 
 ## DDD / Architecture Check
 - {领域/架构边界检查；不适用则写 N/A}
@@ -334,7 +333,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Reason: {结论依据}
 ```
 
-### Phase 5 — coding/review/review_v1.md
+### Phase 4 / code-review — coding/review/review_v1.md
 
 ```markdown
 # Code Review v1
@@ -361,9 +360,9 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Reason: {结论依据}
 ```
 
-边界：不直接实现修复；Critical/Must Fix 回退 Phase 4。
+边界：不直接实现修复；Critical/Must Fix 回退 Phase 4 / implementation。
 
-### Phase 6 — unit_test/test_report.md
+### Phase 5 / unit-test — unit_test/test_report.md
 
 ```markdown
 # Unit Test Report
@@ -389,7 +388,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - {失败、根因和回退目标；没有则写 none}
 ```
 
-### Phase 7 — unit_test/review/test_review_v1.md
+### Phase 5 / test-review — unit_test/review/test_review_v1.md
 
 ```markdown
 # Test Review v1
@@ -412,7 +411,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Reason: {结论依据}
 ```
 
-### Phase 8 — delivery-summary.md
+### Phase 6 — delivery-summary.md
 
 ```markdown
 # Delivery Summary

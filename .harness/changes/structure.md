@@ -67,6 +67,8 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`deliver
 
 ### Standard-flow
 
+Phase 4/5 各包含 implementation 与独立 review 子步骤，但继续保留四个独立报告路径，以区分 Implementer 证据和 Reviewer 证据。
+
 ```text
 .harness/changes/{type}-{name}-{YYYYMMDD}/
 ├── summary.md

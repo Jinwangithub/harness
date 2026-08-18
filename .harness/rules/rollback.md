@@ -27,8 +27,8 @@ Mechanical Gate=`fail|blocked`、执行异常、证据缺失或发现风险扩�
 | 需求不符 | Phase 1 |
 | Spec 不符 | Phase 2 |
 | 任务不可验收 | Phase 3 |
-| 编译错误 | Phase 4 |
-| 编码评审 Must Fix/Critical | Phase 4 |
-| 测试失败 / 测试评审失败 | Phase 6 |
-| spec/tasks 明确要求的 CI 或部署验证失败 | 按根因回退 Phase 2/3、Phase 4 或 Phase 6/7；外部环境问题保持 `blocked` |
+| 编译错误 / 编码评审 Must Fix/Critical | Phase 4 / implementation |
+| 测试失败 / 测试评审 Critical/Must Fix | Phase 5 / unit-test |
+| 测试评审发现实现缺陷 | Phase 4 / implementation |
+| spec/tasks 明确要求的 CI 或部署验证失败 | 按根因回退 Phase 2/3、Phase 4 / implementation 或 Phase 5 / unit-test；外部环境问题保持 `blocked` |
 | 评审超轮次 | 人工决策 |
