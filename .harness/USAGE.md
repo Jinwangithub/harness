@@ -28,13 +28,13 @@ Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Se
 | Flow | 适用场景 | 用户会看到的确认点 | 必需产物 |
 |------|----------|--------------------|----------|
 | Lite-flow | typo、注释、格式、纯文档、README 小修、小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | batched：需求+计划一次，最终验证+交付一次 | `summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`verification_report.md`（含压缩评审） |
-| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：逐 Phase 确认 | 完整 Phase 1-10 产物 |
+| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：逐 Phase 确认 | 完整 Phase 1-8 产物 |
 
 任何 Flow 都不能绕过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。
 
 ## 你会看到哪些确认点
 
-- **Standard-flow**：mandatory，需求理解、spec、任务规划、编码、自检/评审、测试、CI/部署、最终交付等逐 Phase 确认。
+- **Standard-flow**：mandatory，需求理解、spec、任务规划、编码、自检/评审、测试和最终交付等逐 Phase 确认。CI/部署仅在独立任务或 spec/tasks 明确要求时执行，不是固定 Phase。
 - **Lite-flow**：batched，先确认需求+简化计划，再最终验证+交付确认。
 
 Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。每个 Gate 请求你确认前，Orchestrator 应已运行 `python3 .harness/tools/validate_change.py --change {change-id}`；该命令需要 Python 3，执行完整的机械产物验证，退出码非 0 时不得进入人工确认。
@@ -64,7 +64,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/build` | L2 实现 | Phase 4 实现 | 不能冒充 Phase 6 测试完成 |
 | `/review` | L3 压缩评审 | Phase 5/7 评审 | 不能替代 Mechanical Gate |
 | `/test` | L3 验证 | Phase 6 测试或阶段验证 | 不能单独声明交付完成 |
-| `/ship` | L3 交付确认 | Phase 10 交付确认 | 不能在 final `pending` 时标记已完成 |
+| `/ship` | L3 交付确认 | Phase 8 交付确认 | 不能在 final `pending` 时标记已完成 |
 
 ## pending 时你需要做什么
 
@@ -94,7 +94,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 
 ## FAQ
 
-**Q: 每次都要走十阶段吗？**
+**Q: 每次都要走八阶段吗？**
 A: 不一定。Orchestrator 先分类；低风险任务走 Lite-flow，高风险或不明确需求走 Standard-flow。
 
 **Q: 低风险/无行为变更小需求怎么处理？**

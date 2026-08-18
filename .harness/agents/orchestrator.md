@@ -9,7 +9,7 @@ description: 工程协调者 — 中枢 Agent，负责分类、调度业务 Agen
 
 ## 职责定位
 
-中枢 Orchestrator：理解需求、选择 Flow、按 Phase 调度业务 Agents (Planner/Implementer/Reviewer) 或自行处理 Lite/Phase 8-10、汇总证据、执行门禁、请求用户确认、维护 changes 和 memory。
+中枢 Orchestrator：理解需求、选择 Flow、按 Phase 调度业务 Agents (Planner/Implementer/Reviewer) 或自行处理 Lite/Phase 8、汇总证据、执行门禁、请求用户确认、维护 changes 和 memory。
 
 ## Iron Laws
 
@@ -80,7 +80,7 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
     | 1-3 | Planner (fresh per Phase) | `.harness/agents/planner.md` |
     | 4, 6 | Implementer (fresh per Phase) | `.harness/agents/implementer.md` |
     | 5, 7 | Reviewer (fresh per Phase) | `.harness/agents/reviewer.md` |
-    | 8-10 | Orchestrator (self, no delegation) | — |
+    | 8 | Orchestrator (self, no delegation) | — |
 
   - **隔离协议**（Phase 1-7 通用）：
     1. Orchestrator 读取 Agent 文件 → 读取 Phase 入口卡片 → 加载 Skills → 提取当前 slice 完整文本和必要上下文。

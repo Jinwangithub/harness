@@ -1,6 +1,6 @@
 # MCP 集成说明
 
-MCP 是可选增强能力，不是 Harness 十阶段流程的硬依赖。
+MCP 是可选增强能力，不是 Harness Standard-flow 的硬依赖。
 
 ## 用途
 

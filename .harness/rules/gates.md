@@ -106,9 +106,7 @@ Phase N Exit Checklist:
 | 5 | 独立评审报告存在；Critical=0；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `coding/review/*.md` | CK5 |
 | 6 | 测试通过；测试数 > 0；覆盖率符合项目阈值；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | 测试命令结果、`unit_test/test_report.md` | CK6 |
 | 7 | 测试评审报告存在；Must Fix=0；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `unit_test/review/test_review_v1.md` | CK7 |
-| 8 | CI 报告存在且成功；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `ci_result/ci_report.md` | CK8 |
-| 9 | 部署报告存在；冒烟/回滚检查完成；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `deployment/deploy_report.md` | CK9 |
-| 10 | 确认前：delivery summary、`wiki/candidates.md`、Business Wiki candidate check、Memory 完整、summary / INDEX=`active`、final Gate=`pass + pending`；批准后：final Approval=`approved`、两处同步 `done`、Resume point=`none`、重验 PASS；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `delivery-summary.md`, `wiki/candidates.md` | CK10 |
+| 8 | 确认前：delivery summary、`wiki/candidates.md`、Business Wiki candidate check、Memory 完整、summary / INDEX=`active`、final Gate=`pass + pending`；批准后：final Approval=`approved`、两处同步 `done`、Resume point=`none`、重验 PASS；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `delivery-summary.md`, `wiki/candidates.md` | CK8 |
 
 ## 6. Failure Gate 记录
 
@@ -120,7 +118,7 @@ Mechanical Gate=`fail|blocked` 时，记录必须包含：
 - 修复验证：修复后的 fresh evidence。
 - Memory 动作：写入了哪个 memory 文件，或 `none`。
 
-## 8. 声明完成的条件
+## 7. 声明完成的条件
 
 声明完成或标记 `已完成` 前，必须全部满足：
 

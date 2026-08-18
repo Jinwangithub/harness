@@ -87,9 +87,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - [ ] Phase 5: 编码评审
 - [ ] Phase 6: 单元测试
 - [ ] Phase 7: 测试评审
-- [ ] Phase 8: CI验证
-- [ ] Phase 9: 部署验证
-- [ ] Phase 10: 用户确认
+- [ ] Phase 8: 用户确认
 ```
 
 ## Skill Load Record 模板
@@ -414,49 +412,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Reason: {结论依据}
 ```
 
-### Phase 8 — ci_result/ci_report.md
-
-```markdown
-# CI Report
-
-## Pipeline / Gate Results
-- {CI pipeline 名称、运行链接/编号、状态或不可用原因}
-
-## Checks
-- Build / Lint / Typecheck / Tests / Security scan: {pass/fail/blocked/N/A}
-
-## Local Equivalents
-- {CI 不可用时的本地等价验证；不适用则写 N/A}
-
-## Failures
-- {失败项、根因和回退目标；没有则写 none}
-
-## Verdict
-- Status: {pass/fail/blocked}
-- Reason: {结论依据}
-```
-
-### Phase 9 — deployment/deploy_report.md
-
-```markdown
-# Deployment Report
-
-## Pre-launch Checklist
-## Rollout / Staging / Deployment Evidence
-## Rollback Plan
-- {回滚方案、触发条件和执行方式}
-
-## Monitoring / Smoke Evidence
-
-## Issues
-- {部署问题、风险和处理；没有则写 none}
-
-## Verdict
-- Status: {pass/fail/blocked}
-- Reason: {结论依据}
-```
-
-### Phase 10 — delivery-summary.md
+### Phase 8 — delivery-summary.md
 
 ```markdown
 # Delivery Summary

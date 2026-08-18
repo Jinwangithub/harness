@@ -50,8 +50,6 @@ LITE_FORBIDDEN = [
     Path("request_analysis/tasks.md"),
     Path("coding"),
     Path("unit_test"),
-    Path("ci_result"),
-    Path("deployment"),
     Path("delivery-summary.md"),
 ]
 STANDARD_PHASE_ARTIFACTS = {
@@ -61,9 +59,7 @@ STANDARD_PHASE_ARTIFACTS = {
     4: Path("coding/coding_report_v1.md"),
     6: Path("unit_test/test_report.md"),
     7: Path("unit_test/review/test_review_v1.md"),
-    8: Path("ci_result/ci_report.md"),
-    9: Path("deployment/deploy_report.md"),
-    10: Path("delivery-summary.md"),
+    8: Path("delivery-summary.md"),
 }
 WIKI_CANDIDATES = Path("wiki/candidates.md")
 WIKI_CANDIDATE_REQUIRED_HEADINGS = [
@@ -245,8 +241,13 @@ class Validator:
                     self.fail("artifact.forbidden", f"{change_dir.name}: Lite-flow must not contain {rel}")
         elif flow == "Standard-flow":
             phase = self.extract_phase(current_step)
+            if re.search(r"Phase\s+\d+", current_step, re.IGNORECASE) and phase is None:
+                self.fail(
+                    "summary.phase_invalid",
+                    f"{change_dir.name}: Standard-flow Current step must be Phase 1-8, got `{current_step}`",
+                )
             if phase is None and status == "done":
-                phase = 10
+                phase = 8
             if phase:
                 for number, rel in STANDARD_PHASE_ARTIFACTS.items():
                     if number <= phase and not (change_dir / rel).exists():
@@ -255,7 +256,7 @@ class Validator:
                     self.fail("artifact.missing", f"{change_dir.name}: Phase 5 requires coding/review/*.md")
             if status == "done" and not (change_dir / "delivery-summary.md").exists():
                 self.fail("artifact.missing", f"{change_dir.name}: done Standard-flow requires delivery-summary.md")
-            if status == "done" or (phase is not None and phase >= 10):
+            if status == "done" or (phase is not None and phase >= 8):
                 self.validate_wiki_candidates(change_dir)
 
     def validate_wiki_candidates(self, change_dir: Path) -> None:
@@ -339,7 +340,7 @@ class Validator:
         if not match:
             return None
         phase = int(match.group(1))
-        return phase if 1 <= phase <= 10 else None
+        return phase if 1 <= phase <= 8 else None
 
     def extract_named_value(self, text: str, name: str) -> str | None:
         patterns = [

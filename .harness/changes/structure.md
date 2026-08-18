@@ -63,7 +63,7 @@ INDEX.md 格式：
 └── verification_report.md  （含压缩评审）
 ```
 
-Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_result/`、`deployment/`、`delivery-summary.md`，除非升级为 Standard-flow。
+Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`delivery-summary.md`，除非升级为 Standard-flow。
 
 ### Standard-flow
 
@@ -81,8 +81,6 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`ci_resu
 ├── unit_test/
 │   ├── test_report.md
 │   └── review/
-├── ci_result/
-├── deployment/
 ├── wiki/
 │   └── candidates.md
 └── delivery-summary.md

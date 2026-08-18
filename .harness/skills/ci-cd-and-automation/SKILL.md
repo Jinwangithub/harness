@@ -9,7 +9,7 @@ description: Automates CI/CD pipeline setup. Use when setting up or modifying bu
 
 When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/rules/rollback.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
 
-In Harness Phase 8/9, this Skill records CI/deployment evidence and diagnoses failures. It must not push, deploy, mark Gate pass, request Human Approval, or fix implementation directly. CI/deployment failures must be routed through `rollback.md`; git commit/push/deploy actions require explicit user instruction and the correct Phase.
+When invoked as a standalone task or explicitly required by approved spec/tasks, this Skill records CI/deployment evidence and diagnoses failures. It must not push, deploy, mark Gate pass, request Human Approval, or fix implementation directly. CI/deployment failures must be routed through `rollback.md`; git commit/push/deploy actions require explicit user instruction.
 
 ## Overview
 

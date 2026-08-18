@@ -1,15 +1,15 @@
 # Standard-flow 规范
 
-> **TL;DR**: Standard-flow 用于新功能、跨模块、高风险或需求不清任务，完整执行 Phase 1-10；每个 Phase 完成后必须 Mechanical Gate=`pass` 且用户确认后才能进入下一 Phase。
+> **TL;DR**: Standard-flow 用于新功能、跨模块、高风险或需求不清任务，完整执行 Phase 1-8；每个 Phase 完成后必须 Mechanical Gate=`pass` 且用户确认后才能进入下一 Phase。
 
-本文件是 Standard-flow Phase 1-10、Phase Cards 和 Phase 4 隔离实现原则的权威源。
+本文件是 Standard-flow Phase 1-8、Phase Cards 和 Phase 4 隔离实现原则的权威源。
 Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rules/gates.md`，失败处理和回退路径见 `.harness/rules/rollback.md`。
 
 > **边界**：本文件只定义 Standard-flow 执行顺序、每个 Phase 的入口卡片、Phase 4 隔离实现原则和 Standard 特有禁止事项。Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件路径约定见 `.harness/skills/README.md`。
 
 ## Standard-flow
 
-适用：新功能、跨模块、高风险、需求不清。完整 Phase 1-10，每 Phase 完成后必须用户确认才能进入下一 Phase。
+适用：新功能、跨模块、高风险、需求不清。完整 Phase 1-8，每 Phase 完成后必须用户确认才能进入下一 Phase。
 
 | Phase | 目标 | 主要产物 | 确认点 |
 |-------|------|----------|--------|
@@ -20,11 +20,9 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 | 5 | 编码评审 | `coding/review/*.md` | CK5 |
 | 6 | 单元测试 | `unit_test/test_report.md` | CK6 |
 | 7 | 测试评审 | `unit_test/review/test_review_v1.md` | CK7 |
-| 8 | CI 验证 | `ci_result/ci_report.md` | CK8 |
-| 9 | 部署验证 | `deployment/deploy_report.md` | CK9 |
-| 10 | 用户确认 | `delivery-summary.md`, `wiki/candidates.md` | CK10 |
+| 8 | 用户确认 | `delivery-summary.md`, `wiki/candidates.md` | CK8 |
 
-**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。Phase 10 是 finalization 例外：先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后才更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
+**进入下一 Phase 的唯一条件**：当前 Phase Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step` 和 `Resume point`。Phase 8 是 finalization 例外：先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后才更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
 
 关键边界：
 
@@ -181,43 +179,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - Must Fix=0
   - Fresh evidence 四字段完整
 
-### Phase 8 — CI 验证
-
-- 读取 Skills:
-  - `ci-cd-and-automation`
-- 按条件补读 Skills:
-  - 无
-- 失败时补读 Skills:
-  - `debugging-and-error-recovery`
-- 禁止事项:
-  - 不发布
-  - 不绕过失败 CI
-- 产物提示:
-  - `ci_result/ci_report.md`
-- Gate 提示:
-  - CI 报告存在且成功
-  - Fresh evidence 四字段完整
-
-### Phase 9 — 部署验证
-
-- 读取 Skills:
-  - `ci-cd-and-automation`
-- 按条件补读 Skills:
-  - `security-and-hardening`: 仅当部署风险涉及安全/auth/permission
-  - `performance-optimization`: 仅当部署风险涉及性能/容量
-- 失败时补读 Skills:
-  - `debugging-and-error-recovery`
-- 禁止事项:
-  - 不替代最终交付确认
-  - 部署风险回退 Phase 8/9
-- 产物提示:
-  - `deployment/deploy_report.md`
-- Gate 提示:
-  - 部署报告存在
-  - 冒烟/回滚检查完成
-  - Fresh evidence 四字段完整
-
-### Phase 10 — 用户确认
+### Phase 8 — 用户确认
 
 - 读取 Skills:
   - `documentation-and-adrs`
