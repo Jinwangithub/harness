@@ -1,51 +1,34 @@
 ---
 title: {业务域名称}
+kind: domain
 domain: {domain-name}
 modules:
   - {src/path}
-type: domain-rule
-tags: [{tag1}, {tag2}]
+integrations:
+  - {system-id}
+tags:
+  - {tag}
+status: approved
 updated: {YYYY-MM-DD}
+sources:
+  - change_id: {change-id}
+    evidence: {artifact path#section}
+approval:
+  log_ref: .harness/wiki/log.md#{stable-decision-id}
 ---
 
 # {业务域名称}
 
-## 术语表
+## Rules
+- `RULE-{DOMAIN}-001`: {confirmed business rule}
 
-| 术语 | 定义 | 备注 |
-|------|------|------|
-| {term} | {definition} | {notes} |
+## Terms and invariants
+| Term / invariant | Definition | Source rule |
+|---|---|---|
+| {term} | {confirmed definition} | `RULE-{DOMAIN}-001` |
 
-## 核心实体
+## State machine
+{confirmed states and transitions}
 
-| 实体 | 关键字段 | 说明 |
-|------|----------|------|
-| {entity} | {fields} | {description} |
-
-## 状态机
-
-```text
-{state A} -> {state B} -> {state C}
-```
-
-| 状态 | 含义 | 进入条件 | 退出条件 |
-|------|------|----------|----------|
-| {state} | {meaning} | {entry} | {exit} |
-
-## 关键流程
-
-1. {step 1}
-2. {step 2}
-3. {step 3}
-
-## 异常规则
-
-| 场景 | 规则 | 处理方式 |
-|------|------|----------|
-| {scenario} | {rule} | {handling} |
-
-## 上下游依赖
-
-| 方向 | 系统 | 交互内容 | 风险 |
-|------|------|----------|------|
-| {upstream/downstream} | {system} | {interaction} | {risk} |
+## Superseded rules
+- {none or stable rule IDs with deprecation reason}

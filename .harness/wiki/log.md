@@ -1,15 +1,16 @@
 # Business Wiki Log
 
-Append-only log of approved, rejected, and deferred Wiki decisions.
+Append-only decision log. Delivery Approval, Formal Wiki Decision, and Change Retirement Authorization are separate decisions.
 
-```markdown
-## {YYYY-MM-DD} — {record/update/no-update}
+## Log record template
+- Stable decision ID: `{stable-decision-id}`
 - Source change ID: `{change-id}`
-- Human approval evidence: {明确用户决定}
-- Source evidence summary: {交付产物章节或已核验事实摘要}
-- Updated Wiki paths:
-  - `.harness/wiki/{path}` / none
-- Wiki index synchronized: {yes / not-applicable}
-- Cleanup disposition: {retired-after-sync / retained}
-- Notes: {reason or summary}
-```
+- Formal Wiki Decision: `{approved-subset/rejected/deferred/none}`
+- Human approval evidence: `{explicit decision}`
+- Approved candidate IDs: `{candidate IDs / none}`
+- Official Wiki paths: `{canonical paths / none}`
+- Source evidence summary: `{artifact and evidence summary}`
+- Wiki index synchronized: `{yes/not-applicable}`
+- Retirement authorization: `{authorized/not-authorized/not-applicable}`
+- Cleanup disposition: `{retired-after-sync/retained}`
+- Notes: `{reason}`

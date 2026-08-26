@@ -35,6 +35,8 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 ### Phase 1 — 需求分析
 
 - Agent: Planner (`.harness/agents/planner.md`)
+- Wiki Discovery/ingest 入口：先读 `.harness/wiki/index.md`，再按 module → domain → integration 路由，关键词仅作 fallback；涉及来源时保存不可变 raw capture，并将搜索词、分类、候选映射、已读 canonical 页面、缺失知识和 Open Questions 写入 `understanding.md`。
+- 业务未知必须记录为 Open Question，不得猜测为已确认事实。
 - 读取 Skills:
   - `idea-refine`
 - 按条件补读 Skills:
@@ -70,6 +72,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - `request_analysis/spec.md`
 - Gate 提示:
   - `spec.md` 存在
+  - 每个业务断言有 Wiki page/rule ID，或标记 `open-question`
   - 禁止产物不存在
   - Fresh evidence 四字段完整
 
@@ -189,7 +192,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 - 读取 Skills:
   - `documentation-and-adrs`
   - `business-wiki-curation`
-- 按条件补读 Skills:
+- Wiki 接入语义：Phase 6 负责 Wiki ingest/compile/query/archive/lint；普通 query 只读，正式同步需 Formal Wiki Decision。- 按条件补读 Skills:
   - 无
 - 失败时补读 Skills:
   - `debugging-and-error-recovery`

@@ -1,44 +1,35 @@
 ---
 title: {模块名称}
+kind: module
 domain: {domain-name}
 modules:
   - {src/path}
-type: operational-constraint
-tags: [{tag1}, {tag2}]
+integrations:
+  - {system-id}
+tags:
+  - {tag}
+status: approved
 updated: {YYYY-MM-DD}
+sources:
+  - change_id: {change-id}
+    evidence: {artifact path#section}
+approval:
+  log_ref: .harness/wiki/log.md#{stable-decision-id}
 ---
 
 # {模块名称}
 
-## 关联业务域
+## Responsibility
+{confirmed business responsibility}
 
-- 所属域：{domain-name}（详见 `domains/{domain-name}.md`）
-- 涉及的核心实体：{entity list}
+## Business constraints
+- `RULE-{DOMAIN}-001`: {confirmed constraint}
 
-## 输入约束
+## Inputs and outputs
+| Direction | Contract | Rule IDs |
+|---|---|---|
+| Input | {confirmed contract} | `RULE-{DOMAIN}-001` |
+| Output | {confirmed contract} | {rule IDs} |
 
-| 字段 | 约束 | 来源 |
-|------|------|------|
-| {field} | {validation/range/format} | {API/DB/upstream} |
-
-## 输出约束
-
-| 字段 | 约束 | 影响方 |
-|------|------|--------|
-| {field} | {format/guarantee} | {consumer} |
-
-## 边界条件
-
-- 最大值/最小值：{limits}
-- 并发限制：{concurrency}
-- 幂等性要求：{idempotency or N/A}
-
-## 非功能要求
-
-- 性能：{latency/throughput or 待确认}
-- 可靠性：{SLA or 待确认}
-- 安全：{authN/authZ/data classification or 待确认}
-
-## 已知限制
-
-- {limitation}: {impact and workaround}
+## Verification evidence
+- {test or implementation evidence}

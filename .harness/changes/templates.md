@@ -39,6 +39,15 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Lite Spec (Lite-flow 专用)
 {以下内容仅在 Lite-flow 时填写，Standard-flow 不填写此节}
 
+### Wiki Discovery
+- Search terms: {关键词 / none}
+- Candidate modules: {canonical module paths / none}
+- Candidate domains: {domain IDs / none}
+- Candidate integrations: {integration IDs / none}
+- Read pages: {canonical Wiki paths / none}
+- Missing knowledge: {缺失知识 / none}
+- Open Questions: {问题 / none}
+
 ### Request
 - {用户需求}
 
@@ -108,6 +117,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 ## wiki/candidates.md 模板
 
+`wiki/candidates.md` 是当前 change 的编译草稿、证据清单和审批快照，不是另一套 Wiki 知识模型。Raw 来源仍保存在 `.harness/wiki/raw/`；正式页面只在 Formal Wiki Decision 批准后同步。保留以下字段并按当前页面 schema 填写：
 ```markdown
 # Business Wiki Candidates
 
@@ -126,7 +136,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ### Candidate {N}: {title}
 - Type: {business-term / domain-rule / workflow / data-contract / integration-fact / operational-constraint / testing-knowledge / durable-exception}
 - Confidence: {high / medium / low}
-- Proposed target: `.harness/wiki/project/overview.md` / `domains/{domain}.md` / `integrations/{system}.md` / `modules/{module}.md` / new page needed / none
+- Proposed target: `.harness/wiki/project/{page}.md` / `.harness/wiki/domains/{domain}.md` / `.harness/wiki/integrations/{system}.md` / `.harness/wiki/modules/{module}.md` / new page needed / none
 - Source evidence:
   - `{artifact path}`: {line/section or evidence summary}
 - Proposed content:
@@ -155,7 +165,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 删除超额 `done` change 的资格规则：
 
 - `approved`：至少一个正式 Wiki 页面存在，Wiki index 已 regenerate 且 Wiki log 已 append。
-- `not-requested`：`Official Wiki updates: none`、Wiki index 为 `not-applicable`、Wiki log 为 `yes`；Decision evidence 必须是明确的人工"无正式 Wiki 更新且可删除"决定。
+- `not-requested`：`Official Wiki updates: none`、Wiki index 为 `not-applicable`、Wiki log 为 `yes`；Decision evidence 必须是明确的人工“无正式 Wiki 更新且可删除”决定。
 - `pending`、`rejected`、`deferred`、`partially-approved` 均不具备删除资格。
 - Decision evidence 的批准文字必须同时涵盖本次正式 Wiki 处置和删除该 change 的授权；不得把旧 final Gate 的交付批准用作删除授权。
 
@@ -207,6 +217,15 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 ```markdown
 # Understanding
+
+## Wiki Discovery
+- Search terms: {关键词 / none}
+- Candidate modules: {canonical module paths / none}
+- Candidate domains: {domain IDs / none}
+- Candidate integrations: {integration IDs / none}
+- Read pages: {canonical Wiki paths / none}
+- Missing knowledge: {缺失知识 / none}
+- Open Questions: {问题 / none}
 
 ## Problem Statement
 - {用户问题、现状、痛点和期望结果}

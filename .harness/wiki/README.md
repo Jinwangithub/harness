@@ -1,100 +1,131 @@
-# 项目知识库
+# Harness Business Wiki
 
-> Orchestrator L3 按需查询层 — 存储项目业务域名、术语、集成、模块映射等已获人工确认的正式知识。
+Harness Wiki follows a single `raw → wiki → index/log → query/lint` lifecycle.
+Raw sources are immutable inputs; canonical pages are approved compiled
+knowledge; the index is generated; the log is append-only.
 
-## 目录结构
+## Directory contract
 
 ```text
 .harness/wiki/
-├── README.md                # 本文件：原则 + 实例化指南
-├── index.md                 # 自动生成：Module→Wiki 映射 + 按域分类索引
-├── log.md                   # Append-only：approved/rejected/deferred 决策记录
-├── project/
-│   └── overview.md          # 项目概览：技术栈 + 模块→域映射表 + 构建 + 环境
-├── domains/
-│   ├── _TEMPLATE.md         # 模板（_ 前缀不纳入 index）
-│   └── {domain}.md          # 业务域知识：术语、实体、状态机、流程、异常规则
-├── integrations/
-│   ├── _TEMPLATE.md         # 模板
-│   └── {system}.md          # 外部系统集成：协议、鉴权、超时、重试、降级
-└── modules/
-    ├── _TEMPLATE.md         # 模板
-    └── {module}.md          # 模块级业务知识：输入输出约束、边界条件、非功能要求
+├── raw/                         # immutable source text and metadata
+├── project/                     # canonical project pages (flat, one page per file)
+│   └── _TEMPLATE.md
+├── domains/                     # canonical business-domain pages (flat)
+├── modules/                     # canonical module pages (flat)
+├── integrations/                # canonical integration pages (flat)
+├── index.md                     # generated global index
+├── log.md                       # append-only ingest/query/lint/approval log
+└── README.md
 ```
 
-- `_TEMPLATE.md` 文件不会被 `generate_wiki_index.py` 扫描入索引。
-- 所有正式页面头部必须有 YAML frontmatter（见各模板）。
+Only the four canonical directories may contain formal pages. Canonical pages are flat: each entity is one Markdown file directly under its kind directory; nested page directories are not allowed. `_TEMPLATE.md` files are guidance and are excluded from the index. Initialize only a missing `.harness/wiki/raw/`; do not create root-level `raw/` or `wiki/` directories, and do not overwrite existing files.
 
-## Candidate-first 更新策略
+## Raw source contract
 
-1. 每个完成需求的业务知识先写入 `.harness/changes/{change-id}/wiki/candidates.md`（候选层，非 canonical）。
-2. 未经明确人类批准，不得将候选内容写入 `.harness/wiki/`。
-3. 批准后：更新正式 wiki 页面 → 运行 `python3 .harness/tools/generate_wiki_index.py` 重生成 `index.md` → append 到 `log.md`。
-4. Rejected / deferred 的候选仅保留在 change artifact 中。
+Each source capture is stored under `raw/{source-id}/` as two files:
 
-## 实例化指南
+```text
+raw/{source-id}/content.md       # original content, immutable
+raw/{source-id}/metadata.yml     # provenance and content hash
+```
 
-### 最小填充路径
+`metadata.yml` uses this minimum schema:
 
-1. 填写 `project/overview.md`：项目名、技术栈、**模块→域映射表**、构建命令。
-2. 只填写已知事实，未知业务规则写 `{待确认}`。
-3. 当前需求涉及某业务域时，才创建 `domains/{domain}.md`。
-4. 当前需求涉及外部系统时，才创建 `integrations/{system}.md`。
-5. 当前需求涉及某模块的特定业务约束时，才创建 `modules/{module}.md`。
+```yaml
+source_id: {source-id}
+origin: {user-provided/repository/url/command-output}
+uri: {URI-or-none}
+captured_at: {YYYY-MM-DDTHH:MM:SSZ}
+content_sha256: {64 lowercase hexadecimal characters}
+provenance: {how the source was obtained}
+supersedes: {source-id-or-none}
+```
 
-### 原则
+Each raw capture keeps its original content unchanged and records source ID,
+origin or URI, capture date, content hash, and provenance. A new capture or
+version is added rather than replacing an existing capture. Raw material is
+not formal knowledge until it is compiled and approved.
 
-- 不得猜测：未知业务规则写 `{待确认}` 或记入 Phase 1 Open Questions。
-- 模板文件以 `_TEMPLATE.md` 命名，正式页面按实际名称。
-- `generate_wiki_index.py` 自动同步 `index.md`，不要手工编辑。
+## Formal page schema
 
-### Minimal Example
+Every formal page uses Python 3.7-compatible frontmatter:
 
-以下是 `project/overview.md` 的最小实例化形式：
-
-```markdown
+```yaml
 ---
-title: 示例订单服务
+title: 订单域
+kind: domain
 domain: order-management
-updated: 2026-01-01
+modules:
+  - src/orders
+integrations:
+  - payment-gateway
+tags:
+  - order
+status: approved
+updated: 2026-08-19
+sources:
+  - change_id: feat-order-cancel-20260819
+    evidence: request_analysis/spec.md#Cancellation-Rules
+approval:
+  log_ref: .harness/wiki/log.md#feat-order-cancel-20260819
 ---
-
-# 项目概览
-
-## 项目
-- 名称：示例订单服务
-- 目的：演示 wiki 最小实例化。
-
-## 技术栈
-- Runtime: {待确认}
-- Build: {待确认}
-- Test: {待确认}
-
-## 模块映射
-
-| 代码路径 | 业务域 | 说明 |
-|----------|--------|------|
-| src/orders/ | order-management | 订单录入、状态流转 |
-| src/notifications/ | notification | 通知偏好、消息发送 |
-
-## 关键业务域
-- order-management: 订单完整生命周期管理，精确状态和流转规则为 {待确认}。
-- notification: 消息通知渠道规则为 {待确认}。
-
-## 外部依赖
-- 邮件服务：{待确认}
-- 短信服务：{待确认}
-
-## 构建命令
-{待确认}
-
-## 环境说明
-- 开发：{待确认}
-- 测试：{待确认}
-- 生产：{待确认}
 ```
 
-## Orchestrator 使用规则
+`kind` is `project`, `domain`, `module`, or `integration`. `status` is
+`approved` or `deprecated`; formal pages require non-empty `sources` and
+`approval.log_ref`, and cannot contain placeholders, secrets, or guesses.
+Business rules use stable IDs such as `RULE-ORDER-001`; updates and retirement
+use `supersedes` and preserve the historical evidence.
 
-- 遇到不清的业务概念时，先查 `index.md` 的 Module→Wiki 映射表找到对应域/模块页面。
-- 若必要业务知识未实例化或标记 `{待确认}`，在 Phase 1 作为 Open Question 询问用户，不猜测。
+## Ingest and compile
+
+For each source, first capture it in `raw/`, then read `index.md` and search
+module → domain → integration → keyword fallback. Record the search terms,
+matched pages, pages read, missing knowledge, and Open Questions in the current
+change artifact. Classify the source as `New`, `Update`, `Disputed`, or
+`No material`, then compile one source at a time into the matching canonical
+page or change-local `wiki/candidates.md` draft.
+
+Numbers, dates, versions, thresholds, and citations require locate-before-write
+source evidence. Conflicts are never silently overwritten: preserve history,
+mark affected material `Disputed` or `Outdated`, and record resolution,
+`supersedes`, or an Open Question. After compiling, use the index and full-text
+search to inspect affected domain, module, and integration pages. A formal
+update must synchronize sources, approval, rule relationships, generated index,
+and an appended log decision.
+
+## Query and archive
+
+Ordinary queries are read-only. Search in module → domain → integration →
+keyword order and answer only from approved canonical pages, citing
+`.harness/wiki/...` paths and rule IDs. Distinguish missing, disputed, and
+outdated knowledge from confirmed facts. Only an explicit archive request may
+write an archive page or query record, using the existing schema, generated
+index, append-only log, and current change evidence.
+
+## Lint and validation
+
+Lint is report-only: check evidence, links, conflicts, and orphan pages without
+automatically changing facts or formal pages. Structural checks use:
+
+```text
+python3 .harness/tools/validate_wiki.py --repo {repo}
+python3 .harness/tools/generate_wiki_index.py
+python3 .harness/tools/validate_wiki.py --repo {repo}
+```
+
+`index.md` must only be generated by `generate_wiki_index.py`. Any validation
+or Gate failure is Stop-the-Line. The tools may retain warnings for non-
+canonical artifacts, but formal-page failures block delivery.
+
+## Harness change integration
+
+`.harness/changes/{change-id}/wiki/candidates.md` is the change-local compile
+draft, evidence list, and approval snapshot. It is not another Wiki model.
+Record raw capture, discovery, classification, compile evidence, lint results,
+and Human Wiki Decision there using `.harness/changes/templates.md`. Delivery
+Approval, Formal Wiki Decision, and Change Retirement Authorization remain
+separate. Formal pages are updated only after explicit approval, followed by
+validation, index generation, append-only log synchronization, and final
+consistency validation.

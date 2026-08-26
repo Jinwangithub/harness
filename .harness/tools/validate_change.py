@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -171,6 +172,7 @@ class Validator:
         fields = self.parse_summary_fields(text)
         self.validate_summary_fields(change_dir, entry, fields, text)
         self.validate_flow_artifacts(change_dir, fields)
+        self.validate_wiki_discovery(change_dir, fields)
         self.validate_gate_records(change_dir, text, fields)
 
     def parse_summary_fields(self, text: str) -> dict[str, str]:
@@ -301,6 +303,23 @@ class Validator:
         for heading in WIKI_CANDIDATE_REQUIRED_HEADINGS:
             if heading not in text:
                 self.fail("wiki.candidates_heading_missing", f"{change_dir.name}: wiki/candidates.md missing `{heading}`")
+
+    def validate_wiki_discovery(self, change_dir: Path, fields: dict[str, str]) -> None:
+        flow = fields.get("Flow")
+        if flow == "Standard-flow":
+            path = change_dir / "request_analysis" / "understanding.md"
+            if not path.exists():
+                return
+            text = path.read_text(encoding="utf-8")
+            if "Wiki Discovery" not in text:
+                self.warn("wiki.discovery_missing", f"{change_dir.name}: understanding.md should include Wiki Discovery")
+        elif flow == "Lite-flow":
+            path = change_dir / "request_analysis" / "checklist.md"
+            if not path.exists():
+                return
+            text = path.read_text(encoding="utf-8")
+            if "Wiki Discovery" not in text and "wiki discovery" not in text.lower():
+                self.warn("wiki.discovery_missing", f"{change_dir.name}: Lite checklist should include Wiki Discovery")
 
     def validate_gate_records(self, change_dir: Path, text: str, fields: dict[str, str]) -> None:
         records = list(GATE_RECORD_RE.finditer(text))

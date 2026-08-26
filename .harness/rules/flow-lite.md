@@ -23,8 +23,12 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 
 ### L1 — 需求确认+计划
 
+- Wiki Discovery/ingest：先读取 `.harness/wiki/index.md`，按 module → domain → integration 路由，关键词仅作 fallback；涉及来源时保存不可变 raw capture，并在 checklist/inline spec 中记录搜索词、分类、已读 canonical 页面、缺失知识和 Open Questions。
+- 业务断言必须引用正式 Wiki page/rule ID，或标记为 `open-question`，不得猜测。
+
 - 读取 Skills:
   - `idea-refine`
+- Harness Wiki ingest/compile/lint follows `business-wiki-curation`; ordinary Wiki query is read-only.
 - 按条件补读 Skills:
   - `context-engineering`: 仅当需要上下文恢复/压缩
 - 失败时补读 Skills:

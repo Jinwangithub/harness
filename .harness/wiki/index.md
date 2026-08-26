@@ -1,17 +1,26 @@
 # Wiki Index
 
-> 由 `generate_wiki_index.py` 自动生成。不要手工编辑此文件。
+> 由 `generate_wiki_index.py` 自动生成。路径均为 canonical repo-relative path。
 
-## Module → Wiki 映射
+## Module → Wiki
 
-| 代码模块 | 所属业务域 | 相关 Wiki 页面 |
-|----------|-----------|---------------|
+| Module | Pages |
+|---|---|
 
-## 按业务域
+## Domain → Wiki
 
-### global
+| Domain | Pages |
+|---|---|
 
-| 页面 | 类型 | 标题 |
-|------|------|------|
-| project/overview.md |  | 项目概览 |
+## Integration → Wiki
+
+| Integration | Pages |
+|---|---|
+
+## Tags
+
+| Tag | Pages |
+|---|---|
+
+_暂无已批准正式页面。_
 

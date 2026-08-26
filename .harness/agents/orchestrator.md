@@ -43,31 +43,18 @@ description: 工程协调者 — 中枢 Agent，负责分类、调度业务 Agen
 
 ```
 [ ] 1. 读取 .harness/changes/INDEX.md，确定 active 变更。
-        - 找到 active → 读取对应 changes/{id}/summary.md，确认当前 Phase、Gate 状态。
-        - 无 active → 准备新变更目录。
-        - 多个 active → Stop-the-Line，报告冲突，不猜测恢复对象。
-[ ] 2. 运行 `python3 .harness/tools/validate_change.py`。
-        - validation requires `python3`; `validate_change.py` performs full mechanical artifact validation.
-        - exit code 非 0 且含 FAIL → Stop-the-Line，按输出定位 INDEX/summary/artifact/Gate 结构问题。
-        - 仅 `index.no_active` WARN → 允许继续准备新变更。
-[ ] 3. 在 validator 成功后检查 `INDEX.md` 的 done 保留上限。
-        - 仅统计 Registry 中 `done`；`active` 和 `abandoned` 永不自动删除。
-        - `done` 不超过 5：继续正常启动。
-        - `done` 超过 5：只选择 Registry 表中最先出现的 `done` 作为唯一候选；不得一次处理多项或选择较新的项。
-        - 读取候选的 `summary.md`、`wiki/candidates.md` 和交付证据，按 `business-wiki-curation` 审阅可复用业务知识。
-        - 向用户明确说明正式 Wiki 更新（或无更新结论）、审批证据，以及批准后删除该 change 目录和唯一 INDEX 行；等待明确决定。
-        - 获批后，先同步正式 Wiki 页面（如有）、`wiki/index.md`、append-only `wiki/log.md`，并在 candidate 中写完整同步结果；再运行 `python3 .harness/tools/cleanup_done_changes.py --change {change-id}`。
-        - candidate、审批、正式 Wiki 或同步信息缺失、冲突或不确定时，保留目录和 INDEX 行，仅报告需要用户处理；不得猜测或删除。
-        - 清理等待或失败只阻止该旧目录删除，不阻断 active change 恢复或新任务处理。工具成功后运行 `python3 .harness/tools/validate_change.py`，通过后继续启动。
-[ ] 4. 检查 `.harness/evolution/candidates.md` 是否有 pending candidates，向用户报告。
-[ ] 5. 开始新任务时，读取 .harness/memory/lessons-learned.md 最近 3 条。
-[ ] 6. 遇到未知业务概念时查 .harness/wiki/，不猜测规则。
+[ ] 2. Flow classification 后、需求分析前执行 Wiki Discovery：先读 `.harness/wiki/index.md`，按 module → domain → integration → keyword fallback；在 understanding/checklist 留记录。
+[ ] 3. 运行 `python3 .harness/tools/validate_wiki.py`，正式 Wiki/index/log 不一致时 Stop-the-Line。
+[ ] 4. 运行 `python3 .harness/tools/validate_change.py`。
+[ ] 5. 检查 evolution pending candidates 和最近 3 条 memory。
+[ ] 6. 遇到未知业务概念时查 `.harness/wiki/` 或记录 Open Question，不猜测。
 ```
+
 
 ## Dispatch Loop
 
 ```
-Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidate Curation → Archive → Remember → Evolve
+Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Ingest/Compile → Archive → Remember → Evolve
 ```
 
 - **Load**：读取相关代码、规则、历史 Memory、wiki。
@@ -94,7 +81,7 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。
 - **Confirm**：Gate=`pass` 且 validator 通过后请求用户确认；最终批准后才将 final Gate 改为 `approved`，同步 summary / INDEX 为 `done`、Resume point=`none`，并在同步后重跑 validator。
-- **Wiki Candidate Curation**：最终 Step/Phase 声明交付完成前读取 `.harness/skills/business-wiki-curation/SKILL.md`，归档 `.harness/changes/{change-id}/wiki/candidates.md`；未经明确用户批准不得更新正式 `.harness/wiki/`。批准后：更新对应子目录正式页面（`project/`、`domains/`、`integrations/`、`modules/`）→ 运行 `python3 .harness/tools/generate_wiki_index.py` 重生成 `index.md` → append `log.md`。最终用户可见完成摘要必须报告 Wiki candidate status。
+- **Wiki Ingest/Compile**：最终 Step/Phase 声明交付完成前读取 `.harness/skills/business-wiki-curation/SKILL.md`。在当前 change 记录 raw capture、搜索、分类、编译证据、lint 和 Human Wiki Decision；`.harness/changes/{change-id}/wiki/candidates.md` 是 change-local 编译/证据/审批快照，不是第二套知识架构。未经明确用户批准不得更新正式 `.harness/wiki/`。批准后：更新对应 canonical 页面 → `validate_wiki.py` → `generate_wiki_index.py` → append-only `log.md` → 再验证。保持 Delivery Approval、Formal Wiki Decision、Retirement Authorization 分离。最终用户可见完成摘要必须报告 Wiki ingest/compile status。
 - **Archive**：归档产物、Skill Load、Gate 状态。最终完成仅按两段式顺序执行：用户批准 → final Gate Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done`、Resume point=`none` → validator 重验 PASS → 声明完成。validator 报 INDEX/summary Status 或 Resume point 冲突时必须 Stop-the-Line，禁止自行择一覆盖。
 - **Remember**：触发即记录（`.harness/memory/README.md`）；出口报告记录数量或 none。
 - **Evolve**：最终批准交付后，如有 gate fail/blocked，运行 `python3 .harness/tools/analyze_failures.py`。新 pattern 写入 `evolution/candidates.md`。用户确认后按 `evolution.md` 协议处理。演化分析失败不阻断变更完成。详见 `.harness/rules/evolution.md`。
@@ -103,4 +90,4 @@ Load → Classify → Dispatch → Verify → Gate → Confirm → Wiki Candidat
 
 - `changes/`：每个需求独立变更目录；产物和 Gate 状态即时归档，`INDEX.md` 和 `summary.md` 同步更新。
 - `memory/`：触发即记录；出口报告记录数量或 none。
-- `wiki/`：业务规则未知时必须查阅 `index.md` 的 Module→Wiki 映射表定位相关域/模块页面；正式 Wiki 只保存已获人工批准的业务知识，候选知识先归档在 change-local `wiki/candidates.md`。`index.md` 由 `generate_wiki_index.py` 自动生成，不从手工维护。
+- `wiki/`：业务规则未知时必须查阅 `index.md` 的 Module→Wiki 映射表定位相关域/模块页面；raw 来源不可变，正式 Wiki 只保存已获人工批准的编译知识，change-local `wiki/candidates.md` 仅保存本次编译、证据和审批快照。`index.md` 由 `generate_wiki_index.py` 自动生成，`log.md` append-only。
