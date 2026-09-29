@@ -39,12 +39,15 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Lite Spec (Lite-flow 专用)
 {以下内容仅在 Lite-flow 时填写，Standard-flow 不填写此节}
 
-### Wiki Discovery
-- Search terms: {关键词 / none}
-- Candidate modules: {canonical module paths / none}
-- Candidate domains: {domain IDs / none}
-- Candidate integrations: {integration IDs / none}
-- Read pages: {canonical Wiki paths / none}
+### OpenViking Business Knowledge（Lite-flow 专用）
+- Status: {found / no-relevant / unavailable / not-needed}
+- Reason: {状态判断理由；found 时写采用原因}
+- Knowledge root: {精确 `viking://` URI / unknown}
+- Search query: {关键词 / none}
+- Layers searched: {wiki / wiki+raw / none}
+- Read resources: {精确 `viking://` URI / none}
+- Applied business knowledge: {规则或事实 / none}
+- Conflicts / stale knowledge: {冲突或过期信息 / none}
 - Missing knowledge: {缺失知识 / none}
 - Open Questions: {问题 / none}
 
@@ -115,60 +118,6 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Condition / Reason: 条件、判断结果或不需要读取的理由
 - Status: `loaded` / `not-needed` / `blocked`
 
-## wiki/candidates.md 模板
-
-`wiki/candidates.md` 是当前 change 的编译草稿、证据清单和审批快照，不是另一套 Wiki 知识模型。Raw 来源仍保存在 `.harness/wiki/raw/`；正式页面只在 Formal Wiki Decision 批准后同步。保留以下字段并按当前页面 schema 填写：
-```markdown
-# Business Wiki Candidates
-
-## Source Change
-- Change id: {change-id}
-- Flow: {Lite-flow/Standard-flow}
-- Source artifacts:
-  - `{path}`
-
-## Extraction Summary
-- Status: {candidates-found / none / blocked}
-- Reason: {为什么有候选、没有候选或被阻塞}
-
-## Candidates
-
-### Candidate {N}: {title}
-- Type: {business-term / domain-rule / workflow / data-contract / integration-fact / operational-constraint / testing-knowledge / durable-exception}
-- Confidence: {high / medium / low}
-- Proposed target: `.harness/wiki/project/{page}.md` / `.harness/wiki/domains/{domain}.md` / `.harness/wiki/integrations/{system}.md` / `.harness/wiki/modules/{module}.md` / new page needed / none
-- Source evidence:
-  - `{artifact path}`: {line/section or evidence summary}
-- Proposed content:
-  - {候选内容；不得包含猜测或秘密}
-- Open questions:
-  - {待确认问题；没有则写 none}
-- Safety checks:
-  - [ ] No guesses
-  - [ ] No secrets
-  - [ ] Not a one-off implementation detail
-  - [ ] Not a process lesson that belongs in memory
-
-## Recommendation
-- {approve / reject / defer / no formal Wiki update} because {reason}
-
-## Human Wiki Approval
-- Status: {pending / approved / rejected / deferred / partially-approved / not-requested}
-- Decision evidence: {明确用户决定；没有则写 none}
-- Official Wiki updates:
-  - `.harness/wiki/{path}` / none
-- Wiki index regenerated (`generate_wiki_index.py`): {yes / no / not-applicable}
-- Wiki log synchronized: {yes / no}
-- Source evidence summary: {将被正式 Wiki 长期保留的产物章节/事实摘要}
-```
-
-删除超额 `done` change 的资格规则：
-
-- `approved`：至少一个正式 Wiki 页面存在，Wiki index 已 regenerate 且 Wiki log 已 append。
-- `not-requested`：`Official Wiki updates: none`、Wiki index 为 `not-applicable`、Wiki log 为 `yes`；Decision evidence 必须是明确的人工“无正式 Wiki 更新且可删除”决定。
-- `pending`、`rejected`、`deferred`、`partially-approved` 均不具备删除资格。
-- Decision evidence 的批准文字必须同时涵盖本次正式 Wiki 处置和删除该 change 的授权；不得把旧 final Gate 的交付批准用作删除授权。
-
 ## Lite-flow 产物模板
 
 ### request_analysis/checklist.md
@@ -201,11 +150,21 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Verdict
 - Status: {pass/fail}
 
-## Business Wiki Candidate Check
-- Candidate artifact: `wiki/candidates.md`
-- Extraction status: {candidates-found / none / blocked}
-- Human Wiki Approval: {pending / approved / rejected / deferred / partially-approved / not-requested}; cite `wiki/candidates.md` synchronization result
-- Formal Wiki updated: {yes/no}; paths: {`.harness/wiki/...` / none}
+## OpenViking Knowledge Update
+- Durable knowledge: {yes / no}; Reason: {需要长期保存或无需保存的理由}
+- Required for delivery: {yes / no}; Reason: {approved spec 验收条件或默认非阻塞}
+- Knowledge root: {精确 `viking://` URI / unknown}
+- Source artifact: {本次交付产物路径 / none}
+- Disposition: {New / Update / Disputed / No material / none}
+- Status: {pending / started / completed / verification-pending / failed / unavailable / not-needed}
+- Raw URI(s): {不可变原始资料的精确 `viking://` URI / none}
+- Wiki URI(s): {整理后文章的精确 `viking://` URI / none}
+- Index/log result: {`wiki/index.md` 与 `wiki/log.md` 更新证据 / pending / none}
+- Operation ID: {task/request ID / none}
+- Operation result: {不含敏感信息的真实返回摘要或 not-needed 理由}
+- Retry note: {失败、不确定或不可用时的后续动作 / none}
+
+> 最终批准前仅允许 `pending` 或 `not-needed`，不得执行外部写入。`completed` 必须有 raw URI；除 `No material` 外还必须有 wiki URI；`No material` 必须有 log 证据。
 
 ## Memory Check
 （字段见 `.harness/memory/README.md` 的 Lite-flow 3 字段块；出口报告另需 `Memory recorded: {N} entries / none`）
@@ -218,12 +177,15 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ```markdown
 # Understanding
 
-## Wiki Discovery
-- Search terms: {关键词 / none}
-- Candidate modules: {canonical module paths / none}
-- Candidate domains: {domain IDs / none}
-- Candidate integrations: {integration IDs / none}
-- Read pages: {canonical Wiki paths / none}
+## OpenViking Business Knowledge
+- Status: {found / no-relevant / unavailable / not-needed}
+- Reason: {状态判断理由；found 时写采用原因}
+- Knowledge root: {精确 `viking://` URI / unknown}
+- Search query: {需求、业务域、模块、集成关键词 / none}
+- Layers searched: {wiki / wiki+raw / none}
+- Read resources: {精确 `viking://` URI / none}
+- Applied business knowledge: {采用的业务规则和事实 / none}
+- Conflicts / stale knowledge: {冲突或过期信息 / none}
 - Missing knowledge: {缺失知识 / none}
 - Open Questions: {问题 / none}
 
@@ -251,6 +213,17 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 ```markdown
 # Spec
+
+## Project / System Knowledge
+- Status: {found / no-relevant / unavailable / not-needed}
+- Reason: {状态判断理由；found 时写采用原因}
+- Knowledge root: {精确 `viking://` URI / unknown}
+- Search query: {项目规范、架构、ADR、接口契约、工程标准关键词 / none}
+- Layers searched: {wiki / wiki+raw / none}
+- Read resources: {精确 `viking://` URI / none}
+- Applied constraints: {应用到本 Spec 的约束 / none}
+- Conflicts / stale knowledge: {冲突或过期信息 / none}
+- Open Questions: {仍需确认的问题 / none}
 
 ## Objective
 - {目标、业务价值和可验证结果}
@@ -444,12 +417,21 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Documentation / ADR / Changelog
 - {按需项目文档产物；没有则写 none}
 
-## Business Wiki Curation
-- Candidate artifact: `wiki/candidates.md`
-- Extraction status: {candidates-found / none / blocked}
-- Human Wiki Approval: {pending / approved / rejected / deferred / partially-approved / not-requested}; cite `wiki/candidates.md` synchronization result
-- Formal Wiki updated: {yes/no}; paths: {`.harness/wiki/...` / none}
-- Decision reason: {批准、拒绝、延期或无需更新的理由}
+## OpenViking Knowledge Update
+- Durable knowledge: {yes / no}; Reason: {需要长期保存或无需保存的理由}
+- Required for delivery: {yes / no}; Reason: {approved spec 验收条件或默认非阻塞}
+- Knowledge root: {精确 `viking://` URI / unknown}
+- Source artifact: {本次交付产物路径 / none}
+- Disposition: {New / Update / Disputed / No material / none}
+- Status: {pending / started / completed / verification-pending / failed / unavailable / not-needed}
+- Raw URI(s): {不可变原始资料的精确 `viking://` URI / none}
+- Wiki URI(s): {整理后文章的精确 `viking://` URI / none}
+- Index/log result: {`wiki/index.md` 与 `wiki/log.md` 更新证据 / pending / none}
+- Operation ID: {task/request ID / none}
+- Operation result: {不含敏感信息的真实返回摘要或 not-needed 理由}
+- Retry note: {失败、不确定或不可用时的后续动作 / none}
+
+> 最终 Delivery Approval 同时授权交付和本次知识更新。批准后执行 `raw ingest → disposition → wiki compile → index/log`。异步接受不等于完成；只有 approved spec 将知识更新列为验收条件时，远程失败才阻塞交付。
 
 ## Known Gotchas / Limitations
 - {已知限制、注意事项；没有则写 none}

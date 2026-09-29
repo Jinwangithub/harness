@@ -37,7 +37,29 @@ CODE_ACTION_MAP: dict[str, tuple[str, str]] = {
     "artifact.missing": ("skill-update", "templates.md"),
     "artifact.forbidden": ("skill-update", "templates.md"),
     "index.multiple_active": ("rule-update", "structure.md"),
-    "wiki.candidates_missing": ("rule-update", "gates.md"),
+    # OpenViking knowledge evidence — write-back record missing or malformed.
+    "knowledge.update_missing": ("rule-update", "templates.md"),
+    "knowledge.update_invalid": ("rule-update", "templates.md"),
+    "knowledge.delivery_requirement_missing": ("rule-update", "templates.md"),
+    "knowledge.root_missing": ("rule-update", "templates.md"),
+    "knowledge.disposition_invalid": ("rule-update", "templates.md"),
+    "knowledge.raw_uri_missing": ("rule-update", "templates.md"),
+    "knowledge.raw_uri_outside_root": ("rule-update", "templates.md"),
+    "knowledge.wiki_uri_missing": ("rule-update", "templates.md"),
+    "knowledge.wiki_uri_outside_root": ("rule-update", "templates.md"),
+    "knowledge.no_material_has_wiki": ("rule-update", "templates.md"),
+    "knowledge.index_log_missing": ("rule-update", "templates.md"),
+    "knowledge.operation_evidence_missing": ("rule-update", "templates.md"),
+    "knowledge.reason_missing": ("rule-update", "templates.md"),
+    "knowledge.retry_note_missing": ("rule-update", "templates.md"),
+    "knowledge.update_pending": ("rule-update", "templates.md"),
+    # OpenViking external-service / integration issues — NOT code-implementation defects.
+    # A temporary service outage must not be auto-classified as a code bug.
+    "openviking.unavailable": ("rule-update", "rollback.md"),
+    "openviking.read_failed": ("rule-update", "rollback.md"),
+    "openviking.write_failed": ("rule-update", "rollback.md"),
+    "openviking.invalid_uri": ("rule-update", "rollback.md"),
+    "openviking.result_unverified": ("rule-update", "rollback.md"),
 }
 # -------------------------------------------------------------------------
 

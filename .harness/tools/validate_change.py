@@ -65,13 +65,6 @@ STANDARD_SUBSTEPS = {
     4: {"implementation", "code-review", "complete"},
     5: {"unit-test", "test-review", "complete"},
 }
-WIKI_CANDIDATES = Path("wiki/candidates.md")
-WIKI_CANDIDATE_REQUIRED_HEADINGS = [
-    "# Business Wiki Candidates",
-    "## Source Change",
-    "## Extraction Summary",
-    "## Human Wiki Approval",
-]
 
 
 @dataclass(frozen=True)
@@ -172,7 +165,7 @@ class Validator:
         fields = self.parse_summary_fields(text)
         self.validate_summary_fields(change_dir, entry, fields, text)
         self.validate_flow_artifacts(change_dir, fields)
-        self.validate_wiki_discovery(change_dir, fields)
+        self.validate_knowledge_discovery(change_dir, fields)
         self.validate_gate_records(change_dir, text, fields)
 
     def parse_summary_fields(self, text: str) -> dict[str, str]:
@@ -240,7 +233,11 @@ class Validator:
                 for rel in LITE_FINAL_REQUIRED:
                     if not (change_dir / rel).exists():
                         self.fail("artifact.missing", f"{change_dir.name}: Lite-flow final delivery requires {rel}")
-                self.validate_wiki_candidates(change_dir)
+                self.validate_knowledge_update(
+                    change_dir,
+                    "verification_report.md",
+                    is_final=status == "done",
+                )
             for rel in LITE_FORBIDDEN:
                 if (change_dir / rel).exists():
                     self.fail("artifact.forbidden", f"{change_dir.name}: Lite-flow must not contain {rel}")
@@ -292,34 +289,307 @@ class Validator:
             if status == "done" and not (change_dir / "delivery-summary.md").exists():
                 self.fail("artifact.missing", f"{change_dir.name}: done Standard-flow requires delivery-summary.md")
             if status == "done" or (phase is not None and phase >= 6):
-                self.validate_wiki_candidates(change_dir)
+                self.validate_knowledge_update(
+                    change_dir,
+                    "delivery-summary.md",
+                    is_final=status == "done",
+                )
 
-    def validate_wiki_candidates(self, change_dir: Path) -> None:
-        path = change_dir / WIKI_CANDIDATES
+    def extract_knowledge_update_section(self, text: str) -> str | None:
+        match = re.search(r"^##\s*OpenViking\s+Knowledge\s+Update\s*$([\s\S]*?)(?=^##\s+|\Z)", text, re.MULTILINE)
+        return match.group(1) if match else None
+
+    def validate_knowledge_update(
+        self,
+        change_dir: Path,
+        artifact_name: str,
+        *,
+        is_final: bool,
+    ) -> None:
+        """Validate the small, explicit OpenViking write-back record."""
+        path = change_dir / artifact_name
         if not path.exists():
-            self.fail("wiki.candidates_missing", f"{change_dir.name}: final delivery requires {WIKI_CANDIDATES}")
             return
         text = path.read_text(encoding="utf-8")
-        for heading in WIKI_CANDIDATE_REQUIRED_HEADINGS:
-            if heading not in text:
-                self.fail("wiki.candidates_heading_missing", f"{change_dir.name}: wiki/candidates.md missing `{heading}`")
+        section = self.extract_knowledge_update_section(text)
+        if section is None:
+            self.fail("knowledge.update_missing", f"{change_dir.name}: {artifact_name} must record OpenViking Knowledge Update status")
+            return
+        match = re.search(r"^[- ]+(?:\*\*)?(?:Status|Update status)(?:\*\*)?:\s*`?([a-z-]+)", section, re.MULTILINE | re.IGNORECASE)
+        if not match:
+            self.fail("knowledge.update_missing", f"{change_dir.name}: {artifact_name} must record OpenViking Knowledge Update status")
+            return
+        status = match.group(1).lower()
+        allowed_statuses = {
+            "pending",
+            "started",
+            "completed",
+            "verification-pending",
+            "failed",
+            "unavailable",
+            "not-needed",
+        }
+        if status not in allowed_statuses:
+            self.fail("knowledge.update_invalid", f"{change_dir.name}: invalid OpenViking Knowledge Update status `{status}`")
+            return
 
-    def validate_wiki_discovery(self, change_dir: Path, fields: dict[str, str]) -> None:
+        required_match = re.search(
+            r"^[- ]+(?:\*\*)?Required for delivery(?:\*\*)?:\s*`?(yes|no)\b",
+            section,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        if not required_match:
+            self.fail(
+                "knowledge.delivery_requirement_missing",
+                f"{change_dir.name}: {artifact_name} must record `Required for delivery: yes|no`",
+            )
+            required_for_delivery = False
+        else:
+            required_for_delivery = required_match.group(1).lower() == "yes"
+
+        knowledge_root = re.search(
+            r"^[- ]+(?:\*\*)?Knowledge root(?:\*\*)?:\s*`?([^\n`]+)",
+            section,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        disposition = re.search(
+            r"^[- ]+(?:\*\*)?Disposition(?:\*\*)?:\s*(.*?)\s*$",
+            section,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        raw_uri = re.search(
+            r"^[- ]+(?:\*\*)?Raw URI(?:\(s\))?(?:\*\*)?:\s*`?([^\n`]+)",
+            section,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        wiki_uri = re.search(
+            r"^[- ]+(?:\*\*)?Wiki URI(?:\(s\))?(?:\*\*)?:\s*`?([^\n`]+)",
+            section,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        index_log = re.search(
+            r"^[- ]+(?:\*\*)?Index/log result(?:\*\*)?:\s*(.*?)\s*$",
+            section,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        operation_id = re.search(
+            r"^[- ]+(?:\*\*)?Operation ID(?:\*\*)?:\s*`?([^\n`]+)",
+            section,
+            re.MULTILINE | re.IGNORECASE,
+        )
+        root_value = self.clean_value(knowledge_root.group(1)) if knowledge_root else ""
+        disposition_value = self.clean_value(disposition.group(1)) if disposition else ""
+        raw_uri_value = self.clean_value(raw_uri.group(1)) if raw_uri else ""
+        wiki_uri_value = self.clean_value(wiki_uri.group(1)) if wiki_uri else ""
+        index_log_value = self.clean_value(index_log.group(1)) if index_log else ""
+        has_root = not self.is_placeholder_or_empty(root_value) and root_value.startswith("viking://")
+        has_raw_uri = not self.is_placeholder_or_empty(raw_uri_value) and "viking://" in raw_uri_value
+        has_wiki_uri = not self.is_placeholder_or_empty(wiki_uri_value) and "viking://" in wiki_uri_value
+        raw_uris = re.findall(r"viking://[^\s;,`]+", raw_uri_value)
+        wiki_uris = re.findall(r"viking://[^\s;,`]+", wiki_uri_value)
+        has_operation_id = bool(
+            operation_id and not self.is_placeholder_or_empty(self.clean_value(operation_id.group(1)))
+        )
+
+        if status in {"started", "completed"} and not has_root:
+            self.fail(
+                "knowledge.root_missing",
+                f"{change_dir.name}: {status} OpenViking update requires an exact Knowledge root URI",
+            )
+        if status == "started" and not (has_raw_uri or has_operation_id):
+            self.fail(
+                "knowledge.operation_evidence_missing",
+                f"{change_dir.name}: started OpenViking update requires a Raw URI or Operation ID",
+            )
+        if status == "completed":
+            normalized_root = root_value.rstrip("/")
+            disposition_tokens = {
+                token.strip().lower()
+                for token in re.split(r"[;,]", disposition_value)
+                if token.strip()
+            }
+            valid_dispositions = {"new", "update", "disputed", "no material"}
+            if not disposition_tokens or not disposition_tokens <= valid_dispositions or (
+                "no material" in disposition_tokens and len(disposition_tokens) > 1
+            ):
+                self.fail(
+                    "knowledge.disposition_invalid",
+                    f"{change_dir.name}: completed OpenViking update requires a valid disposition",
+                )
+            if not has_raw_uri:
+                self.fail(
+                    "knowledge.raw_uri_missing",
+                    f"{change_dir.name}: completed OpenViking update requires an immutable Raw URI",
+                )
+            elif any(not uri.startswith(f"{normalized_root}/raw/") for uri in raw_uris):
+                self.fail(
+                    "knowledge.raw_uri_outside_root",
+                    f"{change_dir.name}: every Raw URI must be under the recorded Knowledge root raw/ layer",
+                )
+            if disposition_tokens and "no material" not in disposition_tokens and not has_wiki_uri:
+                self.fail(
+                    "knowledge.wiki_uri_missing",
+                    f"{change_dir.name}: completed {disposition_value} update requires a Wiki URI",
+                )
+            elif disposition_tokens == {"no material"} and has_wiki_uri:
+                self.fail(
+                    "knowledge.no_material_has_wiki",
+                    f"{change_dir.name}: No material disposition must not create or update a Wiki article",
+                )
+            elif has_wiki_uri and any(
+                not uri.startswith(f"{normalized_root}/wiki/") for uri in wiki_uris
+            ):
+                self.fail(
+                    "knowledge.wiki_uri_outside_root",
+                    f"{change_dir.name}: every Wiki URI must be under the recorded Knowledge root wiki/ layer",
+                )
+            if self.is_placeholder_or_empty(index_log_value):
+                self.fail(
+                    "knowledge.index_log_missing",
+                    f"{change_dir.name}: completed OpenViking update requires index/log evidence",
+                )
+            else:
+                lowered_result = index_log_value.lower()
+                if disposition_tokens == {"no material"} and "log" not in lowered_result:
+                    self.fail(
+                        "knowledge.index_log_missing",
+                        f"{change_dir.name}: No material disposition requires wiki/log.md evidence",
+                    )
+                if disposition_tokens and "no material" not in disposition_tokens and not (
+                    "index" in lowered_result and "log" in lowered_result
+                ):
+                    self.fail(
+                        "knowledge.index_log_missing",
+                        f"{change_dir.name}: compiled wiki update requires both index and log evidence",
+                    )
+        if status == "not-needed":
+            reason = re.search(r"^[- ]+Durable knowledge:\s*no;\s*Reason:\s*([^\n]*)", section, re.MULTILINE | re.IGNORECASE)
+            reason_value = (reason.group(1).strip() if reason else "").strip()
+            if not reason_value or reason_value.lower() in {"none", "n/a"} or (reason_value.startswith("{") and reason_value.endswith("}")):
+                self.fail("knowledge.reason_missing", f"{change_dir.name}: not-needed OpenViking update requires a reason")
+        if is_final and status == "pending":
+            self.fail(
+                "knowledge.update_pending",
+                f"{change_dir.name}: done change cannot leave OpenViking Knowledge Update pending",
+            )
+
+        if status in {"failed", "unavailable", "verification-pending"}:
+            retry = re.search(
+                r"^[- ]+(?:\*\*)?Retry note(?:\*\*)?:\s*(.*?)\s*$",
+                section,
+                re.MULTILINE | re.IGNORECASE,
+            )
+            retry_value = self.clean_value(retry.group(1)) if retry else ""
+            if self.is_placeholder_or_empty(retry_value):
+                self.fail(
+                    "knowledge.retry_note_missing",
+                    f"{change_dir.name}: {status} OpenViking update requires a Retry note",
+                )
+            issue_code = {
+                "failed": "openviking.write_failed",
+                "unavailable": "openviking.unavailable",
+                "verification-pending": "openviking.result_unverified",
+            }[status]
+            message = f"{change_dir.name}: OpenViking Knowledge Update is `{status}`"
+            if required_for_delivery:
+                self.fail(issue_code, message + " and is required for delivery")
+            else:
+                self.warn(issue_code, message + "; recorded as non-blocking")
+
+    def validate_knowledge_discovery(self, change_dir: Path, fields: dict[str, str]) -> None:
         flow = fields.get("Flow")
+        checks: list[tuple[Path, str, str, str]] = []
         if flow == "Standard-flow":
-            path = change_dir / "request_analysis" / "understanding.md"
-            if not path.exists():
-                return
-            text = path.read_text(encoding="utf-8")
-            if "Wiki Discovery" not in text:
-                self.warn("wiki.discovery_missing", f"{change_dir.name}: understanding.md should include Wiki Discovery")
+            checks = [(
+                change_dir / "request_analysis" / "understanding.md",
+                "business",
+                "understanding",
+                "OpenViking Business Knowledge",
+            )]
+            if (change_dir / "request_analysis" / "spec.md").exists():
+                checks.append((
+                    change_dir / "request_analysis" / "spec.md",
+                    "system",
+                    "spec",
+                    "Project / System Knowledge",
+                ))
         elif flow == "Lite-flow":
-            path = change_dir / "request_analysis" / "checklist.md"
+            checks = [(
+                change_dir / "summary.md",
+                "business",
+                "summary",
+                "OpenViking Business Knowledge（Lite-flow 专用）",
+            )]
+        for path, kind, label, heading in checks:
             if not path.exists():
-                return
+                continue
             text = path.read_text(encoding="utf-8")
-            if "Wiki Discovery" not in text and "wiki discovery" not in text.lower():
-                self.warn("wiki.discovery_missing", f"{change_dir.name}: Lite checklist should include Wiki Discovery")
+            section_match = re.search(
+                rf"^#{{2,3}}\s*{re.escape(heading)}\s*$([\s\S]*?)(?=^#{{1,3}}\s+|\Z)",
+                text,
+                re.MULTILINE,
+            )
+            if not section_match:
+                self.warn("knowledge.discovery_missing", f"{change_dir.name}: {label} should include OpenViking {kind} knowledge evidence")
+                continue
+            section = section_match.group(1)
+            status_match = re.search(
+                r"-\s*Status:\s*(found|no-relevant|unavailable|not-needed)",
+                section,
+                re.IGNORECASE,
+            )
+            if not status_match:
+                self.warn("knowledge.discovery_status_missing", f"{change_dir.name}: {label} should record OpenViking query status")
+                continue
+            discovery_status = status_match.group(1).lower()
+            root_match = None
+            if discovery_status in {"found", "no-relevant"}:
+                root_match = re.search(
+                    r"-\s*Knowledge root:\s*`?(viking://[^\n`]+)",
+                    section,
+                    re.IGNORECASE,
+                )
+                if not root_match:
+                    self.warn(
+                        "knowledge.discovery_root_missing",
+                        f"{change_dir.name}: {label} should record the exact project Knowledge root",
+                    )
+                layers_match = re.search(
+                    r"-\s*Layers searched:\s*(wiki(?:\+raw)?)\s*$",
+                    section,
+                    re.MULTILINE | re.IGNORECASE,
+                )
+                if not layers_match:
+                    self.warn(
+                        "knowledge.discovery_layers_missing",
+                        f"{change_dir.name}: {label} should record `wiki` or `wiki+raw`",
+                    )
+            read_resources = re.search(
+                r"Read resources:\s*([^\n]+)",
+                section,
+                re.IGNORECASE,
+            )
+            read_value = self.clean_value(read_resources.group(1)) if read_resources else ""
+            expected_wiki_prefix = (
+                f"{self.clean_value(root_match.group(1)).rstrip('/')}/wiki/"
+                if root_match else ""
+            )
+            if discovery_status == "found" and (
+                not expected_wiki_prefix or expected_wiki_prefix not in read_value
+            ):
+                self.warn(
+                    "knowledge.discovery_uri_missing",
+                    f"{change_dir.name}: {label} reports `found` but cites no precise wiki URI; "
+                    "raw-only evidence is not accepted as compiled knowledge",
+                )
+            if discovery_status == "not-needed":
+                reason = re.search(r"-\s*Reason:\s*(.*?)\s*$", section, re.MULTILINE | re.IGNORECASE)
+                reason_value = self.clean_value(reason.group(1)) if reason else ""
+                if self.is_placeholder_or_empty(reason_value):
+                    self.warn(
+                        "knowledge.discovery_reason_missing",
+                        f"{change_dir.name}: {label} reports `not-needed` without a reason",
+                    )
 
     def validate_gate_records(self, change_dir: Path, text: str, fields: dict[str, str]) -> None:
         records = list(GATE_RECORD_RE.finditer(text))
@@ -422,7 +692,11 @@ class Validator:
         if value is None:
             return True
         cleaned = value.strip()
-        return not cleaned or (cleaned.startswith("{") and cleaned.endswith("}"))
+        return (
+            not cleaned
+            or cleaned.lower() in {"none", "n/a", "not applicable"}
+            or (cleaned.startswith("{") and cleaned.endswith("}"))
+        )
 
     def print_report(self) -> None:
         if not self.issues:

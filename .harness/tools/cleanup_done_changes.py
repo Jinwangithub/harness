@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Retire one excess completed Harness change after recorded Wiki synchronization."""
+"""Retire one excess completed Harness change after final Delivery Approval."""
 
 from __future__ import annotations
 
@@ -16,8 +16,6 @@ INDEX_ROW_RE = re.compile(
     r"^\|\s*`?([^`|]+?)`?\s*\|\s*`?([^`|]+?)`?\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*$"
 )
 SUMMARY_FIELD_RE = re.compile(r"^- \*\*(.+?)\*\*:\s*(.*?)\s*$", re.MULTILINE)
-APPROVAL_RE = re.compile(r"^## Human Wiki Approval\s*$([\s\S]*?)(?=^##\s+|\Z)", re.MULTILINE)
-LOG_RECORD_RE = re.compile(r"^##\s+.*$[\s\S]*?(?=^##\s+|\Z)", re.MULTILINE)
 PLACEHOLDER_RE = re.compile(r"^\{.*\}$")
 
 
@@ -77,124 +75,6 @@ def parse_summary_fields(summary_path: Path) -> dict[str, str]:
     return {key.strip(): value.strip() for key, value in SUMMARY_FIELD_RE.findall(text)}
 
 
-def approval_fields(candidate_path: Path) -> tuple[dict[str, str], list[str]]:
-    try:
-        text = candidate_path.read_text(encoding="utf-8")
-    except FileNotFoundError as error:
-        raise CleanupError(f"Missing Wiki candidate: {candidate_path}") from error
-    match = APPROVAL_RE.search(text)
-    if not match:
-        raise CleanupError("Candidate lacks Human Wiki Approval section")
-
-    fields: dict[str, str] = {}
-    official_paths: list[str] = []
-    current_field: str | None = None
-    for line in match.group(1).splitlines():
-        field_match = re.match(r"^-\s+([A-Za-z ]+):\s*(.*?)\s*$", line)
-        if field_match:
-            current_field = field_match.group(1).strip().lower()
-            fields[current_field] = field_match.group(2).strip().strip("`")
-            continue
-        path_match = re.match(r"^\s+-\s+`?([^`]+?)`?\s*$", line)
-        if current_field == "official wiki updates" and path_match:
-            official_path = path_match.group(1).strip()
-            official_paths.append(official_path)
-            if official_path.lower() == "none":
-                fields[current_field] = "none"
-    if fields.get("official wiki updates") and fields["official wiki updates"] != "none":
-        official_paths.append(fields["official wiki updates"])
-    return fields, [path for path in official_paths if path.lower() != "none"]
-
-
-def matching_log_record(log_text: str, change_id: str) -> str | None:
-    source = f"- Source change ID: `{change_id}`"
-    for record in LOG_RECORD_RE.findall(log_text):
-        if source in record:
-            return record
-    return None
-
-
-def require_log_evidence(
-    repo_root: Path, change_id: str, decision: str, wiki_paths: list[str], index_value: str
-) -> None:
-    log_path = repo_root / ".harness" / "wiki" / "log.md"
-    try:
-        record = matching_log_record(log_path.read_text(encoding="utf-8"), change_id)
-    except FileNotFoundError as error:
-        raise CleanupError(f"Missing Wiki log: {log_path}") from error
-    if record is None:
-        raise CleanupError(f"Wiki log has no record for source change ID `{change_id}`")
-    if not is_nonplaceholder(re.search(r"^- Human approval evidence:\s*(.*?)\s*$", record, re.MULTILINE | re.IGNORECASE).group(1) if re.search(r"^- Human approval evidence:\s*(.*?)\s*$", record, re.MULTILINE | re.IGNORECASE) else None):
-        raise CleanupError("Wiki log is missing human approval evidence")
-    if f"- Cleanup disposition: retired-after-sync" not in record:
-        raise CleanupError("Wiki log cleanup disposition is not retired-after-sync")
-    if f"- Wiki index synchronized: {index_value}" not in record:
-        raise CleanupError("Wiki log index synchronization does not match candidate")
-    if decision == "not-requested":
-        if "no-update" not in record.splitlines()[0]:
-            raise CleanupError("not-requested cleanup requires a no-update Wiki log record")
-        if not re.search(r"^\s*-\s+`?none`?\s*$", record, re.MULTILINE | re.IGNORECASE):
-            raise CleanupError("no-update Wiki log record must list Updated Wiki paths as none")
-    else:
-        for wiki_path in wiki_paths:
-            if wiki_path not in record:
-                raise CleanupError(f"Wiki log does not list synchronized path: {wiki_path}")
-
-
-def validate_wiki_sync(repo_root: Path, change_id: str, candidate_path: Path) -> None:
-    try:
-        candidate_text = candidate_path.read_text(encoding="utf-8")
-    except FileNotFoundError as error:
-        raise CleanupError(f"Missing Wiki candidate: {candidate_path}") from error
-    if not re.search(rf"^- Change id:\s*`?{re.escape(change_id)}`?\s*$", candidate_text, re.MULTILINE):
-        raise CleanupError("Candidate Source Change ID does not match requested change")
-    fields, paths = approval_fields(candidate_path)
-    status = fields.get("status")
-    evidence = fields.get("decision evidence")
-    source_summary = fields.get("source evidence summary")
-    if not is_nonplaceholder(evidence):
-        raise CleanupError("Candidate Decision evidence is missing or a placeholder")
-    if not is_nonplaceholder(source_summary):
-        raise CleanupError("Candidate Source evidence summary is missing or a placeholder")
-
-    updates = fields.get("official wiki updates")
-    index_sync = fields.get("wiki index synchronized")
-    log_sync = fields.get("wiki log synchronized")
-    if status == "approved":
-        if not paths or updates == "none":
-            raise CleanupError("approved candidate requires at least one official Wiki path")
-        if index_sync != "yes" or log_sync != "yes":
-            raise CleanupError("approved candidate requires synchronized Wiki index and log")
-        index_path = repo_root / ".harness" / "wiki" / "index.md"
-        try:
-            index_text = index_path.read_text(encoding="utf-8")
-        except FileNotFoundError as error:
-            raise CleanupError(f"Missing Wiki index: {index_path}") from error
-        candidate_reference = f".harness/changes/{change_id}/wiki/candidates.md"
-        if candidate_reference in index_text:
-            raise CleanupError("Wiki index retains a change-local candidate reference")
-        for wiki_path in paths:
-            if not wiki_path.startswith(".harness/wiki/"):
-                raise CleanupError(f"Official Wiki path is not under .harness/wiki: {wiki_path}")
-            page = repo_root / wiki_path
-            if not page.is_file():
-                raise CleanupError(f"Official Wiki page is missing: {wiki_path}")
-            page_text = page.read_text(encoding="utf-8")
-            if candidate_reference in page_text:
-                raise CleanupError(f"Official Wiki page retains candidate reference: {wiki_path}")
-            if wiki_path not in index_text:
-                raise CleanupError(f"Wiki index does not list synchronized path: {wiki_path}")
-        require_log_evidence(repo_root, change_id, status, paths, "yes")
-    elif status == "not-requested":
-        if updates != "none" or paths:
-            raise CleanupError("not-requested candidate must have Official Wiki updates: none")
-        if index_sync != "not-applicable" or log_sync != "yes":
-            raise CleanupError("not-requested candidate has invalid synchronization fields")
-        require_log_evidence(repo_root, change_id, status, [], "not-applicable")
-    else:
-        raise CleanupError(f"Candidate approval status is not eligible for cleanup: {status or 'missing'}")
-
-
 def run_validator(repo_root: Path, change_id: str | None) -> None:
     command = [sys.executable, str(repo_root / ".harness" / "tools" / "validate_change.py"), "--repo", str(repo_root)]
     if change_id:
@@ -233,7 +113,6 @@ def cleanup(repo_root: Path, change_id: str) -> None:
     if summary.get("Resume point") != target.resume_point:
         raise CleanupError("summary Resume point does not match INDEX")
 
-    validate_wiki_sync(repo_root, change_id, change_dir / "wiki" / "candidates.md")
     run_validator(repo_root, change_id)
 
     # All preconditions passed; now make the only two persistent cleanup changes.
@@ -248,7 +127,7 @@ def cleanup(repo_root: Path, change_id: str) -> None:
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Retire the oldest excess done Harness change.")
-    parser.add_argument("--change", required=True, help="Done change ID to retire after Wiki synchronization.")
+    parser.add_argument("--change", required=True, help="Done change ID to retire after final Delivery Approval.")
     args = parser.parse_args(argv)
     repo_root = find_repo_root(Path.cwd())
     try:
@@ -256,7 +135,7 @@ def main(argv: list[str]) -> int:
     except CleanupError as error:
         print(f"REFUSED: {error}", file=sys.stderr)
         return 1
-    print(f"PASS: Retired done change `{args.change}` after verified Wiki synchronization.")
+    print(f"PASS: Retired done change `{args.change}` after verified final Delivery Approval.")
     return 0
 
 

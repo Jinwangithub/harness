@@ -51,7 +51,7 @@ Reviewer Agent 由 Orchestrator 按 review 子步骤调度（fresh per substep�
 - Phase 5 / test-review 专属禁止：
   - 不扩大测试范围为新需求。
   - 不创建或修改测试代码。
-- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 reviewer.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 `.harness/wiki/`（业务知识）和项目源码。
+- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 reviewer.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 Orchestrator 提供的已读取 OpenViking 知识、项目源码、文档、配置。
 
 ## Status Protocol
 

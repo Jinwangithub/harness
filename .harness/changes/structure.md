@@ -55,12 +55,10 @@ INDEX.md 格式：
 
 ```text
 .harness/changes/{type}-{name}-{YYYYMMDD}/
-├── summary.md          （含 inline lite spec）
+├── summary.md          （含 inline lite spec 和 OpenViking 业务知识检索记录）
 ├── request_analysis/
 │   └── checklist.md
-├── wiki/
-│   └── candidates.md
-└── verification_report.md  （含压缩评审）
+└── verification_report.md  （含压缩评审和 OpenViking 知识写回记录）
 ```
 
 Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`delivery-summary.md`，除非升级为 Standard-flow。
@@ -83,9 +81,7 @@ Phase 4/5 各包含 implementation 与独立 review 子步骤，但继续保留�
 ├── unit_test/
 │   ├── test_report.md
 │   └── review/
-├── wiki/
-│   └── candidates.md
-└── delivery-summary.md
+└── delivery-summary.md  （含 OpenViking 知识写回记录）
 ```
 
 ## 归档规则
@@ -93,12 +89,12 @@ Phase 4/5 各包含 implementation 与独立 review 子步骤，但继续保留�
 1. 每个 Phase 或 Flow step 完成后立即归档对应产物。
 2. 产物按需标记版本号（如 `review_v1` → `review_v2`）。
 3. 回退或流程升级时记录 reason 到 `summary.md`。
-4. 每个完成需求必须归档 `wiki/candidates.md`；如果没有 durable business knowledge，也必须记录 `none` 和原因。
-5. 正式 `.harness/wiki/` 更新必须获得明确人工批准；未批准、rejected 或 deferred candidates 只保留在 change artifact 中。
-6. 最终用户批准后的归档顺序必须为：更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `python3 .harness/tools/validate_change.py --change {id}`（requires `python3`；执行完整的机械产物验证）→ 仅 PASS 后声明完成。确认前两处均保持 `active`。
+4. Phase 1/L1 的业务知识检索证据写入 `understanding.md` 或 Lite inline spec，Phase 2 的项目/系统知识检索证据写入 `spec.md`；不创建独立 Wiki artifact。
+5. 最终交付产物必须记录 OpenViking Knowledge Update。批准前为 `pending` 或 `not-needed`；批准后记录 disposition、raw/wiki URI 和 index/log 结果。`completed` 必须有 raw URI，除 `No material` 外还必须有 wiki URI；`No material` 必须有 log 证据。失败或不确定必须有 retry note，仅当 `Required for delivery: yes` 时阻塞完成。
+6. 最终归档顺序必须为：确认前准备知识候选并记录 `pending` → final Gate Mechanical=`pass`、Human Approval=`pending` → 用户批准 → 加载 `project-knowledge` 执行写入并更新真实状态（或保留 `not-needed` 理由）→ 更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `python3 .harness/tools/validate_change.py --change {id}` → 仅 PASS 后声明完成。确认前两处均保持 `active`。
 
 ## 已完成变更保留
 
-`changes/` 是短期工作区；正式 `.harness/wiki/` 与 Git 是长期记录。Registry 中 `done` 超过 5 时，Session Startup 按表内顺序审阅最旧的一项，一次只处理一项。
+`changes/` 是保留最近交付证据的短期工作区；OpenViking 保存可复用知识，Git 保存工程历史。Registry 中 `done` 超过 5 时，Session Startup 按表内顺序审阅最旧的一项，一次只处理一项。
 
-仅在完成 Wiki 审阅、取得明确人工批准、同步正式 Wiki 页面（如有）、Wiki index 与 append-only Wiki log，并通过删除工具预检后，才可删除该目录和精确对应的 Registry 行。`active`、`abandoned`、未登记路径以及任何证据不完整的 `done` 均不得删除。明确无可沉淀知识也必须记录人工“无正式 Wiki 更新且可删除”的决策和 Wiki log 记录，之后方可删除。
+删除工具只在 change 已通过最终 Delivery Approval、状态和 Resume point 一致、validator 通过且属于最旧超额 `done` 时删除该目录及精确 Registry 行。`active`、`abandoned`、未登记路径以及任何证据不完整的 `done` 均不得删除。知识写回状态由最终交付 artifact 和 validator 在完成时校验；cleanup 不依赖在线 OpenViking 服务，也不重新验证已删除 change 的远程资源。
