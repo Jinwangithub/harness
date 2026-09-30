@@ -66,12 +66,9 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/test` | L3 验证 | Phase 5 / unit-test 或单点测试 | 不能冒充独立测试评审或声明交付完成 |
 | `/ship` | L3 交付确认 | Phase 6 交付确认 | 不能在 final `pending` 时标记已完成 |
 
-## OpenViking 知识流程
+## 上下文查询
 
-- Lite L1、Standard Phase 1/2 会加载 `project-knowledge-search`，优先查询项目知识根的 `wiki/`，必要时回查不可变 `raw/`。只有实际 `read` 过的精确 `viking://` URI 才能作为证据。
-- 最终批准前只准备知识候选，交付产物中的 Knowledge Update 为 `pending` 或 `not-needed`，不会产生外部写入。
-- 最终批准后加载 `project-knowledge`：来源先进入 `raw/`，再按 `New/Update/Disputed/No material` 编译 `wiki/` 并维护 index/log。异步接受记录为 `started`，不是 `completed`。
-- OpenViking 临时不可用默认不阻塞代码交付，但会记录失败和重试项；若 approved spec 明确把知识写入列为验收条件，则失败会阻塞最终 Gate。
+Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-knowledge-search`，把精确 URI、采用结论和 Open Questions 写入当前产物。Harness 只负责查询，不在最终交付阶段生成或写回知识；后续沉淀由外部流程负责。
 
 ## pending 时你需要做什么
 
@@ -108,7 +105,7 @@ A: 不一定。Orchestrator 先分类；低风险任务走 Lite-flow，高风险
 A: 也走 Lite-flow。内容可以更短，但仍保留统一产物、机械验证、Memory check 和必要确认。
 
 **Q: Lite-flow 会生成 Standard-flow 的目录吗？**
-A: 不会。Lite-flow 生成 summary（含 inline lite spec 和 OpenViking 业务知识检索记录）、checklist、verification report（含压缩评审和 OpenViking 知识写回记录），但不生成 Standard-flow 专用目录。
+A: 不会。Lite-flow 只生成 summary、checklist 和 verification report，不生成 Standard-flow 专用目录。
 
 **Q: 减少确认点是否等于取消 Human Approval Gate？**
 A: 不是。确认点按风险分级减少，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。

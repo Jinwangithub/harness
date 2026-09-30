@@ -19,13 +19,13 @@ SPEC.loader.exec_module(validator_module)
 
 UNDERSTANDING_CONTENT = """# Understanding
 
-## OpenViking Business Knowledge
+## Business Context
 - Status: found
 - Reason: relevant cancellation rule
 - Knowledge root: viking://resources/acme/project-knowledge
 - Search query: order cancellation business rules
-- Layers searched: wiki
-- Read resources: viking://resources/acme/project-knowledge/wiki/business/rules/order-cancellation.md
+- Layers searched: openviking
+- Read resources: viking://resources/acme/project-knowledge/knowledge/business/rules/order-cancellation.md
 - Applied business knowledge: cancellation requires refund authorization
 - Conflicts / stale knowledge: none
 - Missing knowledge: none
@@ -37,13 +37,13 @@ UNDERSTANDING_CONTENT = """# Understanding
 
 SPEC_CONTENT = """# Spec
 
-## Project / System Knowledge
+## Project / System Context
 - Status: found
 - Reason: applicable interface contract
 - Knowledge root: viking://resources/acme/project-knowledge
 - Search query: interface contracts
-- Layers searched: wiki+raw
-- Read resources: viking://resources/acme/project-knowledge/wiki/technical/standards/order-api.md; viking://resources/acme/project-knowledge/raw/technical/order-api-spec.md
+- Layers searched: openviking
+- Read resources: viking://resources/acme/project-knowledge/knowledge/technical/standards/order-api.md; viking://resources/acme/project-knowledge/source/technical/order-api-spec.md
 - Applied constraints: use repository pattern
 - Conflicts / stale knowledge: none
 - Open Questions: none
@@ -52,22 +52,7 @@ SPEC_CONTENT = """# Spec
 - fixture
 """
 
-DELIVERY_CONTENT = """# Delivery Summary
-
-## OpenViking Knowledge Update
-- Durable knowledge: yes; Reason: reusable cancellation rule
-- Required for delivery: no; Reason: knowledge persistence is best effort
-- Knowledge root: viking://resources/acme/project-knowledge
-- Source artifact: delivery-summary.md
-- Disposition: Update
-- Status: completed
-- Raw URI(s): viking://resources/acme/project-knowledge/raw/requirements/2026-08-18-order-cancellation.md
-- Wiki URI(s): viking://resources/acme/project-knowledge/wiki/business/rules/order-cancellation.md
-- Index/log result: wiki/index.md updated; wiki/log.md appended
-- Operation ID: task-123
-- Operation result: task completed
-- Retry note: none
-"""
+DELIVERY_CONTENT = "# Delivery Summary\n"
 
 
 class ValidateStandardFlowTests(unittest.TestCase):
@@ -187,16 +172,16 @@ class ValidateStandardFlowTests(unittest.TestCase):
             "# Understanding\n\n## Problem Statement\n- fixture\n", encoding="utf-8"
         )
         codes = {issue.code for issue in self.issues()}
-        self.assertIn("knowledge.discovery_missing", codes)
+        self.assertIn("context.discovery_missing", codes)
 
     def test_found_status_without_viking_uri_warns(self) -> None:
         self.write_change(1, "none", ["request_analysis/understanding.md"])
         (self.change_dir / "request_analysis" / "understanding.md").write_text(
-            "# Understanding\n\n## OpenViking Business Knowledge\n- Status: found\n- Search query: x\n- Read resources: none\n",
+            "# Understanding\n\n## Business Context\n- Status: found\n- Search query: x\n- Read resources: none\n",
             encoding="utf-8",
         )
         codes = {issue.code for issue in self.issues()}
-        self.assertIn("knowledge.discovery_uri_missing", codes)
+        self.assertIn("context.discovery_uri_missing", codes)
 
     def test_phase2_spec_without_openviking_warns(self) -> None:
         self.write_change(2, "none", self.phase3_artifacts)
@@ -204,210 +189,33 @@ class ValidateStandardFlowTests(unittest.TestCase):
             "# Spec\n\n## Objective\n- fixture\n", encoding="utf-8"
         )
         codes = {issue.code for issue in self.issues()}
-        self.assertIn("knowledge.discovery_missing", codes)
-
-    # -- OpenViking final knowledge update status -------------------------
-
-    def _done_update_codes(self, delivery_content: str) -> set[str]:
-        self.write_change(6, "none", self.done_artifacts, status="done")
-        (self.change_dir / "delivery-summary.md").write_text(delivery_content, encoding="utf-8")
-        return {issue.code for issue in self.issues()}
-
-    def test_done_update_missing_status_fails(self) -> None:
-        codes = self._done_update_codes("# Delivery Summary\n")
-        self.assertIn("knowledge.update_missing", codes)
-
-    def test_done_update_completed_requires_raw_uri(self) -> None:
-        codes = self._done_update_codes(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: reusable rule\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Knowledge root: viking://resources/acme/project-knowledge\n"
-            "- Disposition: Update\n"
-            "- Status: completed\n"
-            "- Raw URI(s): none\n"
-            "- Wiki URI(s): viking://resources/acme/project-knowledge/wiki/business/rules/rule.md\n"
-            "- Index/log result: wiki/index.md updated; wiki/log.md appended\n"
-        )
-        self.assertIn("knowledge.raw_uri_missing", codes)
-
-    def test_done_compiled_update_requires_wiki_uri(self) -> None:
-        codes = self._done_update_codes(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: reusable rule\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Knowledge root: viking://resources/acme/project-knowledge\n"
-            "- Disposition: New\n"
-            "- Status: completed\n"
-            "- Raw URI(s): viking://resources/acme/project-knowledge/raw/requirements/source.md\n"
-            "- Wiki URI(s): none\n"
-            "- Index/log result: wiki/index.md updated; wiki/log.md appended\n"
-        )
-        self.assertIn("knowledge.wiki_uri_missing", codes)
-
-    def test_done_no_material_requires_raw_and_log_but_no_wiki(self) -> None:
-        self.write_change(6, "none", self.done_artifacts, status="done")
-        (self.change_dir / "delivery-summary.md").write_text(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: source retained for traceability\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Knowledge root: viking://resources/acme/project-knowledge\n"
-            "- Disposition: No material\n"
-            "- Status: completed\n"
-            "- Raw URI(s): viking://resources/acme/project-knowledge/raw/technical/source.md\n"
-            "- Wiki URI(s): none\n"
-            "- Index/log result: wiki/log.md appended; index unchanged\n",
-            encoding="utf-8",
-        )
-        self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
-
-    def test_done_no_material_rejects_wiki_article(self) -> None:
-        content = (
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: source retained for traceability\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Knowledge root: viking://resources/acme/project-knowledge\n"
-            "- Disposition: No material\n"
-            "- Status: completed\n"
-            "- Raw URI(s): viking://resources/acme/project-knowledge/raw/technical/source.md\n"
-            "- Wiki URI(s): viking://resources/acme/project-knowledge/wiki/technical/modules/source.md\n"
-            "- Index/log result: wiki/log.md appended; index unchanged\n"
-        )
-        self.assertIn("knowledge.no_material_has_wiki", self._done_update_codes(content))
-
-    def test_done_update_rejects_uri_outside_knowledge_root(self) -> None:
-        codes = self._done_update_codes(
-            DELIVERY_CONTENT.replace(
-                "viking://resources/acme/project-knowledge/raw/requirements/2026-08-18-order-cancellation.md",
-                "viking://resources/other-project/raw/requirements/source.md",
-            )
-        )
-        self.assertIn("knowledge.raw_uri_outside_root", codes)
-
-    def test_done_update_rejects_invalid_disposition(self) -> None:
-        codes = self._done_update_codes(
-            DELIVERY_CONTENT.replace("- Disposition: Update", "- Disposition: No material; Update")
-        )
-        self.assertIn("knowledge.disposition_invalid", codes)
-
-    def test_done_update_not_needed_requires_reason(self) -> None:
-        codes = self._done_update_codes(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: no; Reason: none\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Status: not-needed\n"
-        )
-        self.assertIn("knowledge.reason_missing", codes)
-
-    def test_done_update_required_failed_status_fails(self) -> None:
-        codes = self._done_update_codes(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: required project contract\n"
-            "- Required for delivery: yes; Reason: approved spec requires persistence\n"
-            "- Status: failed\n"
-            "- Operation result: service rejected write\n"
-            "- Retry note: restore service and retry once\n"
-        )
-        self.assertIn("openviking.write_failed", codes)
-
-    def test_done_update_nonblocking_failed_status_warns(self) -> None:
-        self.write_change(6, "none", self.done_artifacts, status="done")
-        (self.change_dir / "delivery-summary.md").write_text(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: reusable project convention\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Status: failed\n"
-            "- Operation result: service rejected write\n"
-            "- Retry note: retry after service recovery\n",
-            encoding="utf-8",
-        )
-        issues = self.issues()
-        self.assertFalse(any(issue.level == "FAIL" for issue in issues))
-        self.assertTrue(any(issue.code == "openviking.write_failed" for issue in issues))
-
-    def test_done_update_failure_requires_retry_note(self) -> None:
-        codes = self._done_update_codes(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: reusable project convention\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Status: unavailable\n"
-            "- Operation result: service unavailable\n"
-            "- Retry note: none\n"
-        )
-        self.assertIn("knowledge.retry_note_missing", codes)
-
-    def test_done_update_invalid_status_fails(self) -> None:
-        codes = self._done_update_codes(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n- Status: banana\n"
-        )
-        self.assertIn("knowledge.update_invalid", codes)
-
-    def test_done_update_not_needed_with_reason_passes(self) -> None:
-        self.write_change(6, "none", self.done_artifacts, status="done")
-        (self.change_dir / "delivery-summary.md").write_text(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: no; Reason: no reusable knowledge\n"
-            "- Required for delivery: no; Reason: no knowledge operation\n"
-            "- Status: not-needed\n"
-            "- Operation result: none\n",
-            encoding="utf-8",
-        )
-        self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
-
-    def test_active_phase6_allows_pending_update(self) -> None:
-        self.write_change(6, "none", self.done_artifacts, status="active")
-        (self.change_dir / "delivery-summary.md").write_text(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: reusable project convention\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Knowledge root: viking://resources/acme/project-knowledge\n"
-            "- Source artifact: delivery-summary.md\n"
-            "- Disposition: Update\n"
-            "- Status: pending\n"
-            "- Raw URI(s): none\n"
-            "- Wiki URI(s): none\n"
-            "- Index/log result: pending\n"
-            "- Operation ID: none\n"
-            "- Operation result: awaiting final approval\n"
-            "- Retry note: none\n",
-            encoding="utf-8",
-        )
-        self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
-
-    def test_done_update_cannot_remain_pending(self) -> None:
-        codes = self._done_update_codes(
-            "# Delivery Summary\n\n## OpenViking Knowledge Update\n"
-            "- Durable knowledge: yes; Reason: reusable project convention\n"
-            "- Required for delivery: no; Reason: best effort\n"
-            "- Status: pending\n"
-        )
-        self.assertIn("knowledge.update_pending", codes)
+        self.assertIn("context.discovery_missing", codes)
 
     def test_not_needed_discovery_requires_reason(self) -> None:
         self.write_change(1, "none", ["request_analysis/understanding.md"])
         (self.change_dir / "request_analysis" / "understanding.md").write_text(
-            "# Understanding\n\n## OpenViking Business Knowledge\n"
+            "# Understanding\n\n## Business Context\n"
             "- Status: not-needed\n"
             "- Reason: none\n",
             encoding="utf-8",
         )
         codes = {issue.code for issue in self.issues()}
-        self.assertIn("knowledge.discovery_reason_missing", codes)
+        self.assertIn("context.discovery_reason_missing", codes)
 
-    def test_found_raw_only_does_not_count_as_compiled_knowledge(self) -> None:
+    def test_found_openviking_resource_counts_as_knowledge(self) -> None:
         self.write_change(1, "none", ["request_analysis/understanding.md"])
         (self.change_dir / "request_analysis" / "understanding.md").write_text(
-            "# Understanding\n\n## OpenViking Business Knowledge\n"
+            "# Understanding\n\n## Business Context\n"
             "- Status: found\n"
             "- Reason: raw source matched\n"
             "- Knowledge root: viking://resources/acme/project-knowledge\n"
             "- Search query: cancellation\n"
-            "- Layers searched: wiki+raw\n"
-            "- Read resources: viking://resources/acme/project-knowledge/raw/requirements/source.md\n",
+            "- Layers searched: openviking\n"
+            "- Read resources: viking://resources/acme/project-knowledge/resources/source.md\n",
             encoding="utf-8",
         )
         codes = {issue.code for issue in self.issues()}
-        self.assertIn("knowledge.discovery_uri_missing", codes)
+        self.assertNotIn("context.discovery_uri_missing", codes)
 
 
 if __name__ == "__main__":

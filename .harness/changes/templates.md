@@ -34,17 +34,16 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Memory status
 - **Memory recorded**: {N} entries / none
 - **Memory evidence**: {decisions.log / lessons-learned.md / known-issues.md / none}
-- **Self-evolution trigger**: {yes 记录在 Gate Record 中 / none}
 
 ## Lite Spec (Lite-flow 专用)
 {以下内容仅在 Lite-flow 时填写，Standard-flow 不填写此节}
 
-### OpenViking Business Knowledge（Lite-flow 专用）
+### Business Context（Lite-flow 专用）
 - Status: {found / no-relevant / unavailable / not-needed}
 - Reason: {状态判断理由；found 时写采用原因}
 - Knowledge root: {精确 `viking://` URI / unknown}
 - Search query: {关键词 / none}
-- Layers searched: {wiki / wiki+raw / none}
+- Layers searched: {openviking / none}
 - Read resources: {精确 `viking://` URI / none}
 - Applied business knowledge: {规则或事实 / none}
 - Conflicts / stale knowledge: {冲突或过期信息 / none}
@@ -150,22 +149,6 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Verdict
 - Status: {pass/fail}
 
-## OpenViking Knowledge Update
-- Durable knowledge: {yes / no}; Reason: {需要长期保存或无需保存的理由}
-- Required for delivery: {yes / no}; Reason: {approved spec 验收条件或默认非阻塞}
-- Knowledge root: {精确 `viking://` URI / unknown}
-- Source artifact: {本次交付产物路径 / none}
-- Disposition: {New / Update / Disputed / No material / none}
-- Status: {pending / started / completed / verification-pending / failed / unavailable / not-needed}
-- Raw URI(s): {不可变原始资料的精确 `viking://` URI / none}
-- Wiki URI(s): {整理后文章的精确 `viking://` URI / none}
-- Index/log result: {`wiki/index.md` 与 `wiki/log.md` 更新证据 / pending / none}
-- Operation ID: {task/request ID / none}
-- Operation result: {不含敏感信息的真实返回摘要或 not-needed 理由}
-- Retry note: {失败、不确定或不可用时的后续动作 / none}
-
-> 最终批准前仅允许 `pending` 或 `not-needed`，不得执行外部写入。`completed` 必须有 raw URI；除 `No material` 外还必须有 wiki URI；`No material` 必须有 log 证据。
-
 ## Memory Check
 （字段见 `.harness/memory/README.md` 的 Lite-flow 3 字段块；出口报告另需 `Memory recorded: {N} entries / none`）
 ```
@@ -177,12 +160,12 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ```markdown
 # Understanding
 
-## OpenViking Business Knowledge
+## Business Context
 - Status: {found / no-relevant / unavailable / not-needed}
 - Reason: {状态判断理由；found 时写采用原因}
 - Knowledge root: {精确 `viking://` URI / unknown}
 - Search query: {需求、业务域、模块、集成关键词 / none}
-- Layers searched: {wiki / wiki+raw / none}
+- Layers searched: {openviking / none}
 - Read resources: {精确 `viking://` URI / none}
 - Applied business knowledge: {采用的业务规则和事实 / none}
 - Conflicts / stale knowledge: {冲突或过期信息 / none}
@@ -214,12 +197,12 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ```markdown
 # Spec
 
-## Project / System Knowledge
+## Project / System Context
 - Status: {found / no-relevant / unavailable / not-needed}
 - Reason: {状态判断理由；found 时写采用原因}
 - Knowledge root: {精确 `viking://` URI / unknown}
 - Search query: {项目规范、架构、ADR、接口契约、工程标准关键词 / none}
-- Layers searched: {wiki / wiki+raw / none}
+- Layers searched: {openviking / none}
 - Read resources: {精确 `viking://` URI / none}
 - Applied constraints: {应用到本 Spec 的约束 / none}
 - Conflicts / stale knowledge: {冲突或过期信息 / none}
@@ -416,22 +399,6 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 ## Documentation / ADR / Changelog
 - {按需项目文档产物；没有则写 none}
-
-## OpenViking Knowledge Update
-- Durable knowledge: {yes / no}; Reason: {需要长期保存或无需保存的理由}
-- Required for delivery: {yes / no}; Reason: {approved spec 验收条件或默认非阻塞}
-- Knowledge root: {精确 `viking://` URI / unknown}
-- Source artifact: {本次交付产物路径 / none}
-- Disposition: {New / Update / Disputed / No material / none}
-- Status: {pending / started / completed / verification-pending / failed / unavailable / not-needed}
-- Raw URI(s): {不可变原始资料的精确 `viking://` URI / none}
-- Wiki URI(s): {整理后文章的精确 `viking://` URI / none}
-- Index/log result: {`wiki/index.md` 与 `wiki/log.md` 更新证据 / pending / none}
-- Operation ID: {task/request ID / none}
-- Operation result: {不含敏感信息的真实返回摘要或 not-needed 理由}
-- Retry note: {失败、不确定或不可用时的后续动作 / none}
-
-> 最终 Delivery Approval 同时授权交付和本次知识更新。批准后执行 `raw ingest → disposition → wiki compile → index/log`。异步接受不等于完成；只有 approved spec 将知识更新列为验收条件时，远程失败才阻塞交付。
 
 ## Known Gotchas / Limitations
 - {已知限制、注意事项；没有则写 none}

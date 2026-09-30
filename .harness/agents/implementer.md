@@ -53,7 +53,7 @@ Implementer Agent 由 Orchestrator 按子步骤调度（fresh per substep），�
   - 不创建 `unit_test/review/` 评审产物。
   - 不做独立测试评审。
   - 不修改 forbidden files（由 Orchestrator 指定）。
-- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 implementer.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 Orchestrator 提供的已读取 OpenViking 知识、项目源码、文档、配置。
+- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 implementer.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 Orchestrator 提供的 context packet、项目源码、文档、配置。
 
 ## Status Protocol
 

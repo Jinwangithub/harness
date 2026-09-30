@@ -31,20 +31,6 @@ VERIFICATION_REPORT = """# Verification Report
 ## Verdict
 - Status: pass
 
-## OpenViking Knowledge Update
-- Durable knowledge: yes; Reason: reusable retention rule
-- Required for delivery: no; Reason: knowledge persistence is best effort
-- Knowledge root: viking://resources/acme/project-knowledge
-- Source artifact: verification_report.md
-- Disposition: Update
-- Status: completed
-- Raw URI(s): viking://resources/acme/project-knowledge/raw/technical/retention-source.md
-- Wiki URI(s): viking://resources/acme/project-knowledge/wiki/technical/standards/retention.md
-- Index/log result: wiki/index.md updated; wiki/log.md appended
-- Operation ID: task-456
-- Operation result: task completed
-- Retry note: none
-
 ## Memory Check
 - Memory recorded: none
 """

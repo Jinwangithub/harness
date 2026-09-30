@@ -20,13 +20,13 @@ Planner Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负责：
 
 | Phase | 必须读取 | 目标 |
 |-------|----------|------|
-| 1 | 用户需求文本、Orchestrator 按 `project-knowledge-search` 生成的业务 knowledge packet、项目相关源代码模块 | 确保理解不为空想：问题域有精确 `viking://` 来源支撑，现状有代码为据 |
-| 2 | approved `understanding.md`、Orchestrator 为本阶段生成的项目/系统 knowledge packet、项目实际代码与配置 | 确保 spec 符合业务规则、架构约束和项目规范，而非凭空造 |
+| 1 | 用户需求文本、Orchestrator 生成的业务 context packet、项目相关源代码模块 | 确保理解不为空想，现状有代码为据 |
+| 2 | approved `understanding.md`、Orchestrator 生成的项目/系统 context packet、项目实际代码与配置 | 确保 spec 符合已确认约束，而非凭空造 |
 | 3 | approved `spec.md`、项目目录结构、依赖关系 | 确保 task 拆分对应真实代码边界 |
 
-> **Phase 1 专项约束**：使用 Orchestrator 提供的本阶段 knowledge packet，将查询状态、知识根、查询层、读取 URI、采用规则和 Open Questions 写入 `understanding.md`。只有 prompt 明确授权且 OpenViking 工具实际可用时才补充查询。
+> **Phase 1 专项约束**：使用 Orchestrator 提供的本阶段 context packet，将查询状态、精确 URI、采用规则和 Open Questions 写入 `understanding.md`。
 >
-> **Phase 2 专项约束**：使用本阶段独立的项目/系统 knowledge packet，将来源 URI、应用约束、冲突/过期信息写入 `spec.md`。项目命令必须来自项目实际配置。无法确认的内容视为 Open Question；搜索摘要不能替代精确读取。
+> **Phase 2 专项约束**：使用本阶段独立的项目/系统 context packet，将来源 URI、应用约束、冲突/过期信息写入 `spec.md`。项目命令必须来自项目实际配置。无法确认的内容视为 Open Question。
 
 ## Iron Laws (Applicable)
 
@@ -41,13 +41,13 @@ Planner Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负责：
 4. **任意失败必须定位根因，不得只修表象或跳过验证。**
    → 失败时记录根因，不得做出"需要修改但先通过"的结论。
 
-5. **业务规则未知时必须查询 OpenViking 或记录疑问，不得猜测。**
-   → 分析中的业务断言必须有实际读取的 `viking://` 来源，或记录为 Open Question。
+5. **业务规则未知时必须补充上下文或记录疑问，不得猜测。**
+   → 分析中的业务断言必须有实际读取的来源，或记录为 Open Question。
 
 ## 允许操作
 
 - 读取项目源代码、文档、配置、历史。
-- 查询 OpenViking 获取已配置知识库中的业务规则和项目/系统知识（仅使用 `find/search → read`；`viking://` URI 不作为本地文件路径）。
+- 使用 Orchestrator 提供的 context packet 获取业务规则和项目/系统知识。
 - 写入当前 Phase 的目标产物。
 - 执行搜索、代码审查、依赖分析等只读分析操作。
 - 按需求使用 Skill（由 Orchestrator 在 prompt 中提供 Skill 摘要）。
@@ -60,7 +60,7 @@ Planner Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负责：
 - **不得创建当前 Phase 以外的产物**：Phase 1 不创建 spec.md/tasks.md；Phase 2 不创建 tasks.md；Phase 3 不创建 coding/ 或 unit_test/ 产物。
 - **不得实现代码**：不创建或修改项目源代码文件。
 - **不得修改 forbidden files**（由 Orchestrator 在 prompt 中指定）。
-- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 planner.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 Orchestrator 提供的已读取 OpenViking 知识、项目源码、文档、配置。
+- **不得要求读取 Harness 元文件来重新解释任务**：不得读 `.harness/rules/`、`.harness/agents/`（含本 planner.md 之外的 agent 文件）、`.harness/changes/INDEX.md`、`.harness/skills/`、`.harness/tools/`。可以读 Orchestrator 提供的 context packet、项目源码、文档、配置。
 
 ## Status Protocol
 

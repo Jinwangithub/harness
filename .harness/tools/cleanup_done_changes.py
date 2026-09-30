@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Retire one excess completed Harness change after final Delivery Approval."""
+"""Retire one excess completed Harness change after final user approval."""
 
 from __future__ import annotations
 
@@ -127,7 +127,7 @@ def cleanup(repo_root: Path, change_id: str) -> None:
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Retire the oldest excess done Harness change.")
-    parser.add_argument("--change", required=True, help="Done change ID to retire after final Delivery Approval.")
+    parser.add_argument("--change", required=True, help="Done change ID to retire after final user approval.")
     args = parser.parse_args(argv)
     repo_root = find_repo_root(Path.cwd())
     try:
@@ -135,7 +135,7 @@ def main(argv: list[str]) -> int:
     except CleanupError as error:
         print(f"REFUSED: {error}", file=sys.stderr)
         return 1
-    print(f"PASS: Retired done change `{args.change}` after verified final Delivery Approval.")
+    print(f"PASS: Retired done change `{args.change}` after verified final user approval.")
     return 0
 
 

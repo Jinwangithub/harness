@@ -5,7 +5,7 @@
 本文件是 Standard-flow Phase 1-6、Phase 4/5 子步骤和隔离实现原则的权威源。
 Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rules/gates.md`，失败处理和回退路径见 `.harness/rules/rollback.md`。
 
-> **边界**：本文件只定义 Standard-flow 执行顺序、每个 Phase/子步骤的入口卡片、Phase 4/5 隔离实现原则和 Standard 特有禁止事项。Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件路径约定见 `.harness/skills/README.md`。
+> **边界**：本文件只定义 Standard-flow 执行顺序、每个 Phase/子步骤的入口卡片、Phase 4/5 隔离实现原则和 Standard 特有禁止事项。Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件位于 `.harness/skills/{name}/SKILL.md`。
 
 ## Standard-flow
 
@@ -18,9 +18,9 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 | 3 | 任务规划 | `request_analysis/tasks.md` | CK3 |
 | 4 | 实现 + 独立代码评审（`implementation` → `code-review`） | `coding/coding_report_v1.md`, `coding/review/*.md` | CK4 |
 | 5 | 单元测试 + 独立测试评审（`unit-test` → `test-review`） | `unit_test/test_report.md`, `unit_test/review/test_review_v1.md` | CK5 |
-| 6 | 用户确认和知识写回 | `delivery-summary.md` | CK6 |
+| 6 | 用户确认和交付归档 | `delivery-summary.md` | CK6 |
 
-**进入下一 Phase 的唯一条件**：当前 Phase 的所有子步骤完成、Composite Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step`、`Substep` 和 `Resume point`。Phase 6 是 finalization 例外：先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后执行并记录 Knowledge Update，才更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
+**进入下一 Phase 的唯一条件**：当前 Phase 的所有子步骤完成、Composite Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step`、`Substep` 和 `Resume point`。Phase 6 先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
 
 关键边界：
 
@@ -35,10 +35,8 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 ### Phase 1 — 需求分析
 
 - Agent: Planner (`.harness/agents/planner.md`)
-- OpenViking Business Knowledge：Orchestrator 按 `project-knowledge-search` 优先查询当前知识根的 `wiki/business/`，仅在核验或缺口时回查 `raw/`，再把 knowledge packet 提供给 Planner；Planner 记录状态、知识根、查询层、读取 URI、采用规则、冲突、缺失知识和 Open Questions。
-- 业务未知必须记录为 Open Question，不得猜测为已确认事实；搜索摘要不能代替精确 `read`，无结果或服务不可用时不回退到本地 Wiki。
+- Phase 1 需要业务或项目上下文时，由 Orchestrator 加载 `project-knowledge-search`；Planner 记录精确 URI、采用规则、冲突和 Open Questions。
 - 读取 Skills:
-  - `project-knowledge-search`
   - `idea-refine`
 - 按条件补读 Skills:
   - `context-engineering`: 仅当需要上下文恢复/压缩
@@ -58,9 +56,8 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 ### Phase 2 — 需求评审
 
 - Agent: Planner (`.harness/agents/planner.md`)
-- OpenViking Project/System Knowledge：Orchestrator 再次按 `project-knowledge-search` 查询当前知识根的 `wiki/technical/`，围绕项目规范、架构约束、ADR、接口契约和工程标准生成独立 knowledge packet；Planner 将知识根、查询层、读取 URI、应用约束和冲突/过期信息写入 `spec.md`。
+- Phase 2 需要项目规范或系统约束时，由 Orchestrator 查询并提供 context packet；Planner 将精确 URI、应用约束和冲突/过期信息写入 `spec.md`。
 - 读取 Skills:
-  - `project-knowledge-search`
   - `spec-driven-development`
 - 按条件补读 Skills:
   - `api-and-interface-design`: 仅当 risk_flags 或任务类型涉及 API/公共契约/模块边界
@@ -75,7 +72,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - `request_analysis/spec.md`
 - Gate 提示:
   - `spec.md` 存在
-  - OpenViking 项目/系统知识查询记录完整；业务和系统断言有实际读取的 `viking://` 来源，或标记 `open-question`
+  - 项目/系统上下文查询记录完整；业务和系统断言有实际读取的 `viking://` 来源，或标记 `open-question`
   - 禁止产物不存在
   - Fresh evidence 四字段完整
 
@@ -190,12 +187,10 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - Critical=0、Must Fix=0
   - Fresh evidence 四字段完整
 
-### Phase 6 — 用户确认和知识写回
+### Phase 6 — 用户确认和交付归档
 
 - 读取 Skills:
   - `documentation-and-adrs`
-  - `project-knowledge`（批准前只准备候选；最终批准后执行外部写入）
-- OpenViking 写回语义：批准前从交付产物提炼候选，Knowledge Update 记录 `pending`；最终 Delivery Approval 同时授权交付和本次写入。批准后按 `project-knowledge` 保存不可变 raw，判定 disposition，编译 wiki，并维护 index/log，再记录真实结果。
 - 按条件补读 Skills:
   - 无
 - 失败时补读 Skills:
@@ -203,16 +198,10 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 - 禁止事项:
   - 未经用户要求不执行 git 提交/推送
   - 不改实现代码
-  - 普通维护不调用不可逆的 OpenViking `forget`
-  - 任何写入失败或结果不确定时不得宣称知识库已更新
 - 产物提示:
-  - `delivery-summary.md`（含 OpenViking Knowledge Update）
+  - `delivery-summary.md`
 - Gate 提示:
   - delivery summary 存在
-  - 批准前 OpenViking Knowledge Update=`pending|not-needed`；批准后记录真实终态
-  - `completed` 有 raw URI；除 `No material` 外有 wiki URI；index/log 结果完整
-  - `started` 有 raw URI 或 operation ID；`not-needed` 有理由；`failed|unavailable|verification-pending` 有 retry note
-  - 只有 `Required for delivery: yes` 时，`failed|unavailable|verification-pending` 阻塞完成
   - Memory 完整
   - 确认前：final Gate=`pass`、Human Approval=`pending`，summary / INDEX 均为 `active`
   - 用户批准后：final Gate Approval=`approved`，summary / INDEX 同步为 `done`、Resume point=`none`
@@ -239,7 +228,7 @@ Phase 4 的 Implementer/Reviewer 和 Phase 5 的 Implementer/Reviewer 定义见 
 
 ### Subagent 约束（通用）
 
-subagent 只执行 prompt 中指定的当前 task。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建非当前 Phase 产物、修改 forbidden files、提交/推送/部署、读取 `.harness/rules/` / `.harness/agents/` / `.harness/changes/INDEX.md` 等 Harness 元文件来重新解释任务。subagent 可以使用 Orchestrator 提供的已读取 OpenViking 知识、项目源码和已批准产物；Planner 仅可在 Phase 1/2 按对应入口卡片直接查询 OpenViking。
+subagent 只执行 prompt 中指定的当前 task。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建非当前 Phase 产物、修改 forbidden files、提交/推送/部署、读取 `.harness/rules/` / `.harness/agents/` / `.harness/changes/INDEX.md` 等 Harness 元文件来重新解释任务。subagent 可以使用 Orchestrator 提供的 context packet、项目源码和已批准产物；上下文查询由 Orchestrator 在 Phase 1/2 完成。
 
 Phase 专用约束见对应 Agent 文件的禁止操作节。
 
