@@ -80,11 +80,11 @@ Load → Classify → Discover (when needed) → Dispatch → Verify → Gate �
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。
 - **Confirm**：Gate=`pass` 且 validator 通过后请求用户确认；中间 Phase 批准后按原流程推进。最终批准后同步 final Gate、summary 和 INDEX，再重验。
-- **Archive**：归档产物、Skill Load、Gate 状态。最终完成顺序固定为：用户批准 → final Gate Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done`、Resume point=`none` → validator 重验 PASS → 声明完成。validator 报 INDEX/summary Status 或 Resume point 冲突时必须 Stop-the-Line，禁止自行择一覆盖。已完成变更继续保留在 `changes/`，不执行数量清理或本地 wiki 沉淀。
+- **Archive**：归档产物、Skill Load、Gate 状态。最终完成顺序固定为：用户批准 → final Gate Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done`、Resume point=`none` → validator 重验 PASS → 声明完成。validator 报 INDEX/summary Status 或 Resume point 冲突时必须 Stop-the-Line，禁止自行择一覆盖。
 - **Remember**：触发即记录（`.harness/memory/README.md`）；出口报告记录数量或 none。
 
 ## 责任边界
 
-- `changes/`：每个需求独立变更目录；产物和 Gate 状态即时归档，`INDEX.md` 和 `summary.md` 同步更新。该目录不承担长期知识沉淀。
+- `changes/`：每个需求独立变更目录；产物和 Gate 状态即时归档，`INDEX.md` 和 `summary.md` 同步更新。
 - `memory/`：触发即记录；出口报告记录数量或 none。
 - `OpenViking`：仅作为 L1/Phase 1/Phase 2 的外部上下文来源；查询证据写入对应分析产物，Harness 不负责最终知识写回。

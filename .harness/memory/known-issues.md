@@ -4,12 +4,12 @@
 
 | 症状 | 根因 | 对应规则 |
 |------|------|---------|
-| Gate 状态无法确认 | 缺少 fresh evidence | `gates.md` §Completion Claim Gate |
+| Gate 状态无法确认 | 缺少 fresh evidence | `gates.md` §3 Gate Record 模板 |
 | 恢复后重复执行已完成 Phase | INDEX.md 未更新 resume point | `changes/structure.md` §Registry |
 | Lite-flow 后发现需要 Standard | Flow Classifier 误判 | `flow.md` §Flow Classifier |
 | Memory 记录不完整 | 字段缺失或未用完整模板 | `memory/README.md` §完整模板 |
 | 多个 active auto-resume | INDEX 维护遗漏 | `changes/INDEX.md` §Maintenance Rules |
-| Phase 产物边界混淆 | Work Lock 未执行 | `flow-standard.md` §Standard-flow Phase 1-6 |
+| Phase 产物边界混淆 | 子步骤边界未执行 | `flow-standard.md` 对应 Phase 卡片 |
 | Skill 加载错误或找不到 | Skill 目录不符合 `.harness/skills/{name}/SKILL.md` 约定，或 flow 入口卡片引用了不存在的 Skill | `skills/README.md` / `rules/flow-lite.md` / `rules/flow-standard.md` |
 | 回退或升级路径不确定 | 未读取回退规则或风险扩大后未重分类 | `rollback.md` §通用失败处理 |
 
@@ -31,21 +31,8 @@
   - 临时方案: 调用时显式指示「只写 spec.md，不写 tasks.md」
   - 计划修复: 需 agent-skills 插件支持 Skill 参数化
 
-- [P3] JaCoCo 覆盖率门禁需手动读取报告 (2026-05-07)
-  - 描述: 需解析 target/site/jacoco/index.html 获取覆盖率数据。
-  - 影响范围: Phase 5 / unit-test 门禁验证
-  - 临时方案: Orchestrator 手动读取报告文件解析覆盖率百分比
-  - 计划修复: 添加 jacoco-check 自动门禁
-
 - [P4] 子任务进度跟踪依赖手动管理 (2026-05-07)
   - 描述: incremental-implementation 无自动化进度 UI。
   - 影响范围: Phase 4 进度展示
   - 临时方案: Orchestrator 每次子任务完成后报告「Task i/N 已完成」
   - 计划修复: 依赖规范约束
-
-## 2026-05-26 | 历史 summary 不完全符合新 schema
-
-- 描述: 历史 changes summary 中存在非 canonical Human Approval wording、`resume_from`、`状态: 已完成` + `pending-human` 等与当前 schema 不一致的问题。`pending-human` 是历史 archive 的 legacy spelling；本次治理不批量重写历史归档，避免伪造或重塑审计链。
-- 影响范围: `.harness/changes/docs-flow-friction-reduction-20260519/`、`.harness/changes/docs-harness-slimming-20260520/`、`.harness/changes/fix-harness-executability-20260521/` 等 legacy archive 的自动恢复和 validator 输出。
-- 临时方案: Registry Status 只使用 `active`、`done` 或 `abandoned`；legacy 状态或恢复建议记录在 INDEX Notes，不得写入非法 Status。默认只验证 active；`--all` 按明确选择严格检查，不自动迁移历史产物。
-- 计划修复: 仅在用户明确要求历史归档迁移时，按单独治理变更逐个迁移并保留原始 approval evidence，不自动改写历史 Human Approval。

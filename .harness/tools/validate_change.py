@@ -216,9 +216,6 @@ class Validator:
                 f"{change_dir.name}: done INDEX entry requires Resume point `none`, got `{entry.resume_point}`",
             )
 
-        if "resume_from" in text:
-            self.warn("summary.legacy_field", f"{change_dir.name}: legacy field `resume_from` found")
-
     def validate_flow_artifacts(self, change_dir: Path, fields: dict[str, str]) -> None:
         flow = fields.get("Flow")
         status = fields.get("状态")

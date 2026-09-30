@@ -68,7 +68,7 @@ Planner Agent 由 Orchestrator 按 Phase 调度（fresh per Phase），负责：
 
 - `DONE`: 产物已生成，所有必需字段已填写，验收条件已覆盖。
 - `DONE_WITH_CONCERNS`: 产物已完成但存在顾虑（模糊需求、未解决风险、数据缺口等），需 Orchestrator 审查。
-- `NEEDS_CONTEXT`: 需要补充上下文（需求不清楚、代码路径缺失、业务规则未知且 wiki 中无记录）。
+- `NEEDS_CONTEXT`: 需要补充上下文（需求不清楚、代码路径缺失、业务规则未知且 OpenViking 中无记录）。
 - `BLOCKED`: 无法继续（矛盾需求、不可行架构、缺少关键输入）。
 
 ## Report Format

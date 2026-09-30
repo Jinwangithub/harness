@@ -45,8 +45,6 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 | `done` | `pending` / `rejected` | 冲突，validator FAIL。 |
 | `active` | `approved` | 可用于 Standard-flow 中间 Phase；不是最终完成。 |
 
-`pending-human` 仅为历史 archive 的旧拼写，不得写入新的 Gate Record。`approved` 不是自动完成：只有 final Gate 且状态同步、重验通过后才能完成。Gate Record 和 summary 均不定义额外的 Completion lock。
-
 ## 3. Gate Record 模板
 
 ```markdown

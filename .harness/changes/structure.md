@@ -91,7 +91,3 @@ Phase 4/5 各包含 implementation 与独立 review 子步骤，但继续保留�
 3. 回退或流程升级时记录 reason 到 `summary.md`。
 4. Phase 1/L1 的上下文检索证据写入 `understanding.md` 或 Lite inline spec，Phase 2 的项目/系统检索证据写入 `spec.md`；不创建独立知识库 artifact。
 5. 最终归档顺序必须为：final Gate Mechanical=`pass`、Human Approval=`pending` → 用户批准 → 更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `python3 .harness/tools/validate_change.py --change {id}` → 仅 PASS 后声明完成。确认前两处均保持 `active`。
-
-## 已完成变更保留
-
-`changes/` 保留每个变更的过程与交付证据，Git 负责历史追踪。Harness 不再按数量自动清理 `done` 变更，也不再把变更产物沉淀为本地 wiki；长期知识由 OpenViking 及其外部知识流程负责。

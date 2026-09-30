@@ -79,8 +79,6 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - `done` + final `pending` 或 `rejected`：冲突，validator FAIL。
 - `active` + `approved` 可用于 Standard-flow 中间 Phase，不代表最终完成。
 
-`pending-human` 是历史 archive 的旧拼写，不得写入新的 Gate Record。Gate Record 模板与最终完成时序见 `.harness/rules/gates.md`；本模板不定义额外的 Completion lock 字段。
-
 ### Lite-flow 阶段进度片段
 
 ```markdown
