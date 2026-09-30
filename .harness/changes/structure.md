@@ -94,6 +94,4 @@ Phase 4/5 各包含 implementation 与独立 review 子步骤，但继续保留�
 
 ## 已完成变更保留
 
-`changes/` 是保留最近交付证据的短期工作区，Git 保存工程历史。Registry 中 `done` 超过 5 时，按表内顺序审阅最旧的一项，一次只处理一项。
-
-删除工具只在 change 已通过最终用户确认、状态和 Resume point 一致、validator 通过且属于最旧超额 `done` 时删除该目录及精确 Registry 行。`active`、`abandoned`、未登记路径以及任何证据不完整的 `done` 均不得删除。
+`changes/` 保留每个变更的过程与交付证据，Git 负责历史追踪。Harness 不再按数量自动清理 `done` 变更，也不再把变更产物沉淀为本地 wiki；长期知识由 OpenViking 及其外部知识流程负责。

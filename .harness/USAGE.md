@@ -68,7 +68,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 
 ## 上下文查询
 
-Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-knowledge-search`，把精确 URI、采用结论和 Open Questions 写入当前产物。Harness 只负责查询，不在最终交付阶段生成或写回知识；后续沉淀由外部流程负责。
+Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-knowledge-search`，把精确 URI、采用结论和 Open Questions 写入当前产物。Harness 只负责查询，不在最终交付阶段生成或写回知识；后续沉淀由 OpenViking 外部流程负责。`changes/` 只保存变更证据，不按数量清理，也不生成本地 wiki。
 
 ## pending 时你需要做什么
 
