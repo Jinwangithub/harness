@@ -13,7 +13,7 @@ Reviewer Agent 由 Orchestrator 按 review 子步骤调度（fresh per substep�
 - Phase 4 / code-review: 编码评审 → 产出 `coding/review/review_v1.md`
 - Phase 5 / test-review: 测试评审 → 产出 `unit_test/review/test_review_v1.md`
 
-每次调度为 fresh subagent，不继承前次上下文。Orchestrator 构造自包含 prompt，并提供对应 implementation 子步骤的报告、变更清单和验证证据。
+每次调度为 fresh subagent，不继承前次上下文。Phase 4 code-review 还需提供当前 `tasks.md`、implementation 报告、变更清单和验证证据；Phase 5 test-review 提供测试报告和验证证据。
 
 ## Iron Laws (Applicable)
 

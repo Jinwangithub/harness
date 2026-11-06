@@ -25,11 +25,11 @@ Mechanical Gate=`fail|blocked`、执行异常、证据缺失或发现风险扩�
 |---------|--------|
 | 需求不符 | Phase 1 |
 | Spec 不符 | Phase 2 |
-| 任务不可验收 | Phase 3 |
+| 任务不可验收或 tasks 与 approved spec 不匹配 | Phase 4 / task-planning；若暴露 spec 缺口则 Phase 2 |
 | 编译错误 / 编码评审 Must Fix/Critical | Phase 4 / implementation |
 | 测试失败 / 测试评审 Critical/Must Fix | Phase 5 / unit-test |
 | 测试评审发现实现缺陷 | Phase 4 / implementation |
 | OpenViking Phase 1 业务知识缺失或冲突 | Phase 1；记录 `not-needed` / `no-relevant` / `unavailable` / 冲突和 Open Question，不回退本地知识 |
 | OpenViking Phase 2 项目/系统知识缺失或冲突 | Phase 2；补充来源或保持 blocked，禁止凭猜测完成 Spec |
-| spec/tasks 明确要求的 CI 或部署验证失败 | 按根因回退 Phase 2/3、Phase 4 / implementation 或 Phase 5 / unit-test；外部环境问题保持 `blocked` |
+| spec/tasks 明确要求的 CI 或部署验证失败 | 按根因回退 Phase 2、Phase 4 / task-planning 或 implementation，或 Phase 5 / unit-test；外部环境问题保持 `blocked` |
 | 评审超轮次 | 人工决策 |

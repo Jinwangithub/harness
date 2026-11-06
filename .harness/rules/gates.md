@@ -9,8 +9,8 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 
 ## 1. 通用规则
 
-- 每个 Phase 或 Flow step 先执行 Mechanical Gate，通过后请求用户确认。
-- Phase 4/5 的 implementation 与 review 子步骤先后执行，但只在两个子步骤及其证据全部完成后写入一次 Composite Mechanical Gate 和请求一次用户确认。
+- 每个 Phase 出口或独立 Flow step 先执行 Mechanical Gate，通过后请求用户确认；Phase 4/task-planning 是内部交接，不构成独立 Gate 或确认点。
+- Phase 4 的 task-planning 是不设独立 Gate/确认的内部子步骤；Planner 完成并经 Orchestrator 检查后直接进入 implementation。Phase 4 在 task-planning、implementation、code-review 全部完成后写入一次 Composite Gate；Phase 5 在 unit-test、test-review 全部完成后写入一次 Composite Gate。每个 Composite Gate 只请求一次用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
 - 每个 Phase/Step 出口写入 Gate Record 后，必须运行 canonical validator：`python3 .harness/tools/validate_change.py --change {change-id}`。
 - validation requires `python3`; `.harness/tools/validate_change.py` performs full mechanical artifact validation。
@@ -63,14 +63,15 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 - Human Approval: {approved / rejected / pending}
 ```
 
-Phase 4/5 Composite Gate 还必须追加以下子步骤证据表；两行任一四字段不完整时 Gate=`blocked`：
+Phase 4/5 Composite Gate 还必须追加以下子步骤证据表；Phase 4 必须记录三行，Phase 5 只记录 unit-test 和 test-review 两行。任一适用行的四字段不完整时 Gate=`blocked`：
 
 ```markdown
 ## Substep Evidence
 | Substep | Command | Exit code | Output summary | Artifact path |
 |---------|---------|-----------|----------------|---------------|
-| {implementation / unit-test} | {完整命令} | {数字} | {关键输出} | {实现或测试报告} |
-| {code-review / test-review} | {完整命令或确定性检查} | {数字} | {评审结论与计数} | {独立评审报告} |
+| task-planning (Phase 4) | {确定性检查} | {数字} | {tasks 与 approved spec 映射结果} | `request_analysis/tasks.md` |
+| implementation / unit-test | {完整命令} | {数字} | {关键输出} | {实现或测试报告} |
+| code-review / test-review | {完整命令或确定性检查} | {数字} | {评审结论与计数} | {独立评审报告} |
 ```
 
 **硬约束**：
@@ -110,10 +111,9 @@ Phase N Exit Checklist:
 |-------|----------------------|----------|--------|
 | 1 | `understanding.md` 存在；业务知识查询状态、知识根、查询层、精确 OpenViking URI 或 `not-needed|no-relevant|unavailable` 说明完整 | `request_analysis/understanding.md` | CK1 |
 | 2 | `spec.md` 存在；项目/系统知识查询状态、知识根、查询层、精确 OpenViking URI 和应用约束完整 | `request_analysis/spec.md` | CK2 |
-| 3 | `tasks.md` 存在，每个任务有验收条件；禁止事项见 `.harness/rules/flow-standard.md` 对应入口卡片 | `request_analysis/tasks.md` | CK3 |
-| 4 | `coding/coding_report_v1.md` 和 `coding/review/*.md` 均存在；编译成功；Author/Self Review 与 Independent Code Review 完成；Critical=0；Must Fix=0；对应两类 Evidence 完整 | 编译命令结果、实现报告、独立评审报告 | CK4 |
-| 5 | `unit_test/test_report.md` 和 `unit_test/review/test_review_v1.md` 均存在；测试通过；测试数 > 0；覆盖率符合项目阈值；Critical=0；Must Fix=0；对应两类 Evidence 完整 | 测试命令结果、测试报告、独立测试评审报告 | CK5 |
-| 6 | delivery summary、Memory 完整、summary / INDEX=`active`、final Gate=`pass + pending`；批准后更新 Approval/status 并重验 | `delivery-summary.md` | CK6 |
+| 4 | `tasks.md`、`coding/coding_report_v1.md` 和 `coding/review/*.md` 均存在；任务映射到 approved spec；编译成功；Author/Self Review 与 Independent Code Review 完成；Critical=0；Must Fix=0；规划、实现、评审证据完整 | tasks 校验、编译结果、实现报告、独立评审报告 | CK3 |
+| 5 | `unit_test/test_report.md` 和 `unit_test/review/test_review_v1.md` 均存在；测试通过；测试数 > 0；覆盖率符合项目阈值；Critical=0；Must Fix=0；对应两类 Evidence 完整 | 测试命令结果、测试报告、独立测试评审报告 | CK4 |
+| 6 | delivery summary、Memory 完整、summary / INDEX=`active`、final Gate=`pass + pending`；批准后更新 Approval/status 并重验 | `delivery-summary.md` | CK5 |
 
 ## 6. Failure Gate 记录
 

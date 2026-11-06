@@ -61,21 +61,22 @@ Load → Classify → Discover (when needed) → Dispatch → Verify → Gate �
 - **Dispatch**：按已选 Flow 读取执行规范：Lite 读取 `.harness/rules/flow-lite.md`，Standard 读取 `.harness/rules/flow-standard.md`；按当前 Phase/Step 入口卡片读取 Skills，并判断是否需要补读条件性 Skills。Skill 文件路径按 `.harness/skills/{name}/SKILL.md` 约定解析。
   - **Agent Dispatch Table**（Standard-flow 专用；Lite-flow 不委托 Agent）：
 
-    | Phase | Agent | File |
+    | Phase / Substep | Agent | File |
     |-------|-------|------|
-    | 1-3 | Planner (fresh per Phase) | `.harness/agents/planner.md` |
+    | 1-2 | Planner (fresh per Phase) | `.harness/agents/planner.md` |
+    | 4 / task-planning | Planner (fresh) | `.harness/agents/planner.md` |
     | 4 / implementation | Implementer (fresh) | `.harness/agents/implementer.md` |
     | 4 / code-review | Reviewer (fresh) | `.harness/agents/reviewer.md` |
     | 5 / unit-test | Implementer (fresh) | `.harness/agents/implementer.md` |
     | 5 / test-review | Reviewer (fresh) | `.harness/agents/reviewer.md` |
     | 6 | Orchestrator (self, no delegation) | — |
 
-  - **隔离协议**（Phase 1-5 通用；Phase 4/5 按子步骤顺序执行）：
+  - **隔离协议**（Phase 1/2/4/5 通用；Phase 4/5 按子步骤顺序执行）：
     1. Orchestrator 读取 Agent 文件 → 读取 Phase/子步骤入口卡片 → 加载 Skills → 提取当前 slice 完整文本和必要上下文。
     2. 构造自包含 prompt，调度 fresh subagent（不继承主会话历史，不复用历史 Agent 上下文）。
     3. Review 子步骤必须额外提供前一 implementation 子步骤的报告、变更清单和验证证据，但 Reviewer 仍为独立 fresh 执行。
     4. Agent 返回后，Orchestrator 按 Status Protocol 处理结果、检查边界合规。
-    5. Phase 4/5 两个子步骤均完成后，Orchestrator 执行 Composite Mechanical Gate → Validator → Human Approval。
+    5. Phase 4 的 task-planning 完成后，Orchestrator 检查 tasks 与 approved spec 的映射并直接调度 implementation，不请求独立计划确认；Phase 4 三个子步骤、Phase 5 两个子步骤均完成后，再执行各自的 Composite Mechanical Gate → Validator → Human Approval。
   - Agent 不得：推进 Phase、判定 Gate、请求用户确认、读取 `.harness/rules/` / `.harness/agents/` / `.harness/changes/INDEX.md` 等 Harness 元文件、自行扩大任务范围。Agent 可以使用 Orchestrator 提供的 context packet、项目源码和已批准产物；上下文查询由 Orchestrator 在 L1/Phase 1/Phase 2 统一完成。
 - **Verify**：执行验证，生成 fresh evidence。
 - **Gate**：执行 Mechanical Gate（`.harness/rules/gates.md`）。写入 Gate Record 后，必须运行 `python3 .harness/tools/validate_change.py --change {change-id}`；validation requires `python3` and performs full mechanical artifact validation. validator exit code 非 0 时 Gate 不得为 `pass`，不得请求用户确认。最终 Gate 先写 Mechanical=`pass`、Human Approval=`pending`；summary / INDEX 均保持 `active`。

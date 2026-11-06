@@ -20,8 +20,8 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - **状态**: {active/done/abandoned}
 - **Flow**: {Lite-flow/Standard-flow}
 - **Current step**: {Standard Phase N 或 Lite L1-L3}
-- **Substep**: {implementation / code-review / unit-test / test-review / none}
-- **Resume point**: {Phase 4/5 时写 `Phase N / {Substep}`；其他 Phase 写下一步入口；没有则写 none}
+- **Substep**: {task-planning / implementation / code-review / unit-test / test-review / none}
+- **Resume point**: {Phase 4/5 时写 `Phase N / {Substep}`；Phase 4 task-planning 完成后直接切到 implementation；其他 Phase 写下一步入口；没有则写 none}
 
 ## Flow Classification
 - **flow**: {Lite-flow/Standard-flow}
@@ -92,8 +92,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ```markdown
 - [ ] Phase 1: 需求分析
 - [ ] Phase 2: 需求评审
-- [ ] Phase 3: 任务规划
-- [ ] Phase 4: 实现 + 独立代码评审
+- [ ] Phase 4: 任务规划 → 实现 + 独立代码评审
 - [ ] Phase 5: 单元测试 + 独立测试评审
 - [ ] Phase 6: 用户确认
 ```
@@ -105,7 +104,8 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 | Phase/Step | Skill | Action | Condition / Reason | Status | Evidence |
 |------------|-------|--------|--------------------|--------|----------|
-| Phase 4 | `incremental-implementation` | 读取 | 阶段入口必须读取 | loaded | `.harness/skills/incremental-implementation/SKILL.md` |
+| Phase 4 / task-planning | `planning-and-task-breakdown` | 读取 | Phase 4 首个子步骤必须读取 | loaded | `.harness/skills/planning-and-task-breakdown/SKILL.md` |
+| Phase 4 / implementation | `incremental-implementation` | 读取 | implementation 子步骤必须读取 | loaded | `.harness/skills/incremental-implementation/SKILL.md` |
 | Phase 4 | `api-and-interface-design` | 按条件补读 | 不涉及公共契约变化，not-needed | not-needed | spec/tasks 检查 |
 ```
 
@@ -239,7 +239,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - {仍需确认的问题；没有则写 none}
 ```
 
-### Phase 3 — request_analysis/tasks.md
+### Phase 4 / task-planning — request_analysis/tasks.md
 
 ```markdown
 # Tasks
@@ -280,7 +280,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 # Coding Report v1
 
 ## Implementation Scope
-- {本次实现范围，必须对应 approved spec/tasks}
+- {本次实现范围，必须对应 approved spec 和 Phase 4 当前 `tasks.md`}
 
 ## Implementation Slices / Tasks
 - {完成的 Task Group / Slice，含状态和证据}

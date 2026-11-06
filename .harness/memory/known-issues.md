@@ -28,7 +28,7 @@
 - [P3] spec-driven-development Skill 默认行为包含 tasks.md 产出 (2026-05-07)
   - 描述: 该 Skill 默认同时产出 spec.md 和 tasks.md，需手动干预限制。
   - 影响范围: Phase 2 执行
-  - 临时方案: 调用时显式指示「只写 spec.md，不写 tasks.md」
+  - 临时方案: Phase 2 明确只产 spec.md；Phase 4 / task-planning 使用 planning-and-task-breakdown 生成 tasks.md，不单独请求计划批准。
   - 计划修复: 需 agent-skills 插件支持 Skill 参数化
 
 - [P4] 子任务进度跟踪依赖手动管理 (2026-05-07)

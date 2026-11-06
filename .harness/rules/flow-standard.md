@@ -1,32 +1,31 @@
 # Standard-flow 规范
 
-> **TL;DR**: Standard-flow 用于新功能、跨模块、高风险或需求不清任务，完整执行 Phase 1-6；Phase 4/5 内保留实现与独立评审子步骤，每个 Phase 完成后必须 Mechanical Gate=`pass` 且用户确认后才能进入下一 Phase。
+> **TL;DR**: Standard-flow 用于新功能、跨模块、高风险或需求不清任务。任务规划作为 Phase 4 的首个子步骤，完成后直接进入实现；Phase 4/5 分别只在实现与独立评审完成后设置一次 Composite Gate 和用户确认。
 
-本文件是 Standard-flow Phase 1-6、Phase 4/5 子步骤和隔离实现原则的权威源。
+本文件是 Standard-flow Phase 1/2、Phase 4-6、Phase 4/5 子步骤和隔离实现原则的权威源。原 Phase 3 任务规划已并入 Phase 4，不再设置独立 Gate 或确认点。恢复旧活动变更时，Phase 3 只作为兼容状态：核验既有 `tasks.md` 后直接归一到 Phase 4 / implementation；计划缺失或不符时归一到 Phase 4 / task-planning，不增加计划确认。
 Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rules/gates.md`，失败处理和回退路径见 `.harness/rules/rollback.md`。
 
 > **边界**：本文件只定义 Standard-flow 执行顺序、每个 Phase/子步骤的入口卡片、Phase 4/5 隔离实现原则和 Standard 特有禁止事项。Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件位于 `.harness/skills/{name}/SKILL.md`。
 
 ## Standard-flow
 
-适用：新功能、跨模块、高风险、需求不清。完整 Phase 1-6；Phase 4/5 内部依次执行实现与独立评审子步骤，每个 Phase 完成后必须用户确认才能进入下一 Phase。
+适用：新功能、跨模块、高风险、需求不清。依次执行 Phase 1、2、4、5、6；任务规划是 Phase 4 的首个子步骤，不单独设置 Gate 或用户确认。Phase 4/5 的所有子步骤完成后各设置一次用户确认。
 
 | Phase | 目标 | 主要产物 | 确认点 |
 |-------|------|----------|--------|
 | 1 | 需求分析 | `request_analysis/understanding.md` | CK1 |
 | 2 | 需求评审 | `request_analysis/spec.md` | CK2 |
-| 3 | 任务规划 | `request_analysis/tasks.md` | CK3 |
-| 4 | 实现 + 独立代码评审（`implementation` → `code-review`） | `coding/coding_report_v1.md`, `coding/review/*.md` | CK4 |
-| 5 | 单元测试 + 独立测试评审（`unit-test` → `test-review`） | `unit_test/test_report.md`, `unit_test/review/test_review_v1.md` | CK5 |
-| 6 | 用户确认和交付归档 | `delivery-summary.md` | CK6 |
+| 4 | 任务规划 → 实现 → 独立代码评审（`task-planning` → `implementation` → `code-review`） | `request_analysis/tasks.md`, `coding/coding_report_v1.md`, `coding/review/*.md` | CK3 |
+| 5 | 单元测试 + 独立测试评审（`unit-test` → `test-review`） | `unit_test/test_report.md`, `unit_test/review/test_review_v1.md` | CK4 |
+| 6 | 用户确认和交付归档 | `delivery-summary.md` | CK5 |
 
-**进入下一 Phase 的唯一条件**：当前 Phase 的所有子步骤完成、Composite Mechanical Gate=`pass` 且用户已确认。进入后立即更新 `summary.md` 的 `Current step`、`Substep` 和 `Resume point`。Phase 6 先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
+**Phase 1/2/4/5 的推进条件**：Phase 1/2 出口经 Mechanical Gate=`pass` 且用户确认后推进。Phase 4 的 `task-planning` 完成并通过 Orchestrator 内部检查后，直接进入 `implementation`，不设置独立 Gate 或请求用户确认；Phase 4 的三个子步骤全部完成后才执行 Composite Mechanical Gate 并请求一次确认。Phase 5 两个子步骤全部完成后同样执行一次 Composite Gate 并请求一次确认。推进或恢复时立即更新 `summary.md` 的 `Current step`、`Substep` 和 `Resume point`。Phase 6 先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
 
 关键边界：
 
-- Phase 4 依次执行实现和独立代码评审：实现子步骤只做编码、编译验证和 Author/Self Review；code-review 子步骤由 fresh Reviewer 只读评审，不能替代 Composite Gate。
+- Phase 4 依次执行任务规划、实现和独立代码评审：Planner 基于 approved `spec.md` 生成 `tasks.md`；Orchestrator 检查任务映射和验收条件后直接派发 Implementer，不请求用户批准计划。实现子步骤只做编码、编译验证和 Author/Self Review；code-review 子步骤由 fresh Reviewer 只读评审，不能替代 Composite Gate。
 - Phase 5 依次执行单元测试和独立测试评审：unit-test 子步骤创建/运行测试；test-review 子步骤由 fresh Reviewer 只读评审，不能修改测试。
-- Phase 4/5 的四个报告保持独立，Composite Gate 必须同时检查实现/测试报告和对应评审报告。
+- Phase 4/5 的实现、测试和评审报告保持独立；Phase 4 Composite Gate 还必须检查 `tasks.md`，Phase 5 Composite Gate 必须检查测试报告和对应评审报告。
 
 Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡必须包含读取 Skills、按条件补读 Skills、失败时补读 Skills、禁止事项、产物提示和 Gate 提示。
 
@@ -76,9 +75,12 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - 禁止产物不存在
   - Fresh evidence 四字段完整
 
-### Phase 3 — 任务规划
+### Phase 4 — 实现 + 独立代码评审
+
+#### Phase 4 / task-planning
 
 - Agent: Planner (`.harness/agents/planner.md`)
+- 输入：approved `request_analysis/spec.md`、项目目录结构、相关代码和依赖关系。
 - 读取 Skills:
   - `planning-and-task-breakdown`
 - 按条件补读 Skills:
@@ -88,16 +90,15 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 - 失败时补读 Skills:
   - `debugging-and-error-recovery`
 - 禁止事项:
-  - 不实现代码
-  - 不运行 Phase 5 / unit-test 职责
+  - 不实现或修改项目代码
+  - 不请求独立计划批准、不判定 Phase 4 Gate
+  - 不创建 Phase 4 implementation、review 或 Phase 5 产物
 - 产物提示:
   - `request_analysis/tasks.md`
-- Gate 提示:
-  - `tasks.md` 存在
-  - 每个任务有验收条件
-  - Fresh evidence 四字段完整
-
-### Phase 4 — 实现 + 独立代码评审
+- 交接条件（非 Gate）:
+  - 每个任务映射到 `spec.md` Success Criteria，并有验收条件、验证方式、依赖和可能修改文件
+  - Orchestrator 检查任务计划没有超出 approved spec 后，更新 Resume point 为 `Phase 4 / implementation` 并直接派发实现
+  - 若计划暴露 spec 缺口、范围变化或未决业务问题，停止派发并回到 Phase 2 或请求必要澄清
 
 #### Phase 4 / implementation
 
@@ -115,7 +116,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 - 产物提示:
   - `coding/coding_report_v1.md`
 - 子步骤完成条件:
-  - 实现范围符合 approved spec/tasks
+  - 实现范围符合 approved spec 和当前 Phase 4 `tasks.md`
   - 编译/构建/typecheck 证据完整
   - Author/Self Review 完成
 
@@ -136,7 +137,7 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 - 产物提示:
   - `coding/review/*.md`
 - Composite Gate 提示:
-  - 两个 Phase 4 报告均存在
+  - `tasks.md`、实现报告和独立评审报告均存在
   - 编译证据和独立评审证据完整
   - Critical=0、Must Fix=0
   - Fresh evidence 四字段完整
@@ -210,14 +211,14 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
 
 ## Agent 隔离实现原则
 
-Standard-flow Phase 1-5 采用 controller/subagent 协议：Orchestrator 是 controller。Phase 4 和 Phase 5 各自按 implementation → review 子步骤顺序调度两个 fresh subagent；Phase 6 由 Orchestrator 自行处理。完整的隔离协议定义在 `.harness/agents/orchestrator.md` 的 Dispatch 步骤中。
+Standard-flow Phase 1/2/4/5 采用 controller/subagent 协议：Orchestrator 是 controller。Phase 4 依次 fresh 调度 Planner 生成任务、Implementer 实现、Reviewer 独立评审；Phase 5 依次 fresh 调度 Implementer 和 Reviewer；Phase 6 由 Orchestrator 自行处理。完整的隔离协议定义在 `.harness/agents/orchestrator.md` 的 Dispatch 步骤中。
 
-Phase 4 的 Implementer/Reviewer 和 Phase 5 的 Implementer/Reviewer 定义见 `.harness/agents/implementer.md` 与 `.harness/agents/reviewer.md`。subagent 不继承主会话历史；Orchestrator 必须构造自包含 prompt，把当前子步骤完整任务文本、必要上下文和前一子步骤产物直接放入 prompt。
+Phase 4 的 Planner/Implementer/Reviewer 和 Phase 5 的 Implementer/Reviewer 定义见对应 Agent 文件。subagent 不继承主会话历史；Orchestrator 必须构造自包含 prompt，把当前子步骤完整任务文本、必要上下文和前一子步骤产物直接放入 prompt。
 
 ### Orchestrator 责任
 
 1. 从 approved 产物中提取当前 Phase/子步骤的完整上下文、验收条件、相关代码路径、允许文件、禁止文件和允许命令。
-2. Phase 4/5 的 review 子步骤必须读取对应 implementation 子步骤的报告、变更清单和验证证据。
+2. Phase 4 implementation 必须消费同一 Phase 4 `task-planning` 产出的 `tasks.md`；Phase 4/5 的 review 子步骤必须读取对应实现/测试子步骤的报告、变更清单和验证证据。
 3. 按 status 协议处理结果：
    - `DONE`：进入边界检查和验证。
    - `DONE_WITH_CONCERNS`：先处理 concerns；若影响范围、正确性或证据完整性，Gate 不得 pass。
@@ -235,7 +236,7 @@ Phase 专用约束见对应 Agent 文件的禁止操作节。
 ### Subagent Prompt 必含字段
 
 - Task description：当前 Phase 完整任务文本，直接粘贴，不让 subagent 自行读取计划文件。
-- Approved context：spec/tasks 摘要、相关代码路径、依赖、架构约束。
+- Approved context：approved spec 摘要；Phase 4 implementation/review 另附当前 tasks 计划、相关代码路径、依赖和架构约束。
 - Allowed files / forbidden files。
 - Allowed commands / forbidden commands。
 - Status protocol：`DONE` / `DONE_WITH_CONCERNS` / `BLOCKED` / `NEEDS_CONTEXT`。

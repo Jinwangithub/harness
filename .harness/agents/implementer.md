@@ -33,7 +33,7 @@ Implementer Agent 由 Orchestrator 按子步骤调度（fresh per substep），�
 
 ## 允许操作
 
-- Phase 4 / implementation: 读取和修改 allowed files；运行 compile/build/typecheck 命令。
+- Phase 4 / implementation: 消费 Orchestrator 提供的 Phase 4 `tasks.md` 当前 slice，读取和修改 allowed files；运行 compile/build/typecheck 命令。
 - Phase 5 / unit-test: 读取和修改测试文件；运行测试命令（按 Orchestrator 指定范围）。
 - Self-review 并记录发现。
 - 按需求使用 Skill（由 Orchestrator 在 prompt 中提供 Skill 摘要）。

@@ -28,13 +28,13 @@ Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Se
 | Flow | 适用场景 | 用户会看到的确认点 | 必需产物 |
 |------|----------|--------------------|----------|
 | Lite-flow | typo、注释、格式、纯文档、README 小修、小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | batched：需求+计划一次，最终验证+交付一次 | `summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`verification_report.md`（含压缩评审） |
-| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：逐 Phase 确认；Phase 4/5 各自合并实现与独立评审 | 完整 Phase 1-6 产物 |
+| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：Phase 1/2 确认；Phase 4 规划后直接实现并独立评审，Phase 4/5 各确认一次；Phase 6 最终确认 | Phase 1/2/4/5/6 产物（Phase 4 含 `tasks.md`） |
 
 任何 Flow 都不能绕过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。
 
 ## 你会看到哪些确认点
 
-- **Standard-flow**：mandatory，需求理解、spec、任务规划、实现+独立代码评审、单元测试+独立测试评审、最终交付逐 Phase 确认；Phase 4/5 各只设置一个确认点。CI/部署仅在独立任务或 spec/tasks 明确要求时执行，不是固定 Phase。
+- **Standard-flow**：需求理解和 spec 各确认一次；Phase 4 先生成 `tasks.md`，Orchestrator 检查后直接实现，再独立代码评审，三步完成后统一确认一次；Phase 5 单元测试和独立测试评审后确认一次；Phase 6 最终交付确认。任务规划没有单独确认点。CI/部署仅在独立任务或 spec/tasks 明确要求时执行，不是固定 Phase。
 - **Lite-flow**：batched，先确认需求+简化计划，再最终验证+交付确认。
 
 Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。每个 Gate 请求你确认前，Orchestrator 应已运行 `python3 .harness/tools/validate_change.py --change {change-id}`；该命令需要 Python 3，执行完整的机械产物验证，退出码非 0 时不得进入人工确认。
@@ -60,7 +60,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | 命令 | Lite-flow | Standard-flow | 不能做什么 |
 |------|-----------|---------------|------------|
 | `/spec` | 产出/更新 L1 lite spec | Phase 1 understanding 或 Phase 2 spec | 不能跳过 Flow Classification 或 approval lock |
-| `/plan` | 产出/更新 L1 checklist | Phase 3 tasks | 不能在 Phase 2 提前创建 tasks |
+| `/plan` | 产出/更新 L1 checklist | Phase 4 / task-planning | 不能在 Phase 2 创建 tasks；Standard 规划完成后不单独请求确认 |
 | `/build` | L2 实现 | Phase 4 / implementation | 不能冒充独立代码评审或 Phase 5 测试完成 |
 | `/review` | L3 压缩评审 | Phase 4 / code-review 或 Phase 5 / test-review | 不能替代 Composite Mechanical Gate |
 | `/test` | L3 验证 | Phase 5 / unit-test 或单点测试 | 不能冒充独立测试评审或声明交付完成 |
@@ -98,8 +98,8 @@ Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-kn
 
 ## FAQ
 
-**Q: 每次都要走六阶段吗？**
-A: 不一定。Orchestrator 先分类；低风险任务走 Lite-flow，高风险或不明确需求走 Standard-flow。
+**Q: Standard-flow 还需要单独走 Phase 3 任务规划并确认吗？**
+A: 不需要。任务规划是 Phase 4 的首个子步骤；Orchestrator 核对计划符合已批准的 spec 后，直接开始实现。
 
 **Q: 低风险/无行为变更小需求怎么处理？**
 A: 也走 Lite-flow。内容可以更短，但仍保留统一产物、机械验证、Memory check 和必要确认。

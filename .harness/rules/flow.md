@@ -46,7 +46,7 @@
 | Flow | 读取文件 | 用途 |
 |------|----------|------|
 | `Lite-flow` | `.harness/rules/flow-lite.md` | Lite-flow 执行顺序、L1/L2/L3 Step Cards |
-| `Standard-flow` | `.harness/rules/flow-standard.md` | Standard-flow Phase 1-6、Phase 4/5 子步骤、隔离原则 |
+| `Standard-flow` | `.harness/rules/flow-standard.md` | Standard-flow Phase 1/2/4-6；Phase 4 含任务规划、实现和独立评审子步骤 |
 | `fail` / `blocked` / 风险扩大 / 需要回退 | `.harness/rules/rollback.md` | Stop-the-Line、failure evidence、根因、恢复点、重验证、回退路径 |
 
 Gate 判定始终读取 `.harness/rules/gates.md`。

@@ -207,7 +207,7 @@ After each increment, verify:
 
 - [ ] The change does one thing and does it completely
 - [ ] Approved Phase 4 compile/build/typecheck command succeeds
-- [ ] Any narrow smoke check is explicitly allowed by the approved spec/tasks
+- [ ] Any narrow smoke check is allowed by the approved spec and the current Phase 4 tasks plan
 - [ ] No Phase 5 / unit-test completion is claimed
 - [ ] Linting passes if it is the approved Phase 4 command
 - [ ] The new functionality works as expected

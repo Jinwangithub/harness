@@ -55,13 +55,11 @@ LITE_FORBIDDEN = [
 STANDARD_PHASE_ARTIFACTS = {
     1: [Path("request_analysis/understanding.md")],
     2: [Path("request_analysis/spec.md")],
-    3: [Path("request_analysis/tasks.md")],
-    4: [Path("coding/coding_report_v1.md")],
     5: [Path("unit_test/test_report.md")],
     6: [Path("delivery-summary.md")],
 }
 STANDARD_SUBSTEPS = {
-    4: {"implementation", "code-review", "complete"},
+    4: {"task-planning", "implementation", "code-review", "complete"},
     5: {"unit-test", "test-review", "complete"},
 }
 
@@ -240,7 +238,7 @@ class Validator:
             if re.search(r"Phase\s+\d+", current_step, re.IGNORECASE) and phase is None:
                 self.fail(
                     "summary.phase_invalid",
-                    f"{change_dir.name}: Standard-flow Current step must be Phase 1-6, got `{current_step}`",
+                    f"{change_dir.name}: Standard-flow Current step must be Phase 1-6 (Phase 3 is legacy only), got `{current_step}`",
                 )
             if phase is None and status == "done":
                 phase = 6
@@ -268,6 +266,19 @@ class Validator:
                         for rel in artifacts:
                             if not (change_dir / rel).exists():
                                 self.fail("artifact.missing", f"{change_dir.name}: Phase {number} requires {rel}")
+                if phase == 3:
+                    self.warn(
+                        "summary.legacy_phase3",
+                        f"{change_dir.name}: Phase 3 is legacy; normalize to Phase 4 / task-planning or implementation when resuming",
+                    )
+                if phase >= 3:
+                    tasks_path = change_dir / "request_analysis/tasks.md"
+                    if not tasks_path.exists():
+                        self.fail("artifact.missing", f"{change_dir.name}: Phase 4 requires request_analysis/tasks.md")
+                if phase >= 4:
+                    needs_implementation = phase > 4 or substep in {"implementation", "code-review", "complete"}
+                    if needs_implementation and not (change_dir / "coding/coding_report_v1.md").exists():
+                        self.fail("artifact.missing", f"{change_dir.name}: Phase 4 requires coding/coding_report_v1.md")
                 needs_code_review = phase > 4 or (phase == 4 and substep in {"code-review", "complete"})
                 if needs_code_review and not any((change_dir / "coding/review").glob("*.md")):
                     self.fail("artifact.missing", f"{change_dir.name}: Phase 4 requires coding/review/*.md")

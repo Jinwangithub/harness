@@ -7,7 +7,7 @@ description: Breaks work into ordered tasks. Use when you have a spec or clear r
 
 ## Harness Integration Constraint
 
-When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win. In Harness Standard Phase 3, output only `request_analysis/tasks.md`; do not create `# Implementation Plan` or `### Phase 1/2/3` headings. Use `Task Group`, `Slice`, and `Checkpoint`, and map every task to `spec.md` Success Criteria.
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win. In Harness Standard Phase 4 / task-planning, output only `request_analysis/tasks.md`; do not create `# Implementation Plan` or `### Phase 1/2/3` headings. Use `Task Group`, `Slice`, and `Checkpoint`, and map every task to `spec.md` Success Criteria. This plan is an internal handoff: after the Orchestrator checks it against the approved spec, implementation proceeds without a separate human approval. If it reveals a spec gap or scope change, stop and return to Phase 2 or ask for clarification.
 
 ## Overview
 
@@ -123,7 +123,7 @@ Add explicit checkpoints:
 - [ ] All tests pass
 - [ ] Application builds without errors
 - [ ] Core user flow works end-to-end
-- [ ] Review with human before proceeding
+- [ ] Plan review requirement of the active workflow is met (standalone: human review; Harness Standard: Orchestrator checks against the approved spec without a separate approval)
 ```
 
 ## Task Sizing Guidelines
@@ -146,7 +146,7 @@ If a task is L or larger, it should be broken into smaller tasks. An agent perfo
 
 ## Plan Document Template
 
-In Harness mode, do not copy this standalone template. Use `.harness/changes/templates.md` Phase 3 (`# Tasks`, `Task Group / Slice`, and spec success criteria mapping). The following template is standalone-only.
+In Harness mode, do not copy this standalone template. Use `.harness/changes/templates.md` Phase 4 / task-planning (`# Tasks`, `Task Group / Slice`, and spec success criteria mapping). The following template is standalone-only.
 
 ```markdown
 # Implementation Plan: [Feature/Project Name]
@@ -226,4 +226,4 @@ Before starting implementation, confirm:
 - [ ] Task dependencies are identified and ordered correctly
 - [ ] No task touches more than ~5 files
 - [ ] Checkpoints exist between major phases
-- [ ] The human has reviewed and approved the plan
+- [ ] Plan review requirement of the active workflow is met (standalone: human approval; Harness Standard: Orchestrator consistency check against the approved spec)

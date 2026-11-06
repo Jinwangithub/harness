@@ -89,7 +89,7 @@ class ValidateStandardFlowTests(unittest.TestCase):
 - Human Approval: approved
 - Command: fixture-check
 - Exit code: 0
-- Output summary: all six-phase artifacts verified
+- Output summary: all required Standard-flow artifacts verified
 - Artifact path: delivery-summary.md
 """
         (self.change_dir / "summary.md").write_text(
@@ -116,51 +116,71 @@ class ValidateStandardFlowTests(unittest.TestCase):
         return validator.issues
 
     @property
-    def phase3_artifacts(self) -> list[str]:
+    def phase2_artifacts(self) -> list[str]:
         return [
             "request_analysis/understanding.md",
             "request_analysis/spec.md",
-            "request_analysis/tasks.md",
         ]
 
     @property
+    def phase4_planning_artifacts(self) -> list[str]:
+        return self.phase2_artifacts + ["request_analysis/tasks.md"]
+
+    @property
+    def phase4_implementation_artifacts(self) -> list[str]:
+        return self.phase4_planning_artifacts + ["coding/coding_report_v1.md"]
+
+    @property
     def done_artifacts(self) -> list[str]:
-        return self.phase3_artifacts + [
-            "coding/coding_report_v1.md",
+        return self.phase4_implementation_artifacts + [
             "coding/review/review_v1.md",
             "unit_test/test_report.md",
             "unit_test/review/test_review_v1.md",
             "delivery-summary.md",
         ]
 
+    def test_phase4_task_planning_does_not_require_implementation_or_review(self) -> None:
+        self.write_change(4, "task-planning", self.phase4_planning_artifacts)
+        self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
+
+    def test_phase4_task_planning_requires_tasks_artifact(self) -> None:
+        self.write_change(4, "task-planning", self.phase2_artifacts)
+        self.assertTrue(any("requires request_analysis/tasks.md" in issue.message for issue in self.issues()))
+
     def test_phase4_implementation_does_not_require_review_yet(self) -> None:
-        self.write_change(4, "implementation", self.phase3_artifacts + ["coding/coding_report_v1.md"])
+        self.write_change(4, "implementation", self.phase4_implementation_artifacts)
         self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
 
     def test_phase4_code_review_requires_review_artifact(self) -> None:
-        self.write_change(4, "code-review", self.phase3_artifacts + ["coding/coding_report_v1.md"])
+        self.write_change(4, "code-review", self.phase4_implementation_artifacts)
         self.assertTrue(any("Phase 4 requires coding/review/*.md" in issue.message for issue in self.issues()))
 
     def test_phase5_test_review_requires_both_test_artifacts(self) -> None:
-        artifacts = self.phase3_artifacts + ["coding/coding_report_v1.md", "coding/review/review_v1.md", "unit_test/test_report.md"]
+        artifacts = self.phase4_implementation_artifacts + ["coding/review/review_v1.md", "unit_test/test_report.md"]
         self.write_change(5, "test-review", artifacts)
         self.assertTrue(any("Phase 5 requires unit_test/review/test_review_v1.md" in issue.message for issue in self.issues()))
 
     def test_invalid_substep_is_rejected(self) -> None:
-        self.write_change(4, "unit-test", self.phase3_artifacts + ["coding/coding_report_v1.md"])
+        self.write_change(4, "unit-test", self.phase4_implementation_artifacts)
         self.assertTrue(any(issue.code == "summary.substep_invalid" for issue in self.issues()))
 
     def test_substep_resume_point_must_match(self) -> None:
-        self.write_change(4, "code-review", self.phase3_artifacts + ["coding/coding_report_v1.md", "coding/review/review_v1.md"])
+        self.write_change(4, "code-review", self.phase4_implementation_artifacts + ["coding/review/review_v1.md"])
         summary = self.change_dir / "summary.md"
         summary.write_text(summary.read_text(encoding="utf-8").replace("Phase 4 / code-review", "Phase 4 / implementation", 1), encoding="utf-8")
         self.assertTrue(any(issue.code == "summary.substep_resume_mismatch" for issue in self.issues()))
 
+    def test_legacy_phase3_is_accepted_for_migration(self) -> None:
+        self.write_change(3, "none", self.phase4_planning_artifacts)
+        issues = self.issues()
+        self.assertFalse(any(issue.level == "FAIL" for issue in issues))
+        self.assertTrue(any(issue.code == "summary.legacy_phase3" for issue in issues))
+
     def test_phase7_is_not_a_valid_standard_phase(self) -> None:
-        self.write_change(7, "none", self.phase3_artifacts)
+        self.write_change(7, "none", self.phase2_artifacts)
         self.assertTrue(any(issue.code == "summary.phase_invalid" for issue in self.issues()))
 
-    def test_done_standard_flow_requires_all_six_phase_artifacts(self) -> None:
+    def test_done_standard_flow_accepts_complete_artifact_set(self) -> None:
         self.write_change(6, "none", self.done_artifacts, status="done")
         self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
 
@@ -184,7 +204,7 @@ class ValidateStandardFlowTests(unittest.TestCase):
         self.assertIn("context.discovery_uri_missing", codes)
 
     def test_phase2_spec_without_openviking_warns(self) -> None:
-        self.write_change(2, "none", self.phase3_artifacts)
+        self.write_change(2, "none", self.phase2_artifacts)
         (self.change_dir / "request_analysis" / "spec.md").write_text(
             "# Spec\n\n## Objective\n- fixture\n", encoding="utf-8"
         )
