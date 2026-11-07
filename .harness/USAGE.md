@@ -5,13 +5,14 @@
 
 ## 启动方式
 
-新会话中输入：
+在 Claude Code 或 Codex 中打开本仓库后，可直接描述需求；项目入口会自动加载 Harness。也可以显式调用插件 Skill：
 
 ```text
-启动 Harness 模式
+Claude Code: /harness:harness
+Codex: $harness
 ```
 
-Claude Code 会从 `CLAUDE.md` → `.harness/agents/orchestrator.md` 启动，优先检查 `.harness/changes/INDEX.md` 恢复进行中的变更。
+Claude Code 从 `CLAUDE.md` → `.harness/agents/orchestrator.md` 启动；Codex 从 `AGENTS.md` → 同一 Orchestrator 启动。两者都会优先检查 `.harness/changes/INDEX.md` 恢复进行中的变更。
 
 ## 如何描述需求
 
@@ -43,17 +44,22 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 
 | 你说 | 效果 |
 |------|------|
-| `启动 Harness 模式` | 读取入口地图并进入 Orchestrator 模式 |
+| `/harness:start`、`/harness:harness` 或 `$harness` | 读取入口地图并进入 Orchestrator 模式 |
+| `/harness:spec` | 执行需求澄清/spec 相关流程 |
+| `/harness:plan` | 执行任务规划或 Lite checklist |
+| `/harness:build` | 按计划实现 |
+| `/harness:review` | 执行评审步骤或单点评审 |
+| `/harness:test` | 执行验证/测试步骤或单点测试 |
+| `/harness:ship` | 执行交付确认 |
 | `新需求: ...` | 自动分类并创建变更归档 |
-| `/spec` | 执行需求澄清/spec 相关流程 |
-| `/plan` | 执行任务规划或 Lite checklist |
-| `/build` | 按计划实现 |
-| `/review` | 执行评审步骤或单点评审 |
-| `/test` | 执行验证/测试步骤或单点测试 |
-| `/ship` | 执行交付确认 |
 | `恢复上次进度` | 从 `.harness/changes/INDEX.md` 和 `summary.md` 恢复 |
 | `当前进度` | 查看当前 Phase / Flow step |
+| `$project-knowledge-search` / `/harness:project-knowledge-search` | 按需查询 OpenViking 项目知识 |
+| `$test-driven-development` / `/harness:test-driven-development` | 显式使用 TDD Skill；仍遵守 Harness 当前 Phase 边界 |
+| `$code-review-and-quality` / `/harness:code-review-and-quality` | 执行评审 Skill；仍遵守 Harness 当前 Phase 边界 |
 | `检查 Harness 结构` | 运行 `python3 .harness/tools/validate_change.py` 或 `python3 .harness/tools/validate_change.py --change {change-id}`；需要 Python 3，执行完整的机械产物验证 |
+
+命令入口差异：Claude Code 通过插件命令 `/harness:{command}` 或 Skill `/harness:{skill-name}` 调用；Codex 使用 `$harness` 或 `$<skill-name>`。也可以直接用自然语言表达上述意图。
 
 ## 命令语义边界
 

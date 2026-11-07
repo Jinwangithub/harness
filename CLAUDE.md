@@ -1,7 +1,7 @@
 # CLAUDE.md — Harness Engineering
 
-> 本项目使用 Harness Engineering 工程框架。
-> 启动时从 `.harness/agents/orchestrator.md` 进入，按 Session Startup 流程执行。
+> 本项目使用 Harness Engineering 工程框架，并提供 Claude Code 插件入口。
+> 启动时从 `.harness/agents/orchestrator.md` 进入，按 Session Startup 流程执行；显式入口为 `/harness:start` 或 `/harness:harness`。
 
 ## 文件导航
 
@@ -23,6 +23,7 @@
 | `.harness/memory/lessons-learned.md` | 开始新任务时读最近 3 条 |
 | `.harness/memory/known-issues.md` | 遇到异常行为时读 |
 | `.harness/USAGE.md` | 人类用户指南，Agent 不逐字加载 |
+| `README.md` | Claude Code 与 Codex 插件安装和仓库开发说明 |
 
 ## 上下文查询约定
 

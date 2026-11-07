@@ -1,0 +1,39 @@
+{
+  "name": "harness",
+  "version": "0.1.0",
+  "description": "A governed engineering workflow for coding agents, with planning, implementation, independent review, verification, and auditable change records.",
+  "author": {
+    "name": "Harness Engineering"
+  },
+  "homepage": "https://github.com/Jinwangithub/harness",
+  "repository": "https://github.com/Jinwangithub/harness",
+  "keywords": [
+    "engineering-workflow",
+    "coding-agent",
+    "planning",
+    "code-review",
+    "verification"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Harness Engineering",
+    "shortDescription": "Governed software engineering workflow",
+    "longDescription": "Use a structured Lite or Standard workflow for software changes, with role-based planning and review, mechanical gates, fresh verification evidence, and auditable change records.",
+    "developerName": "Harness Engineering",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/Jinwangithub/harness",
+    "privacyPolicyURL": "https://github.com/Jinwangithub/harness/blob/main/docs/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/Jinwangithub/harness/blob/main/docs/TERMS.md",
+    "defaultPrompt": [
+      "Start a Harness workflow for this change.",
+      "Resume the active Harness change in this repository.",
+      "Check the Harness change records and gates."
+    ],
+    "brandColor": "#0F766E"
+  }
+}

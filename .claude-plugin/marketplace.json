@@ -1,0 +1,22 @@
+{
+  "name": "harness",
+  "owner": {
+    "name": "Harness Engineering"
+  },
+  "metadata": {
+    "description": "Governed engineering workflows for Claude Code and Codex",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "harness",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/Jinwangithub/harness.git"
+      },
+      "description": "A governed engineering workflow with planning, implementation, independent review, verification, and auditable change records.",
+      "version": "0.1.0",
+      "strict": true
+    }
+  ]
+}

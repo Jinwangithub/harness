@@ -1,0 +1,17 @@
+{
+  "name": "harness",
+  "version": "0.1.0",
+  "description": "A governed engineering workflow for coding agents, with planning, implementation, independent review, verification, and auditable change records.",
+  "author": {
+    "name": "Harness Engineering"
+  },
+  "homepage": "https://github.com/Jinwangithub/harness",
+  "repository": "https://github.com/Jinwangithub/harness",
+  "keywords": [
+    "engineering-workflow",
+    "coding-agent",
+    "planning",
+    "code-review",
+    "verification"
+  ]
+}
