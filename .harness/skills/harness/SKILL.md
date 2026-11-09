@@ -11,13 +11,13 @@ Use this skill as the entry point for the Harness plugin.
 
 - This skill and the bundled `agents/`, `rules/`, `skills/`, `changes/templates.md`, and `tools/` are read-only plugin sources. Resolve them from this loaded skill's installed plugin path; never look for their copies in the consumer project.
 - Resolve symlinks before computing the plugin root. When the host does not provide a plugin root, walk the ancestors of this loaded Skill until finding `.harness/tools/validate_change.py`; use that directory as `<plugin-root>`.
-- The consumer project is the current workspace. Harness output is limited to `.harness/changes/{change-id}/` task artifacts. Do not create project-level `INDEX.md`, `memory/`, `rules/`, `agents/`, `skills/`, `tools/`, `AGENTS.md`, or `CLAUDE.md` as a prerequisite.
-- Keep workflow definitions, role prompts, and verification tools in the plugin. Keep task-specific summaries, plans, reports, and delivery records in the consumer project's change directory.
+- The consumer project is the current workspace. Harness output is limited to `docs/harness/{change-id}/` task artifacts. Do not create project-level `.harness/`, `INDEX.md`, `memory/`, `rules/`, `agents/`, `skills/`, `tools/`, `AGENTS.md`, or `CLAUDE.md` as a prerequisite.
+- Keep workflow definitions, role prompts, and verification tools in the plugin. Keep task-specific summaries, plans, reports, and delivery records in the consumer project's `docs/harness/{change-id}/` directory.
 
 ## Startup
 
 1. Resolve the installed plugin source path and read its `agents/orchestrator.md`.
-2. Treat the current workspace as the consumer project root. Scan `.harness/changes/*/summary.md` for matching active work; if multiple active tasks cannot be matched to the user's request, ask which task to resume.
+2. Treat the current workspace as the consumer project root. Scan `docs/harness/*/summary.md` for matching active work; if multiple active tasks cannot be matched to the user's request, ask which task to resume.
 3. For a new task, classify it using the plugin's `rules/flow.md` before writing project files.
 4. If there is no existing task artifact, do not create project files until a task requires them.
 
@@ -26,7 +26,7 @@ Use this skill as the entry point for the Harness plugin.
 - In Claude Code, use the installed plugin's source path (or `CLAUDE_PLUGIN_ROOT` when available) for role prompts and tools.
 - In Codex, use the source location of this loaded plugin Skill and resolve relative links from the plugin package. Do not derive plugin paths from the consumer workspace.
 - For Standard-flow, dispatch the bundled role prompts with fresh subagents when multi-agent support is available. If it is unavailable, report the limitation before a phase that requires isolated dispatch.
-- Run validation using the plugin-bundled tool and pass the consumer project explicitly: `python3 <plugin-root>/.harness/tools/validate_change.py --repo <project-root> --change <change-id>`.
+- Run validation using the plugin-bundled tool and pass the consumer project explicitly: `python3 <plugin-root>/.harness/tools/validate_change.py --repo <project-root> --change <change-id>`. The validator reads artifacts from `<project-root>/docs/harness/`.
 - A skill or plugin prompt does not grant approval to commit, push, deploy, or publish. Follow the user's authorization and workflow gates.
 
 ## Routing

@@ -5,7 +5,7 @@ description: 将需求、产品、代码、接口、数据、架构、部署和�
 
 # Project Knowledge
 
-Paths under `.harness/rules/`, `.harness/skills/`, and `.harness/changes/templates.md` refer to the installed plugin source. Any task report is written to the current consumer project's `.harness/changes/{change-id}/` artifact; the plugin itself is not copied into the project.
+Paths under `.harness/rules/`, `.harness/skills/`, and `.harness/changes/templates.md` refer to the installed plugin source. Any task report is written to the current consumer project's `docs/harness/{change-id}/` artifact; the plugin itself is not copied into the project.
 
 本 Skill 产出的是“有证据支撑、以后仍可复用的项目知识”，不是资料摘要合集，也不是源代码目录镜像。
 

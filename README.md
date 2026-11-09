@@ -21,7 +21,7 @@ Harness 是面向 Claude Code 和 Codex 的工程工作流，提供共享规则�
 /plugin install harness@harness
 ```
 
-插件会发布 `/harness:start`、`/harness:spec`、`/harness:plan`、`/harness:build`、`/harness:review`、`/harness:test`、`/harness:ship` 命令，以及 `harness` Skill 和 `planner`、`implementer`、`reviewer` Agents。消费项目安装并调用插件即可使用，不需要复制项目级 `AGENTS.md`、`CLAUDE.md`，也不需要迁移插件的 `.harness/agents/`、`rules/`、`skills/` 或 `tools/`。插件只在消费项目需要记录需求时创建 `.harness/changes/{change-id}/`。
+插件会发布 `/harness:start`、`/harness:spec`、`/harness:plan`、`/harness:build`、`/harness:review`、`/harness:test`、`/harness:ship` 命令，以及 `harness` Skill 和 `planner`、`implementer`、`reviewer` Agents。消费项目安装并调用插件即可使用，不需要复制项目级 `AGENTS.md`、`CLAUDE.md`，也不需要迁移插件的 `.harness/agents/`、`rules/`、`skills/` 或 `tools/`。插件只在消费项目需要记录需求时创建 `docs/harness/{change-id}/`。
 
 ## 安装为 Codex 插件
 
@@ -58,7 +58,7 @@ ln -sfn /absolute/path/to/harness ~/plugins/harness
 multi_agent = true
 ```
 
-将该配置写入用户级 Codex 配置（`~/.codex/config.toml`）后重启 Codex。未启用 multi-agent 时，依赖隔离调度的 Standard-flow 阶段会阻塞。消费项目无需迁移本仓库的 Harness 文件，也无需创建 INDEX 或 memory。插件会把每个需求的记录写到消费项目自己的 `.harness/changes/{change-id}/`。
+将该配置写入用户级 Codex 配置（`~/.codex/config.toml`）后重启 Codex。未启用 multi-agent 时，依赖隔离调度的 Standard-flow 阶段会阻塞。消费项目无需迁移本仓库的 Harness 文件，也无需创建 INDEX 或 memory。插件会把每个需求的记录写到消费项目自己的 `docs/harness/{change-id}/`。
 
 ## 目录结构
 
@@ -67,7 +67,8 @@ multi_agent = true
 | `.harness/agents/` | Orchestrator and constrained role prompts |
 | `.harness/rules/` | Flow, gate, and rollback policy |
 | `.harness/skills/` | Reusable workflow and domain skills |
-| `.harness/changes/` | Plugin development records; consumers receive per-demand records here |
+| `.harness/changes/` | Plugin repository development records only |
+| `docs/harness/` | Consumer project task artifacts, one directory per demand |
 | `.harness/tools/validate_change.py` | Plugin-bundled mechanical artifact validator |
 | `.claude-plugin/` | Claude Code plugin and marketplace manifests |
 | `.codex-plugin/` | Codex plugin manifest |

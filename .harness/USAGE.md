@@ -12,7 +12,7 @@ Claude Code: /harness:harness
 Codex: $harness
 ```
 
-插件从自身安装目录读取 Orchestrator、规则、Skills、角色提示和验证工具。消费项目不需要复制 `.harness/`、增加 `AGENTS.md` / `CLAUDE.md` 入口，或创建 INDEX/memory；项目级 Harness 输出只写入每个需求独立的 `.harness/changes/{change-id}/`。
+插件从自身安装目录读取 Orchestrator、规则、Skills、角色提示和验证工具。消费项目不需要复制 `.harness/`、增加 `AGENTS.md` / `CLAUDE.md` 入口，或创建 INDEX/memory；项目级 Harness 输出只写入每个需求独立的 `docs/harness/{change-id}/`。
 
 ## 如何描述需求
 
@@ -52,7 +52,7 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/harness:test` | 执行验证/测试步骤或单点测试 |
 | `/harness:ship` | 执行交付确认 |
 | `新需求: ...` | 自动分类并创建变更归档 |
-| `恢复上次进度` | 扫描当前项目 `.harness/changes/*/summary.md`，恢复与请求匹配的活动任务 |
+| `恢复上次进度` | 扫描当前项目 `docs/harness/*/summary.md`，恢复与请求匹配的活动任务 |
 | `当前进度` | 查看当前 Phase / Flow step |
 | `$project-knowledge-search` / `/harness:project-knowledge-search` | 按需查询 OpenViking 项目知识 |
 | `$test-driven-development` / `/harness:test-driven-development` | 显式使用 TDD Skill；仍遵守 Harness 当前 Phase 边界 |
@@ -94,7 +94,7 @@ Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-kn
 □ Mechanical Gate 状态为 pass
 □ validator 已通过，或只有明确可接受的 WARN
 □ fresh verification evidence 已列出
-□ 必需产物已归档到 .harness/changes/{id}/
+□ 必需产物已归档到 `docs/harness/{id}/`
 □ 如有评审，Critical=0 且 Must Fix=0
 □ 如有测试/CI/部署，结果和报告路径已列出
 □ 需要你确认的 Human Approval Gate 已处理

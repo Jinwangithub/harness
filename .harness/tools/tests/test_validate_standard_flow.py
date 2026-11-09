@@ -67,7 +67,7 @@ class ValidateStandardFlowTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
-        self.changes = self.root / ".harness" / "changes"
+        self.changes = self.root / "docs" / "harness"
         self.change_id = "feat-six-phase-fixture-20260818"
         self.change_dir = self.changes / self.change_id
         self.change_dir.mkdir(parents=True)
@@ -191,6 +191,17 @@ class ValidateStandardFlowTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertNotIn("FAIL:", output.getvalue())
         self.assertNotIn("changes.no_active", output.getvalue())
+
+    def test_validator_ignores_harness_directory_in_consumer_project(self) -> None:
+        self.write_change(1, "none", ["request_analysis/understanding.md"], with_index=False)
+        plugin_style_dir = self.root / ".harness" / "changes" / "fix-plugin-style-20260819"
+        plugin_style_dir.mkdir(parents=True)
+        (plugin_style_dir / "summary.md").write_text("invalid consumer artifact", encoding="utf-8")
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = validator_module.main(["--repo", str(self.root)])
+        self.assertEqual(exit_code, 0)
+        self.assertNotIn("fix-plugin-style-20260819", output.getvalue())
 
     def test_phase4_task_planning_requires_tasks_artifact(self) -> None:
         self.write_change(4, "task-planning", self.phase2_artifacts)

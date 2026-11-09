@@ -7,13 +7,13 @@
 
 > **边界**：本文件只定义 Flow 分类、路由索引和 Phase/Step 入口卡片字段定义。Lite Step Cards 见 `flow-lite.md`，Standard Phase Cards、Phase 4/5 子步骤和隔离原则见 `flow-standard.md`，回退路径见 `rollback.md`，Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件位于 `.harness/skills/{name}/SKILL.md`；本文件不定义 Skill role 或加载类型术语。
 
-**路径约定**：本插件规则和 Skills 中指向 `.harness/agents/`、`.harness/rules/`、`.harness/skills/`、`.harness/tools/` 的路径都相对插件安装目录；只有 `.harness/changes/{change-id}/` 是消费项目内的输出路径。
+**路径约定**：本插件规则和 Skills 中指向 `.harness/agents/`、`.harness/rules/`、`.harness/skills/`、`.harness/tools/` 的路径都相对插件安装目录；消费项目的输出路径统一为 `docs/harness/{change-id}/`。
 
 ## Flow Classifier
 
 > **安全默认值**：任何不确定 → 一律选 Standard-flow。Lite-flow 仅用于 100% 确定安全且满足所有 Lite 条件的场景。
 
-收到新需求后，必须先分类，并把结果写入 `.harness/changes/{id}/summary.md`。
+收到新需求后，必须先分类，并把结果写入消费项目的 `docs/harness/{id}/summary.md`。
 
 | 字段 | 含义 |
 |------|------|

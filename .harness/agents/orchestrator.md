@@ -42,10 +42,10 @@ description: 工程协调者 — 中枢 Agent，负责分类、调度业务 Agen
 ## Session Startup
 
 ```
-[ ] 1. 将当前工作区作为消费项目根；只扫描其 `.harness/changes/*/summary.md` 恢复相关活动需求。
+[ ] 1. 将当前工作区作为消费项目根；只扫描其 `docs/harness/*/summary.md` 恢复相关活动需求。
 [ ] 2. 从已安装插件来源读取 Orchestrator、规则、Skills、角色提示和 validator；不得从消费项目寻找这些定义。
 [ ] 3. Flow classification 后，L1/Phase 1/Phase 2 需要项目上下文时加载 `project-knowledge-search`，把精确 URI 或 Open Questions 写入当前需求产物。
-[ ] 4. 消费项目的 Harness 输出只写入 `.harness/changes/{change-id}/`；不创建 INDEX、memory、rules、agents、skills、tools 或项目级宿主指令副本。
+[ ] 4. 消费项目的 Harness 输出只写入 `docs/harness/{change-id}/`；不创建 `.harness/`、INDEX、memory、rules、agents、skills、tools 或项目级宿主指令副本。
 ```
 
 
@@ -85,6 +85,6 @@ Load → Classify → Discover (when needed) → Dispatch → Verify → Gate �
 
 ## 责任边界
 
-- `changes/`：消费项目唯一 Harness 产物根；每个需求一个独立目录，summary 保存该需求状态与恢复点。
+- `docs/harness/`：消费项目唯一 Harness 产物根；每个需求一个独立目录，summary 保存该需求状态与恢复点。
 - 插件定义：rules、skills、agents 和 tools 均由插件提供，消费项目不保存副本。
 - `OpenViking`：仅作为 L1/Phase 1/Phase 2 的外部上下文来源；查询证据写入对应分析产物，Harness 不负责最终知识写回。

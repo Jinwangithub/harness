@@ -7,7 +7,7 @@ description: Guides systematic root-cause debugging. Use when tests fail, builds
 
 ## Harness Integration Constraint
 
-`.harness/agents/`, `.harness/rules/`, `.harness/skills/`, and `.harness/tools/` paths refer to the installed plugin source; `.harness/changes/{id}/` refers to the consumer project's task artifacts.
+`.harness/agents/`, `.harness/rules/`, `.harness/skills/`, and `.harness/tools/` paths refer to the installed plugin source; `docs/harness/{id}/` refers to the consumer project's task artifacts.
 
 When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/rollback.md`, `.harness/rules/gates.md`, `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
 

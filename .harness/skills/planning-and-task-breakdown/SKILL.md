@@ -7,9 +7,9 @@ description: Breaks work into ordered tasks. Use when you have a spec or clear r
 
 ## Harness Integration Constraint
 
-`.harness/agents/`, `.harness/rules/`, `.harness/skills/`, and `.harness/tools/` paths refer to the installed plugin source; `.harness/changes/{id}/` refers to the consumer project's task artifacts.
+`.harness/agents/`, `.harness/rules/`, `.harness/skills/`, and `.harness/tools/` paths refer to the installed plugin source; `docs/harness/{id}/` refers to the consumer project's task artifacts.
 
-When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win. In Harness Standard Phase 4 / task-planning, output only `request_analysis/tasks.md`; do not create `# Implementation Plan` or `### Phase 1/2/3` headings. Use `Task Group`, `Slice`, and `Checkpoint`, and map every task to `spec.md` Success Criteria. This plan is an internal handoff: after the Orchestrator checks it against the approved spec, implementation proceeds without a separate human approval. If it reveals a spec gap or scope change, stop and return to Phase 2 or ask for clarification.
+When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win. In Harness Standard Phase 4 / task-planning, output only `request_analysis/tasks.md` inside the consumer project's `docs/harness/{change-id}/` artifact; do not create `# Implementation Plan` or `### Phase 1/2/3` headings. Use `Task Group`, `Slice`, and `Checkpoint`, and map every task to `spec.md` Success Criteria. This plan is an internal handoff: after the Orchestrator checks it against the approved spec, implementation proceeds without a separate human approval. If it reveals a spec gap or scope change, stop and return to Phase 2 or ask for clarification.
 
 ## Overview
 

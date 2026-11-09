@@ -82,8 +82,8 @@ class IndexEntry:
 class Validator:
     def __init__(self, repo_root: Path, include_done: bool) -> None:
         self.repo_root = repo_root
-        self.harness_dir = repo_root / ".harness"
-        self.changes_dir = self.harness_dir / "changes"
+        self.harness_dir = repo_root / "docs" / "harness"
+        self.changes_dir = self.harness_dir
         self.index_path = self.changes_dir / "INDEX.md"
         self.include_done = include_done
         self.issues: list[Issue] = []
@@ -123,7 +123,7 @@ class Validator:
     def validate_index(self) -> list[IndexEntry]:
         if not self.index_path.exists():
             if not self.changes_dir.exists():
-                self.warn("changes.none", "No Harness change artifacts found in the consumer project.")
+                self.warn("changes.none", "No Harness change artifacts found in docs/harness.")
                 return []
             entries: list[IndexEntry] = []
             for change_dir in sorted(path for path in self.changes_dir.iterdir() if path.is_dir()):
@@ -520,14 +520,14 @@ class Validator:
 def find_repo_root(start: Path) -> Path:
     current = start.resolve()
     for candidate in [current, *current.parents]:
-        if (candidate / ".harness" / "changes").is_dir():
+        if (candidate / "docs" / "harness").is_dir():
             return candidate
     return current
 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Validate Harness change registry and artifacts.")
-    parser.add_argument("--repo", type=Path, default=None, help="Consumer project root. Defaults to the nearest parent with .harness/changes/.")
+    parser.add_argument("--repo", type=Path, default=None, help="Consumer project root. Defaults to the nearest parent with docs/harness/.")
     parser.add_argument("--change", help="Validate one change directory by name.")
     parser.add_argument("--all", action="store_true", help="Validate all change artifacts, not only active changes.")
     args = parser.parse_args(argv)
