@@ -5,6 +5,8 @@ description: 查询当前项目 OpenViking 知识根中的 wiki 编译层，并�
 
 # Project Knowledge Search
 
+Paths under `.harness/rules/`, `.harness/skills/`, and `.harness/changes/templates.md` refer to the installed plugin source. Task evidence is written only to the current consumer project's `.harness/changes/{change-id}/` artifact.
+
 项目知识使用两层目录模型：`raw/` 保存不可变原始资料，`wiki/` 保存由资料编译、持续维护的项目知识。查询默认面向 `wiki/`；`raw/` 是证据层，不是未经整理就可直接采用的项目结论。沉淀端的 canonical 布局是搜索端的读取契约：文章是分类目录下的普通 Markdown 文件，不把自动生成的 sidecar 或资源容器当成知识文章。
 
 `wiki/` 采用逐级索引。查询先读根 `wiki/index.md`，再按任务进入相关目录的 `index.md`，最后只读能回答问题的文章；不要把根索引当成全部知识，也不要默认全库 `find`。索引只负责导航，文章正文和文章里的精确 raw 来源才是可采用证据。

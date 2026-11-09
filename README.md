@@ -21,7 +21,7 @@ Harness 是面向 Claude Code 和 Codex 的工程工作流，提供共享规则�
 /plugin install harness@harness
 ```
 
-插件会发布 `/harness:start`、`/harness:spec`、`/harness:plan`、`/harness:build`、`/harness:review`、`/harness:test`、`/harness:ship` 命令，以及 `harness` Skill 和 `planner`、`implementer`、`reviewer` Agents。插件提供宿主级入口；每个使用 Harness 工作流的项目还需拥有项目本地的 `AGENTS.md`、`CLAUDE.md` 和 `.harness/`，并将这些文件合入目标仓库现有配置，才能自动启动并保存独立的变更记录。
+插件会发布 `/harness:start`、`/harness:spec`、`/harness:plan`、`/harness:build`、`/harness:review`、`/harness:test`、`/harness:ship` 命令，以及 `harness` Skill 和 `planner`、`implementer`、`reviewer` Agents。消费项目安装并调用插件即可使用，不需要复制项目级 `AGENTS.md`、`CLAUDE.md`，也不需要迁移插件的 `.harness/agents/`、`rules/`、`skills/` 或 `tools/`。插件只在消费项目需要记录需求时创建 `.harness/changes/{change-id}/`。
 
 ## 安装为 Codex 插件
 
@@ -58,7 +58,7 @@ ln -sfn /absolute/path/to/harness ~/plugins/harness
 multi_agent = true
 ```
 
-将该配置写入用户级 Codex 配置（`~/.codex/config.toml`）后重启 Codex。未启用 multi-agent 时，依赖隔离调度的 Standard-flow 阶段会阻塞。与 Claude Code 相同，每个目标仓库都应有自己的 `AGENTS.md`、`CLAUDE.md` 和 `.harness/`；合入项目文件时需保留目标仓库原有规则，并为新项目初始化 `.harness/changes/INDEX.md` 和 memory 文件。
+将该配置写入用户级 Codex 配置（`~/.codex/config.toml`）后重启 Codex。未启用 multi-agent 时，依赖隔离调度的 Standard-flow 阶段会阻塞。消费项目无需迁移本仓库的 Harness 文件，也无需创建 INDEX 或 memory。插件会把每个需求的记录写到消费项目自己的 `.harness/changes/{change-id}/`。
 
 ## 目录结构
 
@@ -67,17 +67,17 @@ multi_agent = true
 | `.harness/agents/` | Orchestrator and constrained role prompts |
 | `.harness/rules/` | Flow, gate, and rollback policy |
 | `.harness/skills/` | Reusable workflow and domain skills |
-| `.harness/changes/` | Active and archived change records |
-| `.harness/tools/validate_change.py` | Mechanical artifact validator |
+| `.harness/changes/` | Plugin development records; consumers receive per-demand records here |
+| `.harness/tools/validate_change.py` | Plugin-bundled mechanical artifact validator |
 | `.claude-plugin/` | Claude Code plugin and marketplace manifests |
 | `.codex-plugin/` | Codex plugin manifest |
 | `.agents/plugins/` | Workspace-local Codex marketplace registration |
 
-启动时、每个审批门禁前以及报告完成前运行验证器：
+验证器从插件安装目录运行，并显式接收消费项目根目录；不要从消费项目查找或复制验证器：
 
-```bash
-python3 .harness/tools/validate_change.py
-python3 .harness/tools/validate_change.py --change <change-id>
+```text
+python3 <plugin-root>/.harness/tools/validate_change.py --repo <consumer-project-root>
+python3 <plugin-root>/.harness/tools/validate_change.py --repo <consumer-project-root> --change <change-id>
 ```
 
 ## 开发检查

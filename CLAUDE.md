@@ -3,6 +3,12 @@
 > 本项目使用 Harness Engineering 工程框架，并提供 Claude Code 插件入口。
 > 启动时从 `.harness/agents/orchestrator.md` 进入，按 Session Startup 流程执行；显式入口为 `/harness:start` 或 `/harness:harness`。
 
+## Harness 插件维护例外
+
+修改本 Harness 插件自身（源码、规则、Skills、插件清单、命令或工具）时，直接修改插件；不要运行消费项目 Harness 流程，也不要为插件维护任务创建 `.harness/changes/` 需求记录。
+
+适用此例外时，忽略下方的文件导航和启动流程。
+
 ## 文件导航
 
 | 文件 | 什么时候读 |

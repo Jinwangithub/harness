@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate Harness change registry and artifacts.
+"""Validate Harness change artifacts and an optional development registry.
 
 This checker intentionally validates only mechanical facts: file existence,
 canonical statuses, required summary fields, Gate Record evidence fields, and
@@ -99,7 +99,10 @@ class Validator:
         if requested_change:
             matching = [entry for entry in entries if entry.change == requested_change]
             if not matching:
-                self.fail("change.not_in_index", f"Change is not listed in INDEX.md: {requested_change}")
+                self.fail(
+                    "change.not_found",
+                    f"Change artifact directory was not found under {self.changes_dir}: {requested_change}",
+                )
                 change_dir = self.changes_dir / requested_change
                 if change_dir.exists():
                     self.validate_change_dir(change_dir, None)
@@ -110,7 +113,7 @@ class Validator:
             if self.include_done:
                 targets = entries
             if not targets:
-                self.warn("index.no_active", "No active change in INDEX.md; registry is idle.")
+                self.warn("changes.no_active", "No active change artifacts found in this project.")
             for entry in targets:
                 self.validate_change_dir(self.changes_dir / entry.change, entry)
 
@@ -119,8 +122,22 @@ class Validator:
 
     def validate_index(self) -> list[IndexEntry]:
         if not self.index_path.exists():
-            self.fail("index.missing", f"Missing registry: {self.index_path}")
-            return []
+            if not self.changes_dir.exists():
+                self.warn("changes.none", "No Harness change artifacts found in the consumer project.")
+                return []
+            entries: list[IndexEntry] = []
+            for change_dir in sorted(path for path in self.changes_dir.iterdir() if path.is_dir()):
+                summary_path = change_dir / "summary.md"
+                fields = self.parse_summary_fields(
+                    summary_path.read_text(encoding="utf-8") if summary_path.exists() else ""
+                )
+                entries.append(IndexEntry(
+                    change_dir.name,
+                    fields.get("状态", "active"),
+                    fields.get("Resume point", ""),
+                    "",
+                ))
+            return entries
 
         entries: list[IndexEntry] = []
         active_count = 0
@@ -503,16 +520,16 @@ class Validator:
 def find_repo_root(start: Path) -> Path:
     current = start.resolve()
     for candidate in [current, *current.parents]:
-        if (candidate / ".harness" / "changes" / "INDEX.md").exists():
+        if (candidate / ".harness" / "changes").is_dir():
             return candidate
     return current
 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Validate Harness change registry and artifacts.")
-    parser.add_argument("--repo", type=Path, default=None, help="Repository root. Defaults to nearest parent with .harness/changes/INDEX.md.")
+    parser.add_argument("--repo", type=Path, default=None, help="Consumer project root. Defaults to the nearest parent with .harness/changes/.")
     parser.add_argument("--change", help="Validate one change directory by name.")
-    parser.add_argument("--all", action="store_true", help="Validate all INDEX.md entries, not only active changes.")
+    parser.add_argument("--all", action="store_true", help="Validate all change artifacts, not only active changes.")
     args = parser.parse_args(argv)
 
     repo_root = args.repo.resolve() if args.repo else find_repo_root(Path.cwd())

@@ -19,7 +19,7 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 | 5 | 单元测试 + 独立测试评审（`unit-test` → `test-review`） | `unit_test/test_report.md`, `unit_test/review/test_review_v1.md` | CK4 |
 | 6 | 用户确认和交付归档 | `delivery-summary.md` | CK5 |
 
-**Phase 1/2/4/5 的推进条件**：Phase 1/2 出口经 Mechanical Gate=`pass` 且用户确认后推进。Phase 4 的 `task-planning` 完成并通过 Orchestrator 内部检查后，直接进入 `implementation`，不设置独立 Gate 或请求用户确认；Phase 4 的三个子步骤全部完成后才执行 Composite Mechanical Gate 并请求一次确认。Phase 5 两个子步骤全部完成后同样执行一次 Composite Gate 并请求一次确认。推进或恢复时立即更新 `summary.md` 的 `Current step`、`Substep` 和 `Resume point`。Phase 6 先以 final Gate=`pass` + Human Approval=`pending` 保持 summary / INDEX 为 `active` 请求最终确认；批准后更新 final Gate 为 `approved`、同步两处为 `done` 且 Resume point=`none`，随后重跑 validator。
+**Phase 1/2/4/5 的推进条件**：Phase 1/2 出口经 Mechanical Gate=`pass` 且用户确认后推进。Phase 4 的 `task-planning` 完成并通过 Orchestrator 内部检查后，直接进入 `implementation`，不设置独立 Gate 或请求用户确认；Phase 4 的三个子步骤全部完成后才执行 Composite Mechanical Gate 并请求一次确认。Phase 5 两个子步骤全部完成后同样执行一次 Composite Gate 并请求一次确认。推进或恢复时立即更新当前任务 `summary.md` 的 `Current step`、`Substep` 和 `Resume point`。Phase 6 先以 final Gate=`pass` + Human Approval=`pending` 保持 summary=`active` 请求最终确认；批准后更新 final Gate 为 `approved`、summary 为 `done` 且 Resume point=`none`，随后重跑插件内 validator。
 
 关键边界：
 
@@ -203,9 +203,8 @@ Phase/Step 入口必须按本文件对应卡片输出入口状态卡；状态卡
   - `delivery-summary.md`
 - Gate 提示:
   - delivery summary 存在
-  - Memory 完整
-  - 确认前：final Gate=`pass`、Human Approval=`pending`，summary / INDEX 均为 `active`
-  - 用户批准后：final Gate Approval=`approved`，summary / INDEX 同步为 `done`、Resume point=`none`
+  - 确认前：final Gate=`pass`、Human Approval=`pending`，summary 为 `active`
+  - 用户批准后：final Gate Approval=`approved`，summary 同步为 `done`、Resume point=`none`
   - 状态同步后 validator PASS
   - 不将 `done` 作为批准前 Gate 条件
 
@@ -229,7 +228,7 @@ Phase 4 的 Planner/Implementer/Reviewer 和 Phase 5 的 Implementer/Reviewer �
 
 ### Subagent 约束（通用）
 
-subagent 只执行 prompt 中指定的当前 task。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建非当前 Phase 产物、修改 forbidden files、提交/推送/部署、读取 `.harness/rules/` / `.harness/agents/` / `.harness/changes/INDEX.md` 等 Harness 元文件来重新解释任务。subagent 可以使用 Orchestrator 提供的 context packet、项目源码和已批准产物；上下文查询由 Orchestrator 在 Phase 1/2 完成。
+subagent 只执行 prompt 中指定的当前 task。subagent 不得：推进 Phase、请求用户确认、判断 Gate、创建非当前 Phase 产物、修改 forbidden files、提交/推送/部署、读取插件治理元文件来重新解释任务。subagent 可以使用 Orchestrator 提供的 context packet、消费项目源码和已批准任务产物；上下文查询由 Orchestrator 在 Phase 1/2 完成。
 
 Phase 专用约束见对应 Agent 文件的禁止操作节。
 

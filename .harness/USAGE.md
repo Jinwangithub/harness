@@ -1,18 +1,18 @@
 # 实战操作指南
 
-> 本文件面向人类用户。Agent 不应逐字加载此文件，应阅读 `.harness/agents/orchestrator.md` 和各权威源。
+> 本文件面向人类用户。Agent 不应逐字加载此文件；执行时由已安装插件读取规则与角色提示。
 > 完整治理细节见 `.harness/rules/flow.md`、`.harness/rules/flow-lite.md`、`.harness/rules/flow-standard.md`、`.harness/rules/rollback.md` 和 `.harness/rules/gates.md`。
 
 ## 启动方式
 
-在 Claude Code 或 Codex 中打开本仓库后，可直接描述需求；项目入口会自动加载 Harness。也可以显式调用插件 Skill：
+在安装插件的消费项目中，可直接显式调用插件 Skill：
 
 ```text
 Claude Code: /harness:harness
 Codex: $harness
 ```
 
-Claude Code 从 `CLAUDE.md` → `.harness/agents/orchestrator.md` 启动；Codex 从 `AGENTS.md` → 同一 Orchestrator 启动。两者都会优先检查 `.harness/changes/INDEX.md` 恢复进行中的变更。
+插件从自身安装目录读取 Orchestrator、规则、Skills、角色提示和验证工具。消费项目不需要复制 `.harness/`、增加 `AGENTS.md` / `CLAUDE.md` 入口，或创建 INDEX/memory；项目级 Harness 输出只写入每个需求独立的 `.harness/changes/{change-id}/`。
 
 ## 如何描述需求
 
@@ -31,14 +31,14 @@ Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Se
 | Lite-flow | typo、注释、格式、纯文档、README 小修、小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | batched：需求+计划一次，最终验证+交付一次 | `summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`verification_report.md`（含压缩评审） |
 | Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：Phase 1/2 确认；Phase 4 规划后直接实现并独立评审，Phase 4/5 各确认一次；Phase 6 最终确认 | Phase 1/2/4/5/6 产物（Phase 4 含 `tasks.md`） |
 
-任何 Flow 都不能绕过 Mechanical Gate、fresh verification evidence、Memory check、Stop-the-Line 或必要 Human Approval Gate。
+任何 Flow 都不能绕过 Mechanical Gate、fresh verification evidence、Stop-the-Line 或必要 Human Approval Gate。
 
 ## 你会看到哪些确认点
 
 - **Standard-flow**：需求理解和 spec 各确认一次；Phase 4 先生成 `tasks.md`，Orchestrator 检查后直接实现，再独立代码评审，三步完成后统一确认一次；Phase 5 单元测试和独立测试评审后确认一次；Phase 6 最终交付确认。任务规划没有单独确认点。CI/部署仅在独立任务或 spec/tasks 明确要求时执行，不是固定 Phase。
 - **Lite-flow**：batched，先确认需求+简化计划，再最终验证+交付确认。
 
-Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。每个 Gate 请求你确认前，Orchestrator 应已运行 `python3 .harness/tools/validate_change.py --change {change-id}`；该命令需要 Python 3，执行完整的机械产物验证，退出码非 0 时不得进入人工确认。
+Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。每个 Gate 请求你确认前，Orchestrator 应已运行插件包内的 validator，并传入消费项目根目录；退出码非 0 时不得进入人工确认。消费项目不需要安装或复制 validator。
 
 ## 常用命令
 
@@ -52,12 +52,12 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | `/harness:test` | 执行验证/测试步骤或单点测试 |
 | `/harness:ship` | 执行交付确认 |
 | `新需求: ...` | 自动分类并创建变更归档 |
-| `恢复上次进度` | 从 `.harness/changes/INDEX.md` 和 `summary.md` 恢复 |
+| `恢复上次进度` | 扫描当前项目 `.harness/changes/*/summary.md`，恢复与请求匹配的活动任务 |
 | `当前进度` | 查看当前 Phase / Flow step |
 | `$project-knowledge-search` / `/harness:project-knowledge-search` | 按需查询 OpenViking 项目知识 |
 | `$test-driven-development` / `/harness:test-driven-development` | 显式使用 TDD Skill；仍遵守 Harness 当前 Phase 边界 |
 | `$code-review-and-quality` / `/harness:code-review-and-quality` | 执行评审 Skill；仍遵守 Harness 当前 Phase 边界 |
-| `检查 Harness 结构` | 运行 `python3 .harness/tools/validate_change.py` 或 `python3 .harness/tools/validate_change.py --change {change-id}`；需要 Python 3，执行完整的机械产物验证 |
+| `检查 Harness 结构` | 调用已安装插件内的 validator，并传入当前消费项目根目录和 change id |
 
 命令入口差异：Claude Code 通过插件命令 `/harness:{command}` 或 Skill `/harness:{skill-name}` 调用；Codex 使用 `$harness` 或 `$<skill-name>`。也可以直接用自然语言表达上述意图。
 
@@ -83,7 +83,7 @@ Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-kn
 1. 查看交付摘要、验证证据和 Gate 状态。
 2. 如果同意，明确回复 `approved` 或说明批准范围。
 3. 如果不同意，回复 `rejected` 并说明问题；Orchestrator 应回退修复。
-4. 在你确认前，`INDEX.md` 与 `summary.md` 均保持 `active`，不得标记为 `done`。批准后 Orchestrator 会同步 final Gate、Status 和 Resume point，再运行 validator；仅 PASS 后声明完成。
+4. 在你确认前，当前需求的 `summary.md` 保持 `active`，不得标记为 `done`。批准后 Orchestrator 会同步 final Gate、Status 和 Resume point，再运行插件包内 validator；仅 PASS 后声明完成。
 
 ## 用户版验收简表
 
@@ -93,10 +93,8 @@ Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-kn
 □ 选定 Flow 与任务风险匹配
 □ Mechanical Gate 状态为 pass
 □ validator 已通过，或只有明确可接受的 WARN
-□ INDEX.md 与 summary.md 的 Status 与 Resume point 一致
 □ fresh verification evidence 已列出
 □ 必需产物已归档到 .harness/changes/{id}/
-□ Memory recorded: {N} entries / none 已报告
 □ 如有评审，Critical=0 且 Must Fix=0
 □ 如有测试/CI/部署，结果和报告路径已列出
 □ 需要你确认的 Human Approval Gate 已处理
@@ -108,16 +106,16 @@ Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-kn
 A: 不需要。任务规划是 Phase 4 的首个子步骤；Orchestrator 核对计划符合已批准的 spec 后，直接开始实现。
 
 **Q: 低风险/无行为变更小需求怎么处理？**
-A: 也走 Lite-flow。内容可以更短，但仍保留统一产物、机械验证、Memory check 和必要确认。
+A: 也走 Lite-flow。内容可以更短，但仍保留当前需求产物、机械验证和必要确认。
 
 **Q: Lite-flow 会生成 Standard-flow 的目录吗？**
 A: 不会。Lite-flow 只生成 summary、checklist 和 verification report，不生成 Standard-flow 专用目录。
 
 **Q: 减少确认点是否等于取消 Human Approval Gate？**
-A: 不是。确认点按风险分级减少，但不能绕过 Mechanical Gate、fresh evidence、Memory check 或 Stop-the-Line。
+A: 不是。确认点按风险分级减少，但不能绕过 Mechanical Gate、fresh evidence 或 Stop-the-Line。
 
 **Q: 只想评审或只想跑测试怎么办？**
 A: 可以使用单点 Skill 任务，但它不等于完整交付流程完成。
 
 **Q: 中途断开后如何继续？**
-A: 输入 `启动 Harness 模式` 或 `恢复上次进度`，Orchestrator 会从 `INDEX.md` 和 `summary.md` 恢复上下文。
+A: 输入 `启动 Harness 模式` 或 `恢复上次进度`，插件会扫描当前项目各需求目录中的 `summary.md`。如果有多个无法与请求匹配的活动任务，会询问要恢复哪一个。

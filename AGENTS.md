@@ -2,6 +2,12 @@
 
 This repository uses Harness Engineering. Route project work through `.harness/agents/orchestrator.md` and treat `.harness/` as the canonical source for workflow rules, skills, role prompts, change records, and validation.
 
+## Harness Repository Maintenance Exception
+
+When the task changes this Harness plugin itself (its source, rules, Skills, manifests, commands, or tools), edit the plugin directly. Do not run the consumer Harness workflow or create a `.harness/changes/` task record for plugin maintenance.
+
+When this exception applies, ignore the session startup and flow steps below.
+
 At session start:
 
 1. Read `.harness/changes/INDEX.md` and resume the active change, if any.

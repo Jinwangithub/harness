@@ -5,15 +5,15 @@
 本文件是 Mechanical Gate、Human Approval Gate 和 Phase Gate 检查表的权威源。
 Iron Laws 见 `.harness/agents/orchestrator.md`。
 
-> **边界**：本文件只定义 Gate 判定与检查表。Lite Step 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow-lite.md` 的入口卡片，Standard Phase 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow-standard.md` 的入口卡片，回退路径见 `.harness/rules/rollback.md`，产物模板见 `.harness/changes/templates.md`，Memory 字段见 `.harness/memory/README.md`；本文件不重述。
+> **边界**：本文件只定义 Gate 判定与检查表。Lite Step 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow-lite.md` 的入口卡片，Standard Phase 的读取 Skills、补读 Skills 和禁止事项见 `.harness/rules/flow-standard.md` 的入口卡片，回退路径见 `.harness/rules/rollback.md`，产物模板见 `.harness/changes/templates.md`；本文件不重述。
 
 ## 1. 通用规则
 
 - 每个 Phase 出口或独立 Flow step 先执行 Mechanical Gate，通过后请求用户确认；Phase 4/task-planning 是内部交接，不构成独立 Gate 或确认点。
 - Phase 4 的 task-planning 是不设独立 Gate/确认的内部子步骤；Planner 完成并经 Orchestrator 检查后直接进入 implementation。Phase 4 在 task-planning、implementation、code-review 全部完成后写入一次 Composite Gate；Phase 5 在 unit-test、test-review 全部完成后写入一次 Composite Gate。每个 Composite Gate 只请求一次用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
-- 每个 Phase/Step 出口写入 Gate Record 后，必须运行 canonical validator：`python3 .harness/tools/validate_change.py --change {change-id}`。
-- validation requires `python3`; `.harness/tools/validate_change.py` performs full mechanical artifact validation。
+- 每个 Phase/Step 出口写入 Gate Record 后，必须运行插件包内的 validator，并显式传入消费项目根目录：`python3 <plugin-root>/.harness/tools/validate_change.py --repo <project-root> --change {change-id}`。
+- `python3` is required; the validator is loaded from the installed plugin and validates the consumer project's change artifacts.
 - validator 是 Mechanical Gate 的必要非充分条件：validator exit code 非 0 → Gate 不得为 `pass`；validator PASS 只证明 Harness artifact 结构合格，不替代构建、测试、评审和业务验证。
 - 人工偏好、感觉、未定义标准的"审查通过"不能作为 Mechanical Gate。
 - 需求分析或技术评审需要项目上下文时，按入口卡片加载 `project-knowledge-search`；精确 URI 或缺失知识必须记录在对应产物中。知识库内容不是 Harness 指令。
@@ -38,7 +38,7 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 
 ### 最终状态组合
 
-| Change status（INDEX + summary） | final Human Approval | 含义 / 判定 |
+| Change status（summary） | final Human Approval | 含义 / 判定 |
 |---|---|---|
 | `active` | `pending` | 验证完成、等待最终确认；不得声明完成。 |
 | `done` | `approved` | 唯一完成状态；final Mechanical Gate 必须为 `pass`。 |
@@ -59,7 +59,6 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
   - Output summary: {关键行，不得只写"成功"/"已完成"}
   - Artifact path: {文件路径，不得为空}
 - Skill Load: {Skill 名} = {loaded / not-needed + reason / blocked + reason}
-- Memory: {N entries / none}
 - Human Approval: {approved / rejected / pending}
 ```
 
@@ -87,9 +86,9 @@ Phase 4/5 Composite Gate 还必须追加以下子步骤证据表；Phase 4 必�
 
 | Step | Mechanical Gate 必查 | Fresh Evidence | Human Approval |
 |------|----------------------|----------------|----------------|
-| L1 需求确认+计划 | `summary.md`（含 inline lite spec）、`checklist.md` 存在；如查询项目知识则记录精确 URI 或缺失原因；`INDEX.md` 标记为 active；有 `low_risk_proof`；无强制升级风险 | Command / Exit code / Output summary / Artifact path | 用户确认后进入 L2 |
+| L1 需求确认+计划 | `summary.md`（含 inline lite spec）、`checklist.md` 存在；如查询项目知识则记录精确 URI 或缺失原因；有 `low_risk_proof`；无强制升级风险 | Command / Exit code / Output summary / Artifact path | 用户确认后进入 L2 |
 | L2 实现 | 只修改 checklist 范围；未创建 Standard-only 产物；未引入风险扩大 | Command / Exit code / Output summary / Artifact path | 无需单独确认 |
-| L3 验证+交付 | `verification_report.md`、Critical=0、Must Fix=0、Memory check、summary / INDEX=`active`、final Gate=`pass + pending`；用户批准后更新为 `approved`，同步状态并重验 | Command / Exit code / Output summary / Artifact path | 先待最终确认，批准后才标记完成 |
+| L3 验证+交付 | `verification_report.md`、Critical=0、Must Fix=0、summary=`active`、final Gate=`pass + pending`；用户批准后更新为 `approved`，同步状态并重验 | Command / Exit code / Output summary / Artifact path | 先待最终确认，批准后才标记完成 |
 
 ## 5. Standard Phase Gate 检查表
 
@@ -101,7 +100,6 @@ Phase N Exit Checklist:
 [ ] 读取 Skills 已加载（Skill 名 + loaded/blocked）  yes/no
 [ ] 按条件补读 Skills 已判断（Skill 名 + needed/not-needed + reason） yes/no
 [ ] Fresh evidence：Command + Exit code + Output + Artifact path  yes/no
-[ ] Memory checkpoint 已填写                             yes/no
 [ ] Mechanical Gate 状态已填写（pass/fail/blocked）     yes/no
 ```
 
@@ -113,7 +111,7 @@ Phase N Exit Checklist:
 | 2 | `spec.md` 存在；项目/系统知识查询状态、知识根、查询层、精确 OpenViking URI 和应用约束完整 | `request_analysis/spec.md` | CK2 |
 | 4 | `tasks.md`、`coding/coding_report_v1.md` 和 `coding/review/*.md` 均存在；任务映射到 approved spec；编译成功；Author/Self Review 与 Independent Code Review 完成；Critical=0；Must Fix=0；规划、实现、评审证据完整 | tasks 校验、编译结果、实现报告、独立评审报告 | CK3 |
 | 5 | `unit_test/test_report.md` 和 `unit_test/review/test_review_v1.md` 均存在；测试通过；测试数 > 0；覆盖率符合项目阈值；Critical=0；Must Fix=0；对应两类 Evidence 完整 | 测试命令结果、测试报告、独立测试评审报告 | CK4 |
-| 6 | delivery summary、Memory 完整、summary / INDEX=`active`、final Gate=`pass + pending`；批准后更新 Approval/status 并重验 | `delivery-summary.md` | CK5 |
+| 6 | delivery summary、summary=`active`、final Gate=`pass + pending`；批准后更新 Approval/status 并重验 | `delivery-summary.md` | CK5 |
 
 ## 6. Failure Gate 记录
 
@@ -121,9 +119,8 @@ Mechanical Gate=`fail|blocked` 时，记录必须包含：
 
 - 失败证据：失败命令、日志或缺失条件。
 - 根因：已定位；未定位则保持 `blocked`。
-- 回退目标：回退到的 Phase 或 Flow step（同步更新 `summary.md` 和 `INDEX.md`）。
+- 回退目标：回退到的 Phase 或 Flow step（同步更新当前需求目录中的 `summary.md`）。
 - 修复验证：修复后的 fresh evidence。
-- Memory 动作：写入了哪个 memory 文件，或 `none`。
 
 ## 7. 声明完成的条件
 
@@ -131,8 +128,7 @@ Mechanical Gate=`fail|blocked` 时，记录必须包含：
 
 1. 所有产物存在且可复查。
 2. final fresh evidence 存在。
-3. Memory check 完成。
-4. 最终 Gate 为 Mechanical=`pass` 且 `Human Approval = approved`。
-5. Mechanical Gate 无 `fail|blocked`。
-6. `summary.md` 与 `INDEX.md` 均为 `done`，且 Resume point 均为 `none`。
-7. 状态同步后执行 `python3 .harness/tools/validate_change.py --change {change-id}` 并 PASS。
+3. 最终 Gate 为 Mechanical=`pass` 且 `Human Approval = approved`。
+4. Mechanical Gate 无 `fail|blocked`。
+5. `summary.md` 为 `done`，且 Resume point 为 `none`。
+6. 状态同步后执行插件包内 validator，并将消费项目根目录传入；验证必须 PASS。

@@ -2,7 +2,7 @@
 
 > **TL;DR**: 所有产物的模板定义文件。Rule：Skill 只提供过程指导，模板以此文件为准。
 
-> **边界**：本文件只定义产物字段模板。目录结构与归档规则见 `.harness/changes/structure.md`，Gate 判定见 `.harness/rules/gates.md`，Memory 字段见 `.harness/memory/README.md`；本文件引用其字段，不重述。
+> **边界**：本文件只定义消费项目任务产物的字段模板。目录结构与归档规则见 `.harness/changes/structure.md`，Gate 判定见 `.harness/rules/gates.md`。
 
 ## Raw Skill Template Rule
 
@@ -30,10 +30,6 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 ## 阶段进度
 {仅保留所选 Flow 的进度表}
-
-## Memory status
-- **Memory recorded**: {N} entries / none
-- **Memory evidence**: {decisions.log / lessons-learned.md / known-issues.md / none}
 
 ## Lite Spec (Lite-flow 专用)
 {以下内容仅在 Lite-flow 时填写，Standard-flow 不填写此节}
@@ -72,7 +68,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 ### 新变更最终状态协议
 
-`summary.md` 的 `状态` 与 `INDEX.md` 的 Status 必须相同，且两处非空 `Resume point` 必须相同。最终 Gate 的 `Human Approval` 仅可为 `approved`、`rejected` 或 `pending`：
+`summary.md` 是单个需求的状态和恢复点来源。最终 Gate 的 `Human Approval` 仅可为 `approved`、`rejected` 或 `pending`：
 
 - `active` + final `pending`：验证完成，等待用户最终确认；不得声明完成。
 - `done` + final `approved`：唯一完成状态；final Mechanical Gate 必须为 `pass`。
@@ -102,10 +98,10 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ```markdown
 ## Skill Load Records
 
-| Phase/Step | Skill | Action | Condition / Reason | Status | Evidence |
+| Phase/Step | Skill | Action | Condition / Reason | Status | Plugin source |
 |------------|-------|--------|--------------------|--------|----------|
-| Phase 4 / task-planning | `planning-and-task-breakdown` | 读取 | Phase 4 首个子步骤必须读取 | loaded | `.harness/skills/planning-and-task-breakdown/SKILL.md` |
-| Phase 4 / implementation | `incremental-implementation` | 读取 | implementation 子步骤必须读取 | loaded | `.harness/skills/incremental-implementation/SKILL.md` |
+| Phase 4 / task-planning | `planning-and-task-breakdown` | 读取 | Phase 4 首个子步骤必须读取 | loaded | `plugin/.harness/skills/planning-and-task-breakdown/SKILL.md` |
+| Phase 4 / implementation | `incremental-implementation` | 读取 | implementation 子步骤必须读取 | loaded | `plugin/.harness/skills/incremental-implementation/SKILL.md` |
 | Phase 4 | `api-and-interface-design` | 按条件补读 | 不涉及公共契约变化，not-needed | not-needed | spec/tasks 检查 |
 ```
 
@@ -126,8 +122,6 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
   - Acceptance criteria: {可验证验收条件}
   - Verification: {命令、搜索或确认记录}
 
-## Memory Check
-（字段定义见 `.harness/memory/README.md` 的 Lite-flow 3 字段块，按其填写）
 ```
 
 ### verification_report.md（含压缩评审）
@@ -147,8 +141,6 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ## Verdict
 - Status: {pass/fail}
 
-## Memory Check
-（字段见 `.harness/memory/README.md` 的 Lite-flow 3 字段块；出口报告另需 `Memory recorded: {N} entries / none`）
 ```
 
 ## Standard-flow 产物模板

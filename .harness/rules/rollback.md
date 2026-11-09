@@ -5,7 +5,7 @@
 本文件是失败处理与回退路径的权威源。
 Flow 分类与路由见 `.harness/rules/flow.md`，Lite 执行见 `.harness/rules/flow-lite.md`，Standard 执行见 `.harness/rules/flow-standard.md`，Gate 判定见 `.harness/rules/gates.md`。
 
-> **边界**：本文件只定义 fail/blocked/异常行为后的 Stop-the-Line、根因、恢复点、重验证、Memory 和回退目标。入口卡片见 `flow-lite.md` / `flow-standard.md`，Gate 检查表见 `gates.md`。
+> **边界**：本文件只定义 fail/blocked/异常行为后的 Stop-the-Line、根因、恢复点和重验证。入口卡片见 `flow-lite.md` / `flow-standard.md`，Gate 检查表见 `gates.md`。
 
 ## 通用失败处理
 
@@ -14,10 +14,9 @@ Mechanical Gate=`fail|blocked`、执行异常、证据缺失或发现风险扩�
 1. **Stop-the-Line**：停止推进当前 Phase/Step；不得请求用户放行失败或跳过验证。
 2. **记录 failure evidence**：记录失败命令、退出码、关键日志、缺失条件或异常行为。
 3. **定位根因**：根因为空或“未定位”时保持 `blocked`，不得宣称修复完成。
-4. **确定恢复点**：按本文件回退路径表选择 Phase 或 Flow step，并同步更新 `summary.md` 和 `INDEX.md`。
+4. **确定恢复点**：按本文件回退路径表选择 Phase 或 Flow step，并同步更新当前需求目录中的 `summary.md`。
 5. **修复并重验证**：修复后生成 fresh evidence；不得复用旧 evidence 作为通过依据。
-6. **Memory**：命中 Memory 触发条件时立即记录；未触发也要在出口报告写 `Memory: none`。
-7. **风险扩大重分类**：Lite-flow 中发现跨模块、公共契约、安全、数据、性能、迁移、架构、部署或治理风险时，重新执行 Flow Classifier；命中强制 Standard 条件则升级 Standard-flow。
+6. **风险扩大重分类**：Lite-flow 中发现跨模块、公共契约、安全、数据、性能、迁移、架构、部署或治理风险时，重新执行 Flow Classifier；命中强制 Standard 条件则升级 Standard-flow。
 
 ## 回退路径
 

@@ -5,6 +5,8 @@ description: 将需求、产品、代码、接口、数据、架构、部署和�
 
 # Project Knowledge
 
+Paths under `.harness/rules/`, `.harness/skills/`, and `.harness/changes/templates.md` refer to the installed plugin source. Any task report is written to the current consumer project's `.harness/changes/{change-id}/` artifact; the plugin itself is not copied into the project.
+
 本 Skill 产出的是“有证据支撑、以后仍可复用的项目知识”，不是资料摘要合集，也不是源代码目录镜像。
 
 ## 产出契约
@@ -57,7 +59,7 @@ description: 将需求、产品、代码、接口、数据、架构、部署和�
 
 - Lite-flow：L3 批准前只形成候选并记录 pending；最终批准后执行，结果写入 verification_report.md。
 - Standard-flow：Phase 6 批准前只形成候选并记录 pending；最终批准后执行，结果写入 delivery-summary.md。
-- 本 Skill 不替代 .harness/memory、Gate、归档或交付证据。
+- 本 Skill 不替代 Gate、归档或交付证据。
 - 用户明确要求导入或维护项目知识时，可在授权范围内独立执行。
 
 ## 不变量

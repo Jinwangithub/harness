@@ -2,6 +2,8 @@
 
 本目录是 Skill 库。
 
+本目录内容随 Harness 插件安装并由插件读取。文件中的 `.harness/...` 源路径都指插件包内部。消费项目只保存每项需求的 `.harness/changes/{change-id}/` 产物。
+
 - 所有 Skill 文件位于 `.harness/skills/{name}/SKILL.md`
 - Skill 名称必须等于目录名：`{name}`
 - Skill 内部补充 `.md` 默认不加载，仅在当前 Phase/Step 入口卡片、主 Skill、任务证据缺口或用户明确要求时读取

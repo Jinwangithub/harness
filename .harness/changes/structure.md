@@ -1,10 +1,10 @@
 # 变更管理 — 目录结构和归档规则
 
-> **TL;DR**: 目录命名 `{type}-{name}-{YYYYMMDD}/`。任意时刻最多一个 `active`。INDEX.md 是唯一 registry。
+> **TL;DR**: 消费项目只保存 `.harness/changes/{type}-{name}-{YYYYMMDD}/` 任务产物；Harness 定义和工具由已安装插件提供。
 
 本文件是变更目录结构、命名规范和归档规则的权威源。产物模板见 `.harness/changes/templates.md`。
 
-> **边界**：本文件只定义目录结构、命名、INDEX 状态语义与归档规则。产物字段模板见 `templates.md`，Gate 判定见 `.harness/rules/gates.md`；本文件不重述。
+> **边界**：本文件定义消费项目任务目录、命名与归档规则，并说明插件仓库开发用 INDEX。产物字段模板见 `templates.md`，Gate 判定见 `.harness/rules/gates.md`。
 
 ## 目录命名
 
@@ -24,11 +24,11 @@
 
 ## Changes Registry — `INDEX.md`
 
-`.harness/changes/INDEX.md` 是全局 changes registry / 恢复索引。会话恢复必须 registry-first：先读 `INDEX.md`，找到 `active` 变更后读其 `summary.md`。冲突时 Stop-the-Line，不自行猜测恢复对象。
+消费项目不需要创建全局 `INDEX.md`。Orchestrator 从消费项目的 `.harness/changes/*/summary.md` 中定位活动任务；若存在多个活动任务且当前请求无法唯一匹配，询问用户选择。插件仓库自身可以保留 `INDEX.md` 作为本插件的开发记录，但它不是消费项目产物。
 
-变更状态只有三种：`active`（进行中）、`done`（已完成）、`abandoned`（已放弃/被取代）。任意时刻最多一个 `active`。
+变更状态只有三种：`active`（进行中）、`done`（已完成）、`abandoned`（已放弃/被取代）。每个任务的状态仅记录在该任务自己的 `summary.md`。
 
-INDEX.md 格式：
+`INDEX.md` 是插件仓库维护用的可选文件，不由消费项目创建：
 
 ```markdown
 # Changes Index
@@ -43,10 +43,12 @@ INDEX.md 格式：
 | `done` | 已完成交付 |
 | `abandoned` | 已放弃或被取代，不自动恢复 |
 
-## 维护规则
-1. 新建变更时新增一行，状态设为 `active`。不得为创建新变更而直接将旧 `active` 改为 `done`：旧 change 只有满足最终完成条件才可 `done`，否则改为 `abandoned` 并在 Notes 说明原因。
-2. 任意时刻最多一个 `active`。
-3. Registry 与 `summary.md` 的 Status，或任一非空 Resume point，出现冲突时均为 Stop-the-Line / validator FAIL；不得自行择一覆盖。
+## 消费项目产物边界
+
+- 插件定义只读来源：插件安装目录中的 `agents/`、`rules/`、`skills/`、`tools/` 和模板。
+- 消费项目唯一 Harness 输出根：`.harness/changes/`。
+- 每个需求在该目录下创建自己的变更目录；不创建项目级 INDEX、memory、rules、agents 或 skills 副本。
+- `summary.md` 是单个需求的状态和恢复点来源。
 ```
 
 ## Flow 产物结构
@@ -90,4 +92,4 @@ Phase 4 首先由 Planner 生成 `tasks.md`，随后依次执行 implementation 
 2. 产物按需标记版本号（如 `review_v1` → `review_v2`）。
 3. 回退或流程升级时记录 reason 到 `summary.md`。
 4. Phase 1/L1 的上下文检索证据写入 `understanding.md` 或 Lite inline spec，Phase 2 的项目/系统检索证据写入 `spec.md`；不创建独立知识库 artifact。
-5. 最终归档顺序必须为：final Gate Mechanical=`pass`、Human Approval=`pending` → 用户批准 → 更新 final Gate Human Approval=`approved` → 同步 `summary.md` / `INDEX.md` 为 `done` 且 Resume point=`none` → 运行 `python3 .harness/tools/validate_change.py --change {id}` → 仅 PASS 后声明完成。确认前两处均保持 `active`。
+5. 最终归档顺序必须为：final Gate Mechanical=`pass`、Human Approval=`pending` → 用户批准 → 更新 final Gate Human Approval=`approved` → 同步当前任务 `summary.md` 为 `done` 且 Resume point=`none` → 调用插件包内 validator 并传入消费项目根目录 → 仅 PASS 后声明完成。确认前 `summary.md` 保持 `active`。

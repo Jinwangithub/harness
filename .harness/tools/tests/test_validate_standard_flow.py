@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 TOOL_PATH = Path(__file__).resolve().parents[1] / "validate_change.py"
@@ -73,14 +75,22 @@ class ValidateStandardFlowTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
-    def write_change(self, phase: int, substep: str, artifacts: list[str], status: str = "active") -> None:
+    def write_change(
+        self,
+        phase: int,
+        substep: str,
+        artifacts: list[str],
+        status: str = "active",
+        with_index: bool = True,
+    ) -> None:
         resume = "none" if status == "done" else f"Phase {phase} / {substep}"
-        (self.changes / "INDEX.md").write_text(
-            "# Changes Index\n\n| Change | Status | Resume point | Notes |\n"
-            "|---|---|---|---|\n"
-            f"| {self.change_id} | {status} | {resume} | fixture |\n",
-            encoding="utf-8",
-        )
+        if with_index:
+            (self.changes / "INDEX.md").write_text(
+                "# Changes Index\n\n| Change | Status | Resume point | Notes |\n"
+                "|---|---|---|---|\n"
+                f"| {self.change_id} | {status} | {resume} | fixture |\n",
+                encoding="utf-8",
+            )
         gate = ""
         if status == "done":
             gate = """
@@ -142,6 +152,45 @@ class ValidateStandardFlowTests(unittest.TestCase):
     def test_phase4_task_planning_does_not_require_implementation_or_review(self) -> None:
         self.write_change(4, "task-planning", self.phase4_planning_artifacts)
         self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
+
+    def test_consumer_project_can_validate_without_index_or_memory_files(self) -> None:
+        self.write_change(1, "none", ["request_analysis/understanding.md"], with_index=False)
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = validator_module.main([
+                "--repo", str(self.root), "--change", self.change_id
+            ])
+        self.assertEqual(exit_code, 0)
+        self.assertIn("PASS:", output.getvalue())
+        self.assertNotIn("index.missing", output.getvalue())
+
+    def test_consumer_project_can_keep_multiple_active_change_artifacts(self) -> None:
+        self.write_change(1, "none", ["request_analysis/understanding.md"], with_index=False)
+        second_dir = self.changes / "fix-another-fixture-20260819"
+        second_dir.mkdir()
+        (second_dir / "summary.md").write_text(
+            "# Summary\n"
+            "- **需求**: second fixture\n"
+            "- **类型**: fix\n"
+            "- **日期**: 20260819\n"
+            "- **状态**: active\n"
+            "- **Flow**: Standard-flow\n"
+            "- **Current step**: Phase 1\n"
+            "- **Substep**: none\n"
+            "- **Resume point**: Phase 1\n",
+            encoding="utf-8",
+        )
+        (second_dir / "request_analysis").mkdir()
+        (second_dir / "request_analysis" / "understanding.md").write_text(
+            UNDERSTANDING_CONTENT,
+            encoding="utf-8",
+        )
+        output = io.StringIO()
+        with redirect_stdout(output):
+            exit_code = validator_module.main(["--repo", str(self.root)])
+        self.assertEqual(exit_code, 0)
+        self.assertNotIn("FAIL:", output.getvalue())
+        self.assertNotIn("changes.no_active", output.getvalue())
 
     def test_phase4_task_planning_requires_tasks_artifact(self) -> None:
         self.write_change(4, "task-planning", self.phase2_artifacts)

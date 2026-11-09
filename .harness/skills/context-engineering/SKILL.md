@@ -7,6 +7,8 @@ description: Optimizes agent context setup. Use when starting a new session, whe
 
 ## Harness Integration Constraint
 
+`.harness/agents/`, `.harness/rules/`, `.harness/skills/`, and `.harness/tools/` paths refer to the installed plugin source; `.harness/changes/{id}/` refers to the consumer project's task artifacts.
+
 When used inside Harness Engineering, this Skill is subordinate to `.harness/rules/flow-lite.md`, `.harness/rules/flow-standard.md`, `.harness/rules/gates.md`, `.harness/changes/templates.md`, and `.harness/skills/README.md`. If this Skill conflicts with those files, the Harness files win.
 
 This Skill may recommend context loading and compression strategy, but it must not create artifacts outside the current Phase/Step, advance Phase/Step, mark Gate pass, or request Human Approval.
