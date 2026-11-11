@@ -15,9 +15,9 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 
 执行顺序：
 
-1. **L1** 需求确认+计划：加载 `project-knowledge-search`，写入 `summary.md`（含 inline lite spec）和 `checklist.md`；Mechanical Gate=`pass` 后请求用户确认；未确认前不得进入 L2。
+1. **L1** 需求确认+计划：按需加载 `project-knowledge-search`，写入 `summary.md`（含 inline lite spec）和 `checklist.md`；Mechanical Gate=`pass` 后请求用户确认；未确认前不得进入 L2。
 2. **L2** 实现：按 checklist 驱动修改，无独立文件；风险扩大则 Stop-the-Line 并升级 Standard-flow。
-3. **L3** 验证+交付：生成 `verification_report.md`（含压缩评审）并完成 fresh evidence；写 final Gate=`pass` + Human Approval=`pending`；获得用户最终批准后，将 final Gate 更新为 `approved`，同步 summary 为 `done`、Resume point=`none`，运行 validator。仅重验 PASS 后可声明完成。
+3. **L3** 验证+交付：生成 `verification_report.md`（含压缩评审）并完成 fresh evidence；写 Mechanical Gate=`pass` + Human Approval=`pending`；获得用户最终批准后，将 Human Approval 更新为 `approved`，保持 Mechanical Gate=`pass`，同步 summary 为 `done`、Resume point=`none`，运行 validator。仅重验 PASS 后可声明完成。
 
 ## Lite Step Cards
 
@@ -75,15 +75,15 @@ Flow 分类与路由见 `.harness/rules/flow.md`，Gate 判定见 `.harness/rule
 - 禁止事项:
   - 不创建 Standard-only 产物
   - 未完成验证前不得标记完成
-  - final Gate 为 `pending` 时不得将 summary 标为 `done`
+  - Human Approval=`pending` 时不得将 summary 标为 `done`
   - 用户批准后不得省略状态同步后的 validator 重验
 - 产物提示:
   - `verification_report.md`（含压缩评审）
 - Gate 提示:
   - Critical=0
   - Must Fix=0
-  - final Gate=`pass` 且 Human Approval=`pending` 后才能请求最终确认
-  - 确认前：final Gate=`pass`、Human Approval=`pending`，summary 为 `active`
-  - 批准后：final Gate Approval=`approved`，summary 同步为 `done`、Resume point=`none`
+  - Mechanical Gate=`pass` 且 Human Approval=`pending` 后才能请求最终确认
+  - 确认前：Mechanical Gate=`pass`、Human Approval=`pending`，summary 为 `active`
+  - 批准后：final Mechanical Gate=`pass`、Human Approval=`approved`，summary 同步为 `done`、Resume point=`none`
   - 状态同步后运行 validator，PASS 后才可声明完成
   - Fresh evidence 四字段完整

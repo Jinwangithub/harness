@@ -21,7 +21,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - **Flow**: {Lite-flow/Standard-flow}
 - **Current step**: {Standard Phase N 或 Lite L1-L3}
 - **Substep**: {task-planning / implementation / code-review / unit-test / test-review / none}
-- **Resume point**: {Phase 4/5 时写 `Phase N / {Substep}`；Phase 4 task-planning 完成后直接切到 implementation；其他 Phase 写下一步入口；没有则写 none}
+- **Resume point**: {Phase 3/4 时写 `Phase N / {Substep}`；Phase 1/2/5 写下一步入口；没有则写 none}
 
 ## Flow Classification
 - **flow**: {Lite-flow/Standard-flow}
@@ -71,7 +71,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 `summary.md` 是单个需求的状态和恢复点来源。最终 Gate 的 `Human Approval` 仅可为 `approved`、`rejected` 或 `pending`：
 
 - `active` + final `pending`：验证完成，等待用户最终确认；不得声明完成。
-- `done` + final `approved`：唯一完成状态；final Mechanical Gate 必须为 `pass`。
+- `done` + final Human Approval=`approved`：唯一完成状态；final Mechanical Gate 必须为 `pass`。
 - `done` + final `pending` 或 `rejected`：冲突，validator FAIL。
 - `active` + `approved` 可用于 Standard-flow 中间 Phase，不代表最终完成。
 
@@ -88,9 +88,9 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 ```markdown
 - [ ] Phase 1: 需求分析
 - [ ] Phase 2: 需求评审
-- [ ] Phase 4: 任务规划 → 实现 + 独立代码评审
-- [ ] Phase 5: 单元测试 + 独立测试评审
-- [ ] Phase 6: 用户确认
+- [ ] Phase 3: 任务规划 → 实现 + 独立代码评审
+- [ ] Phase 4: 单元测试 + 独立测试评审
+- [ ] Phase 5: 用户确认
 ```
 
 ## Skill Load Record 模板
@@ -100,9 +100,9 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 | Phase/Step | Skill | Action | Condition / Reason | Status | Plugin source |
 |------------|-------|--------|--------------------|--------|----------|
-| Phase 4 / task-planning | `planning-and-task-breakdown` | 读取 | Phase 4 首个子步骤必须读取 | loaded | `plugin/.harness/skills/planning-and-task-breakdown/SKILL.md` |
-| Phase 4 / implementation | `incremental-implementation` | 读取 | implementation 子步骤必须读取 | loaded | `plugin/.harness/skills/incremental-implementation/SKILL.md` |
-| Phase 4 | `api-and-interface-design` | 按条件补读 | 不涉及公共契约变化，not-needed | not-needed | spec/tasks 检查 |
+| Phase 3 / task-planning | `planning-and-task-breakdown` | 读取 | Phase 3 首个子步骤必须读取 | loaded | `plugin/.harness/skills/planning-and-task-breakdown/SKILL.md` |
+| Phase 3 / implementation | `incremental-implementation` | 读取 | implementation 子步骤必须读取 | loaded | `plugin/.harness/skills/incremental-implementation/SKILL.md` |
+| Phase 3 | `api-and-interface-design` | 按条件补读 | 不涉及公共契约变化，not-needed | not-needed | spec/tasks 检查 |
 ```
 
 字段含义：
@@ -231,7 +231,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - {仍需确认的问题；没有则写 none}
 ```
 
-### Phase 4 / task-planning — request_analysis/tasks.md
+### Phase 3 / task-planning — request_analysis/tasks.md
 
 ```markdown
 # Tasks
@@ -266,13 +266,13 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 
 边界：禁止使用 `Phase 1/2/3` 作为实现步骤标题；每个 Task Group/Slice 必须映射到 `spec.md` Success Criteria。
 
-### Phase 4 / implementation — coding/coding_report_v1.md
+### Phase 3 / implementation — coding/coding_report_v1.md
 
 ```markdown
 # Coding Report v1
 
 ## Implementation Scope
-- {本次实现范围，必须对应 approved spec 和 Phase 4 当前 `tasks.md`}
+- {本次实现范围，必须对应 approved spec 和 Phase 3 当前 `tasks.md`}
 
 ## Implementation Slices / Tasks
 - {完成的 Task Group / Slice，含状态和证据}
@@ -285,7 +285,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Result: {exit code / key output}
 
 ## Author / Self Review
-- {Orchestrator 自检结果、发现和处理；不得替代 Phase 4 / code-review}
+- {Orchestrator 自检结果、发现和处理；不得替代 Phase 3 / code-review}
 
 ## DDD / Architecture Check
 - {领域/架构边界检查；不适用则写 N/A}
@@ -298,7 +298,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Reason: {结论依据}
 ```
 
-### Phase 4 / code-review — coding/review/review_v1.md
+### Phase 3 / code-review — coding/review/review_v1.md
 
 ```markdown
 # Code Review v1
@@ -325,9 +325,9 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Reason: {结论依据}
 ```
 
-边界：不直接实现修复；Critical/Must Fix 回退 Phase 4 / implementation。
+边界：不直接实现修复；Critical/Must Fix 回退 Phase 3 / implementation。
 
-### Phase 5 / unit-test — unit_test/test_report.md
+### Phase 4 / unit-test — unit_test/test_report.md
 
 ```markdown
 # Unit Test Report
@@ -353,7 +353,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - {失败、根因和回退目标；没有则写 none}
 ```
 
-### Phase 5 / test-review — unit_test/review/test_review_v1.md
+### Phase 4 / test-review — unit_test/review/test_review_v1.md
 
 ```markdown
 # Test Review v1
@@ -376,7 +376,7 @@ Skill 只提供过程指导和内容素材，不能直接复制其原始模板�
 - Reason: {结论依据}
 ```
 
-### Phase 6 — delivery-summary.md
+### Phase 5 — delivery-summary.md
 
 ```markdown
 # Delivery Summary

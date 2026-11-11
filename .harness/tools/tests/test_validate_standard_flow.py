@@ -68,7 +68,7 @@ class ValidateStandardFlowTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.root = Path(self.temp.name)
         self.changes = self.root / "docs" / "harness"
-        self.change_id = "feat-six-phase-fixture-20260818"
+        self.change_id = "feat-five-phase-fixture-20260818"
         self.change_dir = self.changes / self.change_id
         self.change_dir.mkdir(parents=True)
 
@@ -83,7 +83,12 @@ class ValidateStandardFlowTests(unittest.TestCase):
         status: str = "active",
         with_index: bool = True,
     ) -> None:
-        resume = "none" if status == "done" else f"Phase {phase} / {substep}"
+        if status == "done":
+            resume = "none"
+        elif substep == "none":
+            resume = f"Phase {phase}"
+        else:
+            resume = f"Phase {phase} / {substep}"
         if with_index:
             (self.changes / "INDEX.md").write_text(
                 "# Changes Index\n\n| Change | Status | Resume point | Notes |\n"
@@ -94,13 +99,20 @@ class ValidateStandardFlowTests(unittest.TestCase):
         gate = ""
         if status == "done":
             gate = """
-## Gate Record — Phase 6
+## Gate Record — Phase 5
 - Mechanical Gate: pass
 - Human Approval: approved
 - Command: fixture-check
 - Exit code: 0
 - Output summary: all required Standard-flow artifacts verified
 - Artifact path: delivery-summary.md
+## Memory Check
+- Architecture/governance decision made: no; fixture
+- Agent/process lesson found: no; fixture
+- Known issue or governance debt found: no; fixture
+- Memory action: none
+- Memory recorded: none
+- Template completeness verified: N/A
 """
         (self.change_dir / "summary.md").write_text(
             "# Summary\n"
@@ -133,24 +145,24 @@ class ValidateStandardFlowTests(unittest.TestCase):
         ]
 
     @property
-    def phase4_planning_artifacts(self) -> list[str]:
+    def phase3_planning_artifacts(self) -> list[str]:
         return self.phase2_artifacts + ["request_analysis/tasks.md"]
 
     @property
-    def phase4_implementation_artifacts(self) -> list[str]:
-        return self.phase4_planning_artifacts + ["coding/coding_report_v1.md"]
+    def phase3_implementation_artifacts(self) -> list[str]:
+        return self.phase3_planning_artifacts + ["coding/coding_report_v1.md"]
 
     @property
     def done_artifacts(self) -> list[str]:
-        return self.phase4_implementation_artifacts + [
+        return self.phase3_implementation_artifacts + [
             "coding/review/review_v1.md",
             "unit_test/test_report.md",
             "unit_test/review/test_review_v1.md",
             "delivery-summary.md",
         ]
 
-    def test_phase4_task_planning_does_not_require_implementation_or_review(self) -> None:
-        self.write_change(4, "task-planning", self.phase4_planning_artifacts)
+    def test_phase3_task_planning_does_not_require_implementation_or_review(self) -> None:
+        self.write_change(3, "task-planning", self.phase3_planning_artifacts)
         self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
 
     def test_consumer_project_can_validate_without_index_or_memory_files(self) -> None:
@@ -192,6 +204,13 @@ class ValidateStandardFlowTests(unittest.TestCase):
         self.assertNotIn("FAIL:", output.getvalue())
         self.assertNotIn("changes.no_active", output.getvalue())
 
+    def test_gate_record_requires_memory_check(self) -> None:
+        self.write_change(5, "none", self.done_artifacts, status="done")
+        summary = self.change_dir / "summary.md"
+        content = summary.read_text(encoding="utf-8")
+        summary.write_text(content.split("## Memory Check\n", 1)[0], encoding="utf-8")
+        self.assertTrue(any(issue.code == "gate.memory_check_missing" for issue in self.issues()))
+
     def test_validator_ignores_harness_directory_in_consumer_project(self) -> None:
         self.write_change(1, "none", ["request_analysis/understanding.md"], with_index=False)
         plugin_style_dir = self.root / ".harness" / "changes" / "fix-plugin-style-20260819"
@@ -203,45 +222,44 @@ class ValidateStandardFlowTests(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertNotIn("fix-plugin-style-20260819", output.getvalue())
 
-    def test_phase4_task_planning_requires_tasks_artifact(self) -> None:
-        self.write_change(4, "task-planning", self.phase2_artifacts)
+    def test_phase3_task_planning_requires_tasks_artifact(self) -> None:
+        self.write_change(3, "task-planning", self.phase2_artifacts)
         self.assertTrue(any("requires request_analysis/tasks.md" in issue.message for issue in self.issues()))
 
-    def test_phase4_implementation_does_not_require_review_yet(self) -> None:
-        self.write_change(4, "implementation", self.phase4_implementation_artifacts)
+    def test_phase3_implementation_does_not_require_review_yet(self) -> None:
+        self.write_change(3, "implementation", self.phase3_implementation_artifacts)
         self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
 
-    def test_phase4_code_review_requires_review_artifact(self) -> None:
-        self.write_change(4, "code-review", self.phase4_implementation_artifacts)
-        self.assertTrue(any("Phase 4 requires coding/review/*.md" in issue.message for issue in self.issues()))
+    def test_phase3_code_review_requires_review_artifact(self) -> None:
+        self.write_change(3, "code-review", self.phase3_implementation_artifacts)
+        self.assertTrue(any("Phase 3 requires coding/review/*.md" in issue.message for issue in self.issues()))
 
-    def test_phase5_test_review_requires_both_test_artifacts(self) -> None:
-        artifacts = self.phase4_implementation_artifacts + ["coding/review/review_v1.md", "unit_test/test_report.md"]
-        self.write_change(5, "test-review", artifacts)
-        self.assertTrue(any("Phase 5 requires unit_test/review/test_review_v1.md" in issue.message for issue in self.issues()))
+    def test_phase4_test_review_requires_both_test_artifacts(self) -> None:
+        artifacts = self.phase3_implementation_artifacts + ["coding/review/review_v1.md", "unit_test/test_report.md"]
+        self.write_change(4, "test-review", artifacts)
+        self.assertTrue(any("Phase 4 requires unit_test/review/test_review_v1.md" in issue.message for issue in self.issues()))
 
     def test_invalid_substep_is_rejected(self) -> None:
-        self.write_change(4, "unit-test", self.phase4_implementation_artifacts)
+        self.write_change(3, "unit-test", self.phase3_implementation_artifacts)
         self.assertTrue(any(issue.code == "summary.substep_invalid" for issue in self.issues()))
 
     def test_substep_resume_point_must_match(self) -> None:
-        self.write_change(4, "code-review", self.phase4_implementation_artifacts + ["coding/review/review_v1.md"])
+        self.write_change(3, "code-review", self.phase3_implementation_artifacts + ["coding/review/review_v1.md"])
         summary = self.change_dir / "summary.md"
-        summary.write_text(summary.read_text(encoding="utf-8").replace("Phase 4 / code-review", "Phase 4 / implementation", 1), encoding="utf-8")
+        summary.write_text(summary.read_text(encoding="utf-8").replace("Phase 3 / code-review", "Phase 3 / implementation", 1), encoding="utf-8")
         self.assertTrue(any(issue.code == "summary.substep_resume_mismatch" for issue in self.issues()))
 
-    def test_legacy_phase3_is_accepted_for_migration(self) -> None:
-        self.write_change(3, "none", self.phase4_planning_artifacts)
+    def test_phase3_is_a_valid_task_planning_phase(self) -> None:
+        self.write_change(3, "task-planning", self.phase3_planning_artifacts)
         issues = self.issues()
         self.assertFalse(any(issue.level == "FAIL" for issue in issues))
-        self.assertTrue(any(issue.code == "summary.legacy_phase3" for issue in issues))
 
     def test_phase7_is_not_a_valid_standard_phase(self) -> None:
         self.write_change(7, "none", self.phase2_artifacts)
         self.assertTrue(any(issue.code == "summary.phase_invalid" for issue in self.issues()))
 
     def test_done_standard_flow_accepts_complete_artifact_set(self) -> None:
-        self.write_change(6, "none", self.done_artifacts, status="done")
+        self.write_change(5, "none", self.done_artifacts, status="done")
         self.assertFalse(any(issue.level == "FAIL" for issue in self.issues()))
 
     # -- OpenViking Phase 1/2 discovery evidence --------------------------

@@ -33,7 +33,7 @@
 
 ## Memory Check 块（Standard-flow — 6 字段）
 
-每个 Standard Phase artifact 或 `summary.md` Gate Record 必须填写：
+每个 Standard-flow `summary.md` Gate Record 必须填写。Phase artifact 不再重复复制这一段；其 Gate Record 是唯一机械检查点：
 
 ```markdown
 ## Memory Check

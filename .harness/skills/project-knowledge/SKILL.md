@@ -1,6 +1,6 @@
 ---
 name: project-knowledge
-description: 将需求、产品、代码、接口、数据、架构、部署和故障资料保存为 OpenViking raw 证据，并按十类读者问题编译成可追溯的项目 wiki。用于 Harness Lite L3、Standard Phase 6、首次建立或持续维护项目知识库；负责判定生成什么长期知识、唯一主分类、文章新建或更新、index/log 级联，不收录秘密、交付过程记录、通用最佳实践或未经验证的猜测。
+description: 用户明确请求时，将需求、产品、代码、接口、数据、架构、部署和故障资料保存为 OpenViking raw 证据，并按十类读者问题编译成可追溯的项目 wiki。它是独立的知识维护 Skill，不属于 Harness Lite L3 或 Standard Phase 5 的自动步骤；负责判定生成什么长期知识、唯一主分类、文章新建或更新、index/log 级联，不收录秘密、交付过程记录、通用最佳实践或未经验证的猜测。
 ---
 
 # Project Knowledge
@@ -57,10 +57,9 @@ Paths under `.harness/rules/`, `.harness/skills/`, and `.harness/changes/templat
 
 ## Harness 边界
 
-- Lite-flow：L3 批准前只形成候选并记录 pending；最终批准后执行，结果写入 verification_report.md。
-- Standard-flow：Phase 6 批准前只形成候选并记录 pending；最终批准后执行，结果写入 delivery-summary.md。
+- Lite-flow / Standard-flow：交付流程只在对应 artifact 中记录知识查询引用，不自动调用本 Skill，也不自动写入外部知识库。
 - 本 Skill 不替代 Gate、归档或交付证据。
-- 用户明确要求导入或维护项目知识时，可在授权范围内独立执行。
+- 用户明确要求导入或维护项目知识时，可在授权范围内独立执行，并单独记录其 raw/wiki/index/log 结果。
 
 ## 不变量
 

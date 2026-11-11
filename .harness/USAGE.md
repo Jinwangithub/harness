@@ -29,13 +29,13 @@ Orchestrator 会先执行 Flow Classifier，并在 `summary.md` 写入 Flow、Se
 | Flow | 适用场景 | 用户会看到的确认点 | 必需产物 |
 |------|----------|--------------------|----------|
 | Lite-flow | typo、注释、格式、纯文档、README 小修、小配置、单模块/少量文件、明确低风险行为变化、简单 bugfix、简单测试补充 | batched：需求+计划一次，最终验证+交付一次 | `summary.md`（含 inline lite spec）、`request_analysis/checklist.md`、`verification_report.md`（含压缩评审） |
-| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：Phase 1/2 确认；Phase 4 规划后直接实现并独立评审，Phase 4/5 各确认一次；Phase 6 最终确认 | Phase 1/2/4/5/6 产物（Phase 4 含 `tasks.md`） |
+| Standard-flow | 新功能、跨模块、架构/数据/安全/权限/外部接口/迁移/性能/部署、需求不清 | mandatory：Phase 1/2 确认；Phase 3/4 各确认一次；Phase 5 最终确认 | Phase 1/2/3/4/5 产物 |
 
 任何 Flow 都不能绕过 Mechanical Gate、fresh verification evidence、Stop-the-Line 或必要 Human Approval Gate。
 
 ## 你会看到哪些确认点
 
-- **Standard-flow**：需求理解和 spec 各确认一次；Phase 4 先生成 `tasks.md`，Orchestrator 检查后直接实现，再独立代码评审，三步完成后统一确认一次；Phase 5 单元测试和独立测试评审后确认一次；Phase 6 最终交付确认。任务规划没有单独确认点。CI/部署仅在独立任务或 spec/tasks 明确要求时执行，不是固定 Phase。
+- **Standard-flow**：需求理解和 spec 各确认一次；Phase 3 任务规划、实现和独立代码评审完成后确认一次；Phase 4 单元测试和独立测试评审完成后确认一次；Phase 5 最终交付确认。CI/部署仅在独立任务或 spec/tasks 明确要求时执行，不是固定 Phase。
 - **Lite-flow**：batched，先确认需求+简化计划，再最终验证+交付确认。
 
 Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你人工忽略失败。每个 Gate 请求你确认前，Orchestrator 应已运行插件包内的 validator，并传入消费项目根目录；退出码非 0 时不得进入人工确认。消费项目不需要安装或复制 validator。
@@ -66,15 +66,15 @@ Mechanical Gate 不通过时，Orchestrator 会先回退修复，不会请求你
 | 命令 | Lite-flow | Standard-flow | 不能做什么 |
 |------|-----------|---------------|------------|
 | `/spec` | 产出/更新 L1 lite spec | Phase 1 understanding 或 Phase 2 spec | 不能跳过 Flow Classification 或 approval lock |
-| `/plan` | 产出/更新 L1 checklist | Phase 4 / task-planning | 不能在 Phase 2 创建 tasks；Standard 规划完成后不单独请求确认 |
-| `/build` | L2 实现 | Phase 4 / implementation | 不能冒充独立代码评审或 Phase 5 测试完成 |
-| `/review` | L3 压缩评审 | Phase 4 / code-review 或 Phase 5 / test-review | 不能替代 Composite Mechanical Gate |
-| `/test` | L3 验证 | Phase 5 / unit-test 或单点测试 | 不能冒充独立测试评审或声明交付完成 |
-| `/ship` | L3 交付确认 | Phase 6 交付确认 | 不能在 final `pending` 时标记已完成 |
+| `/plan` | 产出/更新 L1 checklist | Phase 3 / task-planning | 不能在 Phase 2 创建 tasks；规划完成后直接进入 Phase 3 implementation |
+| `/build` | L2 实现 | Phase 3 / implementation | 不能冒充独立代码评审或 Phase 4 测试完成 |
+| `/review` | L3 压缩评审 | Phase 3 / code-review 或 Phase 4 / test-review | 不能替代 Composite Mechanical Gate |
+| `/test` | L3 验证 | Phase 4 / unit-test 或单点测试 | 不能冒充独立测试评审或声明交付完成 |
+| `/ship` | L3 交付确认 | Phase 5 交付确认 | 不能在 final `pending` 时标记已完成 |
 
 ## 上下文查询
 
-Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-knowledge-search`，把精确 URI、采用结论和 Open Questions 写入当前产物。Harness 只负责查询并记录引用；知识库维护由外部 OpenViking 流程负责。
+Lite L1、Standard Phase 1/2 需要业务或项目上下文时按需加载 `project-knowledge-search`，把精确 URI、采用结论和 Open Questions 写入当前产物。Harness 只负责查询并记录引用；知识库维护不属于交付流程，只有用户明确请求 `project-knowledge` Skill 时才单独执行。
 
 ## pending 时你需要做什么
 
@@ -83,7 +83,7 @@ Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-kn
 1. 查看交付摘要、验证证据和 Gate 状态。
 2. 如果同意，明确回复 `approved` 或说明批准范围。
 3. 如果不同意，回复 `rejected` 并说明问题；Orchestrator 应回退修复。
-4. 在你确认前，当前需求的 `summary.md` 保持 `active`，不得标记为 `done`。批准后 Orchestrator 会同步 final Gate、Status 和 Resume point，再运行插件包内 validator；仅 PASS 后声明完成。
+4. 在你确认前，当前需求的 `summary.md` 保持 `active`，不得标记为 `done`。批准后 Orchestrator 会保持 Mechanical Gate=`pass`、更新 Human Approval=`approved`，同步 Status 和 Resume point，再运行插件包内 validator；仅 PASS 后声明完成。
 
 ## 用户版验收简表
 
@@ -102,8 +102,8 @@ Lite L1、Standard Phase 1/2 需要业务或项目上下文时加载 `project-kn
 
 ## FAQ
 
-**Q: Standard-flow 还需要单独走 Phase 3 任务规划并确认吗？**
-A: 不需要。任务规划是 Phase 4 的首个子步骤；Orchestrator 核对计划符合已批准的 spec 后，直接开始实现。
+**Q: Standard-flow 的任务规划是否单独确认？**
+A: 不单独确认。Phase 3 先生成 `tasks.md`，Orchestrator 检查映射后直接进入实现，三个 Phase 3 子步骤完成后统一确认。
 
 **Q: 低风险/无行为变更小需求怎么处理？**
 A: 也走 Lite-flow。内容可以更短，但仍保留当前需求产物、机械验证和必要确认。

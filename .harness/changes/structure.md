@@ -67,7 +67,7 @@ Lite-flow 不创建 `spec.md`、`tasks.md`、`coding/`、`unit_test/`、`deliver
 
 ### Standard-flow
 
-Phase 4 首先由 Planner 生成 `tasks.md`，随后依次执行 implementation 与独立 code-review；任务规划不单独设 Gate 或用户确认。Phase 4/5 保留各自独立报告路径，以区分实现/测试证据和 Reviewer 证据。
+Phase 3 首先由 Planner 生成 `tasks.md`，随后依次执行 implementation 与独立 code-review；任务规划不单独设 Gate 或用户确认。Phase 3/4 保留各自独立报告路径，以区分实现/测试证据和 Reviewer 证据。
 
 ```text
 docs/harness/{type}-{name}-{YYYYMMDD}/
@@ -92,4 +92,4 @@ docs/harness/{type}-{name}-{YYYYMMDD}/
 2. 产物按需标记版本号（如 `review_v1` → `review_v2`）。
 3. 回退或流程升级时记录 reason 到 `summary.md`。
 4. Phase 1/L1 的上下文检索证据写入 `understanding.md` 或 Lite inline spec，Phase 2 的项目/系统检索证据写入 `spec.md`；不创建独立知识库 artifact。
-5. 最终归档顺序必须为：final Gate Mechanical=`pass`、Human Approval=`pending` → 用户批准 → 更新 final Gate Human Approval=`approved` → 同步当前任务 `summary.md` 为 `done` 且 Resume point=`none` → 调用插件包内 validator 并传入消费项目根目录 → 仅 PASS 后声明完成。确认前 `summary.md` 保持 `active`。
+5. 最终归档顺序必须为：Mechanical Gate=`pass`、Human Approval=`pending` → 用户批准 → 保持 Mechanical Gate=`pass` 并更新 Human Approval=`approved` → 同步当前任务 `summary.md` 为 `done` 且 Resume point=`none` → 调用插件包内 validator 并传入消费项目根目录 → 仅 PASS 后声明完成。确认前 `summary.md` 保持 `active`。

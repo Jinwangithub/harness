@@ -50,7 +50,7 @@
 - 根因: Gate、summary 和 INDEX 的状态同步缺少机械一致性检查。
 - 影响: 后续执行者可能把未获用户确认的变更当作完成。
 - 修复: 统一使用 `approved` / `rejected` / `pending`，并由 validator 检查最终状态组合。
-- 预防: 只有 final Gate 批准、summary 和 INDEX 同步为 `done` 后才能声明完成。
+- 预防: 只有 Mechanical Gate=`pass`、Human Approval=`approved` 且 summary 和 INDEX 同步为 `done` 后才能声明完成。
 
 2026-05-26 | summary 字段不一致降低恢复确定性
 - 问题: summary 中的 `Current step`、`Resume point` 或审批状态不一致。

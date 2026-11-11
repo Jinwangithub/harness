@@ -9,8 +9,8 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
 
 ## 1. 通用规则
 
-- 每个 Phase 出口或独立 Flow step 先执行 Mechanical Gate，通过后请求用户确认；Phase 4/task-planning 是内部交接，不构成独立 Gate 或确认点。
-- Phase 4 的 task-planning 是不设独立 Gate/确认的内部子步骤；Planner 完成并经 Orchestrator 检查后直接进入 implementation。Phase 4 在 task-planning、implementation、code-review 全部完成后写入一次 Composite Gate；Phase 5 在 unit-test、test-review 全部完成后写入一次 Composite Gate。每个 Composite Gate 只请求一次用户确认。
+- 每个 Phase 出口或独立 Flow step 先执行 Mechanical Gate，通过后请求用户确认。
+- Phase 3 的 task-planning 是内部交接，不构成独立 Gate；Phase 3 在 task-planning、implementation、code-review 全部完成后写入一次 Composite Gate；Phase 4 在 unit-test、test-review 全部完成后写入一次 Composite Gate。每个 Composite Gate 只请求一次用户确认。
 - Mechanical Gate 必须严格机械判定：命令退出码、文件存在、确定性搜索、计数阈值。
 - 每个 Phase/Step 出口写入 Gate Record 后，必须运行插件包内的 validator，并显式传入消费项目根目录：`python3 <plugin-root>/.harness/tools/validate_change.py --repo <project-root> --change {change-id}`。
 - `python3` is required; the validator is loaded from the installed plugin and validates the consumer project's change artifacts.
@@ -60,15 +60,25 @@ Iron Laws 见 `.harness/agents/orchestrator.md`。
   - Artifact path: {文件路径，不得为空}
 - Skill Load: {Skill 名} = {loaded / not-needed + reason / blocked + reason}
 - Human Approval: {approved / rejected / pending}
+
+## Memory Check
+- Architecture/governance decision made: {yes/no; evidence}
+- Agent/process lesson found: {yes/no; evidence}
+- Known issue or governance debt found: {yes/no; evidence}
+- Memory action: {decisions.log / lessons-learned.md / known-issues.md / none}
+- Memory recorded: {N} entries / none
+- Template completeness verified: {yes/no/N/A}
 ```
 
-Phase 4/5 Composite Gate 还必须追加以下子步骤证据表；Phase 4 必须记录三行，Phase 5 只记录 unit-test 和 test-review 两行。任一适用行的四字段不完整时 Gate=`blocked`：
+Lite-flow 只要求前三个 Memory Check 字段；Standard-flow 要求全部六个字段。`none` 和 `N/A` 是合法的明确结论，不是缺失值。
+
+Phase 3/4 Composite Gate 还必须追加以下子步骤证据表；Phase 3 记录三行，Phase 4 记录两行。任一适用行的四字段不完整时 Gate=`blocked`：
 
 ```markdown
 ## Substep Evidence
 | Substep | Command | Exit code | Output summary | Artifact path |
 |---------|---------|-----------|----------------|---------------|
-| task-planning (Phase 4) | {确定性检查} | {数字} | {tasks 与 approved spec 映射结果} | `request_analysis/tasks.md` |
+| task-planning (Phase 3) | {确定性检查} | {数字} | {tasks 与 approved spec 映射结果} | `request_analysis/tasks.md` |
 | implementation / unit-test | {完整命令} | {数字} | {关键输出} | {实现或测试报告} |
 | code-review / test-review | {完整命令或确定性检查} | {数字} | {评审结论与计数} | {独立评审报告} |
 ```
@@ -80,6 +90,7 @@ Phase 4/5 Composite Gate 还必须追加以下子步骤证据表；Phase 4 必�
 - 入口卡片列出的“按条件补读 Skills”缺少条件判断记录 → Mechanical Gate 自动 `blocked`。
 - 条件成立但未读取对应 Skill，且无理由 → Mechanical Gate 自动 `blocked`。
 - 入口卡片列出的“失败时补读 Skills”在 fail/blocked/异常时未读取 → Mechanical Gate 自动 `blocked`。
+- 每个 Gate Record 必须包含与 Flow 对应的完整 `Memory Check`；缺少字段或仍为模板占位符 → Mechanical Gate 自动 `blocked`。
 - 出口报告缺少上述模板任一字段 → Mechanical Gate 自动 `blocked`。
 
 ## 4. Lite-flow Gate 表
@@ -88,7 +99,7 @@ Phase 4/5 Composite Gate 还必须追加以下子步骤证据表；Phase 4 必�
 |------|----------------------|----------------|----------------|
 | L1 需求确认+计划 | `summary.md`（含 inline lite spec）、`checklist.md` 存在；如查询项目知识则记录精确 URI 或缺失原因；有 `low_risk_proof`；无强制升级风险 | Command / Exit code / Output summary / Artifact path | 用户确认后进入 L2 |
 | L2 实现 | 只修改 checklist 范围；未创建 Standard-only 产物；未引入风险扩大 | Command / Exit code / Output summary / Artifact path | 无需单独确认 |
-| L3 验证+交付 | `verification_report.md`、Critical=0、Must Fix=0、summary=`active`、final Gate=`pass + pending`；用户批准后更新为 `approved`，同步状态并重验 | Command / Exit code / Output summary / Artifact path | 先待最终确认，批准后才标记完成 |
+| L3 验证+交付 | `verification_report.md`、Critical=0、Must Fix=0、summary=`active`、Mechanical Gate=`pass` + Human Approval=`pending`；用户批准后更新 Human Approval 为 `approved`，同步状态并重验 | Command / Exit code / Output summary / Artifact path | 先待最终确认，批准后才标记完成 |
 
 ## 5. Standard Phase Gate 检查表
 
@@ -109,9 +120,9 @@ Phase N Exit Checklist:
 |-------|----------------------|----------|--------|
 | 1 | `understanding.md` 存在；业务知识查询状态、知识根、查询层、精确 OpenViking URI 或 `not-needed|no-relevant|unavailable` 说明完整 | `request_analysis/understanding.md` | CK1 |
 | 2 | `spec.md` 存在；项目/系统知识查询状态、知识根、查询层、精确 OpenViking URI 和应用约束完整 | `request_analysis/spec.md` | CK2 |
-| 4 | `tasks.md`、`coding/coding_report_v1.md` 和 `coding/review/*.md` 均存在；任务映射到 approved spec；编译成功；Author/Self Review 与 Independent Code Review 完成；Critical=0；Must Fix=0；规划、实现、评审证据完整 | tasks 校验、编译结果、实现报告、独立评审报告 | CK3 |
-| 5 | `unit_test/test_report.md` 和 `unit_test/review/test_review_v1.md` 均存在；测试通过；测试数 > 0；覆盖率符合项目阈值；Critical=0；Must Fix=0；对应两类 Evidence 完整 | 测试命令结果、测试报告、独立测试评审报告 | CK4 |
-| 6 | delivery summary、summary=`active`、final Gate=`pass + pending`；批准后更新 Approval/status 并重验 | `delivery-summary.md` | CK5 |
+| 3 | `tasks.md`、`coding/coding_report_v1.md` 和 `coding/review/*.md` 均存在；任务映射到 approved spec；编译成功；Author/Self Review 与 Independent Code Review 完成；Critical=0；Must Fix=0；规划、实现、评审证据完整 | tasks 校验、编译结果、实现报告、独立评审报告 | CK3 |
+| 4 | `unit_test/test_report.md` 和 `unit_test/review/test_review_v1.md` 均存在；测试通过；测试数 > 0；覆盖率符合项目阈值；Critical=0；Must Fix=0；测试/评审证据完整 | 测试结果、测试报告、独立测试评审报告 | CK4 |
+| 5 | delivery summary、summary=`active`、Mechanical Gate=`pass` + Human Approval=`pending`；批准后更新 Human Approval/status 并重验 | `delivery-summary.md` | CK5 |
 
 ## 6. Failure Gate 记录
 

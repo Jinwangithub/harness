@@ -13,5 +13,5 @@
 ## OpenViking Skills
 
 - `project-knowledge-search`：只读召回。默认查询 OpenViking 项目知识根的 `wiki/`，仅在核验或知识缺口时回查 `raw/`；Lite L1、Standard Phase 1/2 按入口卡片加载。
-- `project-knowledge`：长期知识编译。Lite L3、Standard Phase 6 在最终批准后执行 `raw ingest → wiki compile → index/log`；批准前不得写入外部知识库。
+- `project-knowledge`：用户显式请求时执行的长期知识编译。它不属于 Lite L3 或 Standard Phase 5 的自动步骤；执行时按 `raw ingest → wiki compile → index/log` 维护知识库，未经明确授权不得写入外部知识库。
 - OpenViking 的查询与写入只由以上两个 Skill 定义，不再维护其他 Wiki/curation Skill。

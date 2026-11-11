@@ -5,7 +5,7 @@
 本文件是 Flow Classifier 与 Flow 路由索引的权威源。
 门禁检查表见 `.harness/rules/gates.md`，Lite-flow 执行见 `.harness/rules/flow-lite.md`，Standard-flow 执行见 `.harness/rules/flow-standard.md`，失败处理和回退路径见 `.harness/rules/rollback.md`，Memory 模板见 `.harness/memory/README.md`。
 
-> **边界**：本文件只定义 Flow 分类、路由索引和 Phase/Step 入口卡片字段定义。Lite Step Cards 见 `flow-lite.md`，Standard Phase Cards、Phase 4/5 子步骤和隔离原则见 `flow-standard.md`，回退路径见 `rollback.md`，Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件位于 `.harness/skills/{name}/SKILL.md`；本文件不定义 Skill role 或加载类型术语。
+> **边界**：本文件只定义 Flow 分类、路由索引和 Phase/Step 入口卡片字段定义。Lite Step Cards 见 `flow-lite.md`，Standard Phase Cards、Phase 3/4 子步骤和隔离原则见 `flow-standard.md`，回退路径见 `rollback.md`，Gate 判定见 `gates.md`，产物结构见 `changes/structure.md`，Skill 文件位于 `.harness/skills/{name}/SKILL.md`；本文件不定义 Skill role 或加载类型术语。
 
 **路径约定**：本插件规则和 Skills 中指向 `.harness/agents/`、`.harness/rules/`、`.harness/skills/`、`.harness/tools/` 的路径都相对插件安装目录；消费项目的输出路径统一为 `docs/harness/{change-id}/`。
 
@@ -48,7 +48,7 @@
 | Flow | 读取文件 | 用途 |
 |------|----------|------|
 | `Lite-flow` | `.harness/rules/flow-lite.md` | Lite-flow 执行顺序、L1/L2/L3 Step Cards |
-| `Standard-flow` | `.harness/rules/flow-standard.md` | Standard-flow Phase 1/2/4-6；Phase 4 含任务规划、实现和独立评审子步骤 |
+| `Standard-flow` | `.harness/rules/flow-standard.md` | Standard-flow Phase 1-5；Phase 3/4 含实现和独立评审子步骤 |
 | `fail` / `blocked` / 风险扩大 / 需要回退 | `.harness/rules/rollback.md` | Stop-the-Line、failure evidence、根因、恢复点、重验证、回退路径 |
 
 Gate 判定始终读取 `.harness/rules/gates.md`。

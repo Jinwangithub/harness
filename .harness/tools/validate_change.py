@@ -2,8 +2,9 @@
 """Validate Harness change artifacts and an optional development registry.
 
 This checker intentionally validates only mechanical facts: file existence,
-canonical statuses, required summary fields, Gate Record evidence fields, and
-basic flow artifact boundaries. It does not judge business correctness.
+canonical statuses, required summary fields, Gate Record evidence and memory
+fields, and basic flow artifact boundaries. It does not judge business
+correctness.
 """
 
 from __future__ import annotations
@@ -25,7 +26,7 @@ INDEX_ROW_RE = re.compile(
 )
 SUMMARY_FIELD_RE = re.compile(r"^- \*\*(.+?)\*\*:\s*(.*?)\s*$", re.MULTILINE)
 GATE_RECORD_RE = re.compile(
-    r"^## Gate Record\s*[—-]\s*(.+?)\s*$([\s\S]*?)(?=^##\s+|\Z)",
+    r"^## Gate Record\s*[—-]\s*(.+?)\s*$([\s\S]*?)(?=^## Gate Record\s*[—-]|\Z)",
     re.MULTILINE,
 )
 
@@ -55,12 +56,12 @@ LITE_FORBIDDEN = [
 STANDARD_PHASE_ARTIFACTS = {
     1: [Path("request_analysis/understanding.md")],
     2: [Path("request_analysis/spec.md")],
-    5: [Path("unit_test/test_report.md")],
-    6: [Path("delivery-summary.md")],
+    4: [Path("unit_test/test_report.md")],
+    5: [Path("delivery-summary.md")],
 }
 STANDARD_SUBSTEPS = {
-    4: {"task-planning", "implementation", "code-review", "complete"},
-    5: {"unit-test", "test-review", "complete"},
+    3: {"task-planning", "implementation", "code-review", "complete"},
+    4: {"unit-test", "test-review", "complete"},
 }
 
 
@@ -255,10 +256,10 @@ class Validator:
             if re.search(r"Phase\s+\d+", current_step, re.IGNORECASE) and phase is None:
                 self.fail(
                     "summary.phase_invalid",
-                    f"{change_dir.name}: Standard-flow Current step must be Phase 1-6 (Phase 3 is legacy only), got `{current_step}`",
+                    f"{change_dir.name}: Standard-flow Current step must be Phase 1-5, got `{current_step}`",
                 )
             if phase is None and status == "done":
-                phase = 6
+                phase = 5
             if phase in STANDARD_SUBSTEPS:
                 if substep not in STANDARD_SUBSTEPS[phase]:
                     self.fail(
@@ -283,27 +284,22 @@ class Validator:
                         for rel in artifacts:
                             if not (change_dir / rel).exists():
                                 self.fail("artifact.missing", f"{change_dir.name}: Phase {number} requires {rel}")
-                if phase == 3:
-                    self.warn(
-                        "summary.legacy_phase3",
-                        f"{change_dir.name}: Phase 3 is legacy; normalize to Phase 4 / task-planning or implementation when resuming",
-                    )
                 if phase >= 3:
                     tasks_path = change_dir / "request_analysis/tasks.md"
                     if not tasks_path.exists():
-                        self.fail("artifact.missing", f"{change_dir.name}: Phase 4 requires request_analysis/tasks.md")
-                if phase >= 4:
-                    needs_implementation = phase > 4 or substep in {"implementation", "code-review", "complete"}
+                        self.fail("artifact.missing", f"{change_dir.name}: Phase 3 requires request_analysis/tasks.md")
+                if phase >= 3:
+                    needs_implementation = phase > 3 or substep in {"implementation", "code-review", "complete"}
                     if needs_implementation and not (change_dir / "coding/coding_report_v1.md").exists():
-                        self.fail("artifact.missing", f"{change_dir.name}: Phase 4 requires coding/coding_report_v1.md")
-                needs_code_review = phase > 4 or (phase == 4 and substep in {"code-review", "complete"})
+                        self.fail("artifact.missing", f"{change_dir.name}: Phase 3 requires coding/coding_report_v1.md")
+                needs_code_review = phase > 3 or (phase == 3 and substep in {"code-review", "complete"})
                 if needs_code_review and not any((change_dir / "coding/review").glob("*.md")):
-                    self.fail("artifact.missing", f"{change_dir.name}: Phase 4 requires coding/review/*.md")
-                needs_test_review = phase > 5 or (phase == 5 and substep in {"test-review", "complete"})
+                    self.fail("artifact.missing", f"{change_dir.name}: Phase 3 requires coding/review/*.md")
+                needs_test_review = phase > 4 or (phase == 4 and substep in {"test-review", "complete"})
                 if needs_test_review and not (change_dir / "unit_test/review/test_review_v1.md").exists():
                     self.fail(
                         "artifact.missing",
-                        f"{change_dir.name}: Phase 5 requires unit_test/review/test_review_v1.md",
+                        f"{change_dir.name}: Phase 4 requires unit_test/review/test_review_v1.md",
                     )
             if status == "done" and not (change_dir / "delivery-summary.md").exists():
                 self.fail("artifact.missing", f"{change_dir.name}: done Standard-flow requires delivery-summary.md")
@@ -443,6 +439,32 @@ class Validator:
             if any(self.is_placeholder_or_empty(value) for value in evidence.values()) and mechanical == "pass":
                 self.fail("gate.pass_without_evidence", f"{change_dir.name} {label}: pass requires complete fresh evidence")
 
+            memory_fields = {
+                "Architecture/governance decision made": self.extract_bullet_value(body, "Architecture/governance decision made"),
+                "Agent/process lesson found": self.extract_bullet_value(body, "Agent/process lesson found"),
+                "Known issue or governance debt found": self.extract_bullet_value(body, "Known issue or governance debt found"),
+            }
+            flow = fields.get("Flow")
+            if flow == "Standard-flow":
+                memory_fields.update({
+                    "Memory action": self.extract_bullet_value(body, "Memory action"),
+                    "Memory recorded": self.extract_bullet_value(body, "Memory recorded"),
+                    "Template completeness verified": self.extract_bullet_value(body, "Template completeness verified"),
+                })
+            for memory_field, value in memory_fields.items():
+                if self.is_missing_or_template(value):
+                    self.fail(
+                        "gate.memory_check_missing",
+                        f"{change_dir.name} {label}: Memory Check is missing `{memory_field}`",
+                    )
+            if flow == "Standard-flow":
+                completeness = memory_fields["Template completeness verified"]
+                if completeness and completeness.lower() not in {"yes", "no", "n/a"}:
+                    self.fail(
+                        "gate.memory_check_invalid",
+                        f"{change_dir.name} {label}: Template completeness verified must be yes/no/N/A",
+                    )
+
         final_label = records[-1].group(1).strip()
         final_body = records[-1].group(2)
         final_mechanical = self.extract_bullet_value(final_body, "Mechanical Gate")
@@ -504,6 +526,13 @@ class Validator:
             or cleaned.lower() in {"none", "n/a", "not applicable"}
             or (cleaned.startswith("{") and cleaned.endswith("}"))
         )
+
+    def is_missing_or_template(self, value: str | None) -> bool:
+        """Check required fields while allowing explicit `none`/`N/A` values."""
+        if value is None:
+            return True
+        cleaned = value.strip()
+        return not cleaned or (cleaned.startswith("{") and cleaned.endswith("}"))
 
     def print_report(self) -> None:
         if not self.issues:
